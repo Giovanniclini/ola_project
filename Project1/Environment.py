@@ -1,9 +1,17 @@
 import numpy as np
 
 class Environment:
-    def __init__(self, n_product_types, product_prices, n_users, reservation_price):
-        self.n_product_types = n_product_types #int
-        self.product_prices =  product_prices #array
-        self.n_user = n_users #int
-        self.carts = [[] for i in range(n_product_types)] #array/matrice
-        self.reservation_price = reservation_price #array of int
+    def __init__(self, n_arms, prices_probabilities, customer_class):
+        self.n_arms = n_arms #20 arms
+        self.prices_probabilities = prices_probabilities # probabilità associate ai prezzi
+        self.customer_class = customer_class
+
+    def round(self, pulled_arm):
+        reward = np.random.binomial(1, self.probabilities[pulled_arm]) #Bernulli distribution is modeled as a binomial with input 1
+        return reward
+
+    def select_class_cust(self, customer_class):
+        class_cust = np.random.choice(customer_class)
+        return class_cust
+
+
