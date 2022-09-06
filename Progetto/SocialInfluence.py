@@ -8,106 +8,105 @@ class SocialInfluence:
     def __init__(self):
         self.a = 0
 
-        def ecommerce_user_simulation(number_of_products, initial_active_nodes, price_configuration, price_campaign,
-                                      customer_class):
-            # assign a value for the lambda coefficient for the second secondary product
-            lambda_coefficient = 0.5
-            # store probability_matrix of the current customer class
-            prob_matrix = 0
-            prob_matrix = np.copy(customers[customer_class].social_influence_transition_probability_matrix)
-            np.fill_diagonal(prob_matrix, 0)
-            # store_the number of products, i.e, the nodes of the graph
-            n_nodes = number_of_products
-            # assign first the history to the initial active nodes array
-            history = np.array([initial_active_nodes])
-            # assign the active nodes to the initial active one(s)
-            active_nodes = initial_active_nodes
-            # assign the newl active nodes (nodes active at the end of each iteration) to the initial active one(s)
-            newly_active_nodes = active_nodes
-            # assign value to initial time step
-            t = 0
-            # assign value to n_steps_max,
-            n_steps_max = 5
-            # check if the first product displayed has a price higher than the reservation price; if yes, return
-            if customers[customer_class].reservation_prices[int(np.where(active_nodes == 1)[0])] < price_configuration[
-                int(np.where(active_nodes == 1)[0])]:
-                return history
-            # update transition probability of the new active nodes to zero value so that it is not possible to reach
-            # again the same node (product)
+    def ecommerce_user_simulation(number_of_products, initial_active_nodes, price_configuration, price_campaign,
+                                  customer_class):
+        # assign a value for the lambda coefficient for the second secondary product
+        lambda_coefficient = 0.5
+        # store probability_matrix of the current customer class
+        prob_matrix = 0
+        prob_matrix = np.copy(customers[customer_class].social_influence_transition_probability_matrix)
+        np.fill_diagonal(prob_matrix, 0)
+        # store_the number of products, i.e, the nodes of the graph
+        n_nodes = number_of_products
+        # assign first the history to the initial active nodes array
+        history = np.array([initial_active_nodes])
+        # assign the active nodes to the initial active one(s)
+        active_nodes = initial_active_nodes
+        # assign the newl active nodes (nodes active at the end of each iteration) to the initial active one(s)
+        newly_active_nodes = active_nodes
+        # assign value to initial time step
+        t = 0
+        # assign value to n_steps_max,
+        n_steps_max = 5
+        # check if the first product displayed has a price higher than the reservation price; if yes, return
+        if customers[customer_class].reservation_prices[int(np.where(active_nodes == 1)[0])] < price_configuration[int(
+                np.where(active_nodes == 1)[0])]:
+            return history
+        # update transition probability of the new active nodes to zero value so that it is not possible to reach
+        # again the same node (product)
+        for i in range(prob_matrix.shape[1]):
+            if i == int(np.where(newly_active_nodes == 1)[0]):
+                # from all the nodes to the new active one
+                for j in range(prob_matrix.shape[0]):
+                    prob_matrix[j][i] = 0
+        # while the number of max steps is not reached and there are still active nodes, continue simulation
+        order_of_parallel_product = [[active_nodes]]
+        while t < n_steps_max and len(order_of_parallel_product) != 0:
+            # assign at random value the first secondary node
+            first_secondary_node = np.random.randint(0, 5)
+            # assign at random value the second secondary node
+            second_secondary_node = np.random.randint(0, 5)
+            # repeat assignment until the two products are different
+            while second_secondary_node == first_secondary_node:
+                second_secondary_node = np.random.randint(0, 5)
+            # select from the probability matrix only the rows related to the active nodes
+            transition_probabilities_from_the_active_node = (prob_matrix.T * order_of_parallel_product[0]).T
+            # select from the probability rows just the ones related to the active node
+            p_row = transition_probabilities_from_the_active_node[np.where(order_of_parallel_product[0] == 1)][0]
+            # update the value of the transition probability related to the second secondary product
+            p_row[second_secondary_node] = p_row[second_secondary_node] * lambda_coefficient
+            # assign false to all the activated edges array to keep track of the one that will be selected (
+            # clicked secondary product)
+            activated_edges = [False for _ in range(5)]
+            # one or two secondary products are chosen num_prod_clicked = np.random.randint(1, 3) random choice
+            # of the index of the secondary product selected by the user (select one, but maybe could be two)
+            num_prod_clicked = np.random.randint(1, 3)
+            indx = random.choices(np.arange(0, 5), p_row, k=num_prod_clicked)
+            # check if the probability related to the chosen index if > 0.0; if yes, activate the edge (set true)
+            for z in range(num_prod_clicked):
+                if (p_row[indx[z]]) > 0.0:
+                    activated_edges[indx[z]] = True
+            # if ((p != 0) == activated_edges) it is False, empty the matrix
+            prob_matrix = prob_matrix * ((transition_probabilities_from_the_active_node != 0) == activated_edges)
+            # assign 0 to the new active nodes (reset values)
+            newly_active_nodes = np.zeros(5)
+            # for each product, find the chosen one
+            for i in range(5):
+                # if the chosen secondary product is found, let the costumer actually buy it, by updated the
+                # values related to the units sold and the revenue
+                if (activated_edges[i] == True and customers[customer_class].reservation_prices[i] >=
+                        price_configuration[i]):
+                    # assign a random amount of units of product purchased by the user
+                    units_purchased = np.random.randint(1, 20)
+                    # update the amount of unites of product purchased by the class of user
+                    customers[customer_class].units_purchased_for_each_product[i] += units_purchased
+                    # if the purchase cap is not reached, then activate the node to continue the simulation
+                    if (customers[customer_class].max_number_of_purchases >= sum(
+                            customers[customer_class].units_purchased_for_each_product)):
+                        # assign 1 to the new active nodes
+                        newly_active_nodes[i] = 1
+            # update transition probability of the new active nodes to zero value so that it is not possible to
+            # reach again the same node (product)
+            order_of_parallel_product.pop(0)
             for i in range(prob_matrix.shape[1]):
-                if i == int(np.where(newly_active_nodes == 1)[0]):
+                if i in np.array(np.where(newly_active_nodes == 1)):
                     # from all the nodes to the new active one
                     for j in range(prob_matrix.shape[0]):
                         prob_matrix[j][i] = 0
-            # while the number of max steps is not reached and there are still active nodes, continue simulation
-            order_of_parallel_product = [[active_nodes]]
-            while t < n_steps_max and np.sum(newly_active_nodes) > 0:
-                # assign at random value the first secondary node
-                first_secondary_node = np.random.randint(0, 5)
-                # assign at random value the second secondary node
-                second_secondary_node = np.random.randint(0, 5)
-                # repeat assignment until the two products are different
-                while second_secondary_node == first_secondary_node:
-                    second_secondary_node = np.random.randint(0, 5)
-                # select from the probability matrix only the rows related to the active nodes
-                transition_probabilities_from_the_active_node = (prob_matrix.T * order_of_parallel_product[0]).T
-                # select from the probability rows just the ones related to the active node
-                p_row = transition_probabilities_from_the_active_node[np.where(order_of_parallel_product[0] == 1)][0]
-                # update the value of the transition probability related to the second secondary product
-                p_row[second_secondary_node] = p_row[second_secondary_node] * lambda_coefficient
-                # assign false to all the activated edges array to keep track of the one that will be selected (
-                # clicked secondary product)
-                activated_edges = [False for _ in range(5)]
-                # one or two secondary products are chosen num_prod_clicked = np.random.randint(1, 3) random choice
-                # of the index of the secondary product selected by the user (select one, but maybe could be two)
-                num_prod_clicked = np.random.randint(1, 3)
-                indx = random.choices(np.arange(0, 5), p_row, k=num_prod_clicked)
-                # check if the probability related to the chosen index if > 0.0; if yes, activate the edge (set true)
-                for z in range(num_prod_clicked):
-                    if (p_row[indx[z]]) > 0.0:
-                        activated_edges[indx[z]] = True
-                # if ((p != 0) == activated_edges) it is False, empty the matrix
-                prob_matrix = prob_matrix * ((transition_probabilities_from_the_active_node != 0) == activated_edges)
-                # assign 0 to the new active nodes (reset values)
-                newly_active_nodes = np.zeros(5)
-                # for each product, find the chosen one
-                for i in range(5):
-                    # if the chosen secondary product is found, let the costumer actually buy it, by updated the
-                    # values related to the units sold and the revenue
-                    if (activated_edges[i] == True and customers[customer_class].reservation_prices[i] >=
-                            price_configuration[i]):
-                        # assign a random amount of units of product purchased by the user
-                        units_purchased = np.random.randint(1, 20)
-                        # update the amount of unites of product purchased by the class of user
-                        customers[customer_class].units_purchased_for_each_product[i] += units_purchased
-                        # if the purchase cap is not reached, then activate the node to continue the simulation
-                        if (customers[customer_class].max_number_of_purchases >= sum(
-                                customers[customer_class].units_purchased_for_each_product)):
-                            # assign 1 to the new active nodes
-                            newly_active_nodes[i] = 1
-                # update transition probability of the new active nodes to zero value so that it is not possible to
-                # reach again the same node (product)
-                order_of_parallel_product.pop(0)
-                for i in range(prob_matrix.shape[1]):
-                    if i in np.array(np.where(newly_active_nodes == 1)):
-                        # from all the nodes to the new active one
-                        for j in range(prob_matrix.shape[0]):
-                            prob_matrix[j][i] = 0
-                        # update the active nodes
-                        active_nodes = np.zeros(5)
-                        active_nodes[i] = 1
-                        active_nodes = newly_active_nodes
-                        # update the history
-                        history = np.concatenate((history, [active_nodes]), axis=0)
-                        # update time step
-                        t = t + 1
-                        # list of product for manage the parallel case
-                        order_of_parallel_product.append([active_nodes])
-            # return the history
-            return history
+                    # update the active nodes
+                    active_nodes = np.zeros(5)
+                    active_nodes[i] = 1
+                    # update the history
+                    history = np.concatenate((history, [active_nodes]), axis=0)
+                    # update time step
+                    t = t + 1
+                    # list of product for manage the parallel case
+                    order_of_parallel_product.append([active_nodes])
+        # return the history
+        return history
 
-        # a function to evaluate the conversion rate of each customer class, by computing the number of occurrences in
-        # global history (n. of sales) over the number of customers belonging to the class
+    # a function to evaluate the conversion rate of each customer class, by computing the number of occurrences in
+    # global history (n. of sales) over the number of customers belonging to the class
 
     def evaluate_conversion_rate(customer_class, price_campaign, price_configuration):
         # check if the global history is not null (just to be sure)
@@ -132,31 +131,33 @@ class SocialInfluence:
             price_campaign.conversion_rate[customer_class] = conversion
         return conversion
 
-        def evaluate_aggregate_conversion_rate(price_campaign, price_configuration):
-            total_sales = 0
-            # check if the global history is not null (just to be sure)
-            for customer_class in range(3):
-                if price_campaign.global_history[customer_class] is not None:
-                    # for each history (relative to one costumer) in the global history
-                    for history in price_campaign.global_history[customer_class]:
-                        # check if the current step in global history is not null (just to be sure)
-                        if history is not None:
-                            # for each step in the history
-                            for history_step in history:
-                                # if contains a 1, i.e., a product was bought
-                                if (1 in history_step):
-                                    # increase the global number of sales of the customer class involved
-                                    price_campaign.sales[customer_class] += 1
-                                    total_sales += 1
-                price_campaign.aggregate_sales = total_sales
-                # a the end of the loop, evaluate the number of no-sales, by subtracting the number of sales from the total number of customers
-                total_conversion = total_sales / (
-                        customers[0].number_of_customers + customers[1].number_of_customers + customers[
-                    2].number_of_customers)
-                # the conversione rate is equal to the number of sales over the number of customer of the current class. the conversion rate is relative to the whole price campaing (price configuration)
-                # store the value of the conversion rate
-                price_campaign.aggregate_conversion_rate = total_conversion
-            return total_conversion
+    def evaluate_aggregate_conversion_rate(price_campaign, price_configuration):
+        total_sales = 0
+        # check if the global history is not null (just to be sure)
+        for customer_class in range(3):
+            if price_campaign.global_history[customer_class] is not None:
+                # for each history (relative to one costumer) in the global history
+                for history in price_campaign.global_history[customer_class]:
+                    # check if the current step in global history is not null (just to be sure)
+                    if history is not None:
+                        # for each step in the history
+                        for history_step in history:
+                            # if contains a 1, i.e., a product was bought
+                            if (1 in history_step):
+                                # increase the global number of sales of the customer class involved
+                                price_campaign.sales[customer_class] += 1
+                                total_sales += 1
+            price_campaign.aggregate_sales = total_sales
+            # at the end of the loop, evaluate the number of no-sales, by subtracting the number of sales from the
+            # total number of customers
+            total_conversion = total_sales / (
+                    customers[0].number_of_customers + customers[1].number_of_customers + customers[
+                2].number_of_customers)
+            # the conversione rate is equal to the number of sales over the number of customer of the current class.
+            # the conversion rate is relative to the whole price campaing (price configuration) store the value of
+            # the conversion rate
+            price_campaign.aggregate_conversion_rate = total_conversion
+        return total_conversion
 
     # a function to evaluate the actual profit relative to one price configuration
     def evaluate_profit(customer_class, price_campaign, price_configuration):
