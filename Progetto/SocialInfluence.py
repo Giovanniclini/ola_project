@@ -22,7 +22,7 @@ class SocialInfluence:
         history = np.array([initial_active_nodes])
         # assign the active nodes to the initial active one(s)
         active_nodes = initial_active_nodes
-        # assign the newl active nodes (nodes active at the end of each iteration) to the initial active one(s)
+        # assign the new active nodes (nodes active at the end of each iteration) to the initial active one(s)
         newly_active_nodes = active_nodes
         # assign value to initial time step
         t = 0
