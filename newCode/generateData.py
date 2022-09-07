@@ -13,8 +13,7 @@ def generate_configuration_levels(prices, number_of_configurations):
         price_configurations2.append(configuration_level)
     return price_configurations2
 
-
-def initialization(prices, number_of_configurations):
+def initialization(prices, number_of_configurations, step):
     # define all the price configuration levels
     price_configurations = np.copy(generate_configuration_levels(prices, number_of_configurations))
     # define the margin for each price configuration as 18% of prices
@@ -43,13 +42,13 @@ def initialization(prices, number_of_configurations):
     # create all of the customer classes
     for c in range(number_of_customer_classes):
         customers.append(CustomerClass(c))
-
-    for camp in campaigns:
-        for cus in customers:
-            for prod in range(number_of_products):
-                camp.sales_per_product[cus.id][prod] = np.random.randint(cus.number_of_customers/2, cus.number_of_customers)
-                camp.sales[cus.id] += camp.sales_per_product[cus.id][prod]
-            #camp.no_sales[cus.class_id] = cus.number_of_customers - camp.sales[cus.class_id]
+    if step == 2:
+        for camp in campaigns:
+            for cus in customers:
+                for prod in range(number_of_products):
+                    camp.sales_per_product[cus.id][prod] = np.random.randint(cus.number_of_customers/2, cus.number_of_customers)
+                    camp.sales[cus.id] += camp.sales_per_product[cus.id][prod]
+                #camp.no_sales[cus.class_id] = cus.number_of_customers - camp.sales[cus.class_id]
     return price_configurations, customers, campaigns
 
 
