@@ -13,6 +13,7 @@ def generate_configuration_levels(prices, number_of_configurations):
         price_configurations2.append(configuration_level)
     return price_configurations2
 
+
 def initialization(prices, number_of_configurations):
     # define all the price configuration levels
     price_configurations = np.copy(generate_configuration_levels(prices, number_of_configurations))

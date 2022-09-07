@@ -1,5 +1,6 @@
 from Learner import *
 
+
 class Greedy_Learner(Learner):
     def __init__(self, n_arms):
         super().__init__(n_arms)
@@ -8,7 +9,7 @@ class Greedy_Learner(Learner):
 
     # selects the arm to pull, by maximizing the expected rewards array
     def pull_arm(self):
-        if (self.t < self.n_arms):   # we are saying that at each round we pull arm with index +1
+        if self.t < self.n_arms:   # we are saying that at each round we pull arm with index +1
             return self.t
         idxs = np.argwhere(self.expected_rewards == self.expected_rewards.max()).reshape(-1)
         # indexes of the arms with the maximum reward

@@ -6,13 +6,16 @@ class PricingCampaign:
         self.id = campaign_id
         # assign the configuration to the pricing campaign
         self.configuration = np.copy(configuration)
-        # assign a random conversion rate between 1% and 20% for this campaign, TBD with Social Influence for each customer class
+        # assign a random conversion rate between 1% and 20% for this campaign, TBD with Social Influence for each
+        # customer class
         self.conversion_rate = np.random.uniform(0.01, 0.5, 3)
-        # assign a random conversion rate between 1% and 20% for this campaign, for each price belonging to the price configuration for each customer class
+        # assign a random conversion rate between 1% and 20% for this campaign, for each price belonging to the price
+        # configuration for each customer class
         self.conversion_rate_for_each_product = np.random.uniform(0.01, 0.5, (3, 5))
         # assign an amount of profit per successful sale for this campaign
         self.average_margin_for_sale = np.copy(average_margin_for_configuration)
-        # assign an amount of profit per successful sale for this campaign for each price belonging to the price configuration
+        # assign an amount of profit per successful sale for this campaign for each price belonging to the price
+        # configuration
         self.average_margin_for_price_in_configuration = np.copy(margins_for_configuration)
         # track the number of successes and failures
         self.sales = np.zeros(3)
