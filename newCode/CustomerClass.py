@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class CustomerClass:
     def __init__(self, class_id):
         self.id = class_id
