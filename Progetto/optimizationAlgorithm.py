@@ -3,6 +3,8 @@ from termcolor import colored
 from SocialInfluence import *
 from Environment import *
 from TSLearner import *
+from CustomerClass import CustomerClass
+
 # define time of experiment (time step is one day, price changes every day)
 T = 1000
 # define number of price configurations (price changes)
@@ -84,6 +86,10 @@ def optimizationProblem(step):
                     if campaigns[idx].sales[customer_class] == 0:
                         social.run_social_influence_simulation(number_of_products, campaigns[idx].configuration,
                                                                customer_class, campaigns[idx], customers)
+                    for prod in range(number_of_products):
+                        for c in range(3):
+                            profit[i] += social.evaluate_profit_aggregate(CustomerClass(c), campaigns[idx],
+                                                                          configurations[i])
                 # assign aggregate conversion rate evaluated in social influence
                 ts_p[i] = np.copy(campaigns[idx].aggregate_conversion_rate)
                 # ucb_p = np.copy(campaigns[idx].aggregate_conversion_rate_per_product)

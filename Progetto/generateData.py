@@ -52,5 +52,3 @@ def initialization(prices, number_of_configurations, step):
                     camp.sales[cus.id] += camp.sales_per_product[cus.id][prod]
                 # camp.no_sales[cus.class_id] = cus.number_of_customers - camp.sales[cus.class_id]
     return price_configurations, customers, campaigns
-
-

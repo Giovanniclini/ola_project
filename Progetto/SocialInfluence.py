@@ -163,7 +163,7 @@ class SocialInfluence:
         return total_conversion
 
     # a function to evaluate the actual profit relative to one price configuration
-    def evaluate_profit(self, customer_class, price_campaign, price_configuration):
+    def evaluate_profit_aggregate(self, customer_class, price_campaign, price_configuration):
         # assign zero to the variable (init)
         total_purchase_revenue = 0
         # for each product
@@ -171,8 +171,6 @@ class SocialInfluence:
             # evaluate the profit (margin) by multiplying the units purchased (of each product) by their average margin
             total_purchase_revenue += customer_class.units_purchased_for_each_product[product] * \
                                       price_campaign.average_margin_for_price_in_configuration[product]
-            # reset value
-            customer_class.units_purchased_for_each_product[product] = 0
         return total_purchase_revenue
 
     def simulation(self, number_of_products, price_configuration, customer_class, price_campaign, aggregate_conversion):
@@ -191,7 +189,7 @@ class SocialInfluence:
         # evaluate the conversion rate for the current customer class and price configuration
         conversion_rate = self.evaluate_conversion_rate(customer_class, price_campaign, price_configuration)
         # evaluate the marginal profit of the current price campaign (price configuration) and customer class
-        price_campaign.marginal_profit[customer_class] = self.evaluate_profit(CustomerClass(customer_class),
+        price_campaign.marginal_profit[customer_class] = self.evaluate_profit_aggregate(CustomerClass(customer_class),
                                                                               price_campaign, price_configuration)
         if not aggregate_conversion:
             print(
@@ -210,3 +208,4 @@ class SocialInfluence:
         else:
             self.simulation(number_of_products, price_configuration, customer_class, price_campaign,
                             aggregate_conversion)
+
