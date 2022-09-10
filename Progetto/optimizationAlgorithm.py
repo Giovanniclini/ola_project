@@ -90,6 +90,8 @@ def optimizationProblem(step):
                         for c in range(3):
                             profit[i] += social.evaluate_profit_aggregate(CustomerClass(c), campaigns[idx],
                                                                           configurations[i])
+                            CustomerClass(c).units_purchased_for_each_product[prod] = 0
+
                 # assign aggregate conversion rate evaluated in social influence
                 ts_p[i] = np.copy(campaigns[idx].aggregate_conversion_rate)
                 # ucb_p = np.copy(campaigns[idx].aggregate_conversion_rate_per_product)

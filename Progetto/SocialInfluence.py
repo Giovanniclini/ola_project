@@ -169,6 +169,7 @@ class SocialInfluence:
             # evaluate the profit (margin) by multiplying the units purchased (of each product) by their average margin
             total_purchase_revenue += customer_class.units_purchased_for_each_product[product] * \
                                       price_campaign.average_margin_for_price_in_configuration[product]
+        customer_class.units_purchased_for_each_product = 0
         return total_purchase_revenue
 
     def simulation(self, number_of_products, price_configuration, customer_class, price_campaign, aggregate_conversion):
