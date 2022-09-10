@@ -110,6 +110,7 @@ class SocialInfluence:
     # global history (n. of sales) over the number of customers belonging to the class
 
     def evaluate_conversion_rate(self, customer_class, price_campaign, price_configuration):
+        conversion = 0.0
         # check if the global history is not null (just to be sure)
         if price_campaign.global_history[customer_class] is not None:
             # for each history (relative to one costumer) in the global history
@@ -134,6 +135,7 @@ class SocialInfluence:
 
     def evaluate_aggregate_conversion_rate(self, price_campaign, price_configuration):
         total_sales = 0
+        total_conversion = 0.0
         # check if the global history is not null (just to be sure)
         for customer_class in range(3):
             if price_campaign.global_history[customer_class] is not None:
@@ -153,7 +155,7 @@ class SocialInfluence:
             # total number of customers
             total_conversion = total_sales / (CustomerClass(0).number_of_customers + CustomerClass(1).number_of_customers + CustomerClass(2).number_of_customers)
             # the conversion rate is equal to the number of sales over the number of customer of the current class.
-            # the conversion rate is relative to the whole price campaing (price configuration) store the value of
+            # the conversion rate is relative to the whole price campaign (price configuration) store the value of
             # the conversion rate
             price_campaign.aggregate_conversion_rate = total_conversion
             return total_conversion
