@@ -130,7 +130,7 @@ class SocialInfluence:
             conversion = price_campaign.sales[customer_class] / CustomerClass(customer_class).number_of_customers
             # store the value of the conversion rate
             price_campaign.conversion_rate[customer_class] = conversion
-        return conversion
+            return conversion
 
     def evaluate_aggregate_conversion_rate(self, price_campaign, price_configuration):
         total_sales = 0
@@ -151,14 +151,12 @@ class SocialInfluence:
             price_campaign.aggregate_sales = total_sales
             # at the end of the loop, evaluate the number of no-sales, by subtracting the number of sales from the
             # total number of customers
-            total_conversion = total_sales / (
-                    CustomerClass(0).number_of_customers + CustomerClass(1).number_of_customers + CustomerClass(2).
-                    number_of_customers)
+            total_conversion = total_sales / (CustomerClass(0).number_of_customers + CustomerClass(1).number_of_customers + CustomerClass(2).number_of_customers)
             # the conversion rate is equal to the number of sales over the number of customer of the current class.
             # the conversion rate is relative to the whole price campaing (price configuration) store the value of
             # the conversion rate
             price_campaign.aggregate_conversion_rate = total_conversion
-        return total_conversion
+            return total_conversion
 
     # a function to evaluate the actual profit relative to one price configuration
     def evaluate_profit(self, customer_class, price_campaign, price_configuration):
