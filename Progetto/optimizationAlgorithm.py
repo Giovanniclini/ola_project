@@ -85,12 +85,13 @@ def optimizationProblem(step):
                 if step == 3:
                     if campaigns[idx].sales[customer_class] == 0:
                         social.run_social_influence_simulation(number_of_products, campaigns[idx].configuration,
-                                                               customer_class, campaigns[idx], customers)
+                                                               customer_class, campaigns[idx], True, customers)
                     for prod in range(number_of_products):
                         for c in range(3):
-                            profit[i] += social.evaluate_profit_aggregate(CustomerClass(c), campaigns[idx],
+                            profit[i] += social.evaluate_profit_aggregate(customers[c], campaigns[idx],
                                                                           configurations[i])
-                            CustomerClass(c).units_purchased_for_each_product[prod] = 0
+                            customers[c].units_purchased_for_each_product[prod] = 5
+                            print(customers[c].units_purchased_for_each_product[prod])
                 # assign aggregate conversion rate evaluated in social influence
                 ts_p[i] = np.copy(campaigns[idx].aggregate_conversion_rate)
                 # ucb_p = np.copy(campaigns[idx].aggregate_conversion_rate_per_product)
