@@ -81,7 +81,6 @@ class SocialInfluence:
                     units_purchased = np.random.randint(1, 20)
                     # update the amount of unites of product purchased by the class of user
                     customers[customer_class].assign_values(units_purchased, i)
-                    print(CustomerClass(customer_class).units_purchased_for_each_product)
                     # if the purchase cap is not reached, then activate the node to continue the simulation
                     if customers[customer_class].max_number_of_purchases >= sum(
                             customers[customer_class].units_purchased_for_each_product):
