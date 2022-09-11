@@ -80,10 +80,11 @@ class SocialInfluence:
                     # assign a random amount of units of product purchased by the user
                     units_purchased = np.random.randint(1, 20)
                     # update the amount of unites of product purchased by the class of user
-                    CustomerClass(customer_class).units_purchased_for_each_product[i] += units_purchased
+                    CustomerClass(customer_class).assign_values(units_purchased, i)
+                    print(CustomerClass(customer_class).units_purchased_for_each_product)
                     # if the purchase cap is not reached, then activate the node to continue the simulation
-                    if (CustomerClass(customer_class).max_number_of_purchases >= sum(
-                            CustomerClass(customer_class).units_purchased_for_each_product)):
+                    if CustomerClass(customer_class).max_number_of_purchases >= sum(
+                            CustomerClass(customer_class).units_purchased_for_each_product):
                         # assign 1 to the new active nodes
                         newly_active_nodes[i] = 1
             # update transition probability of the new active nodes to zero value so that it is not possible to
@@ -169,7 +170,6 @@ class SocialInfluence:
             # evaluate the profit (margin) by multiplying the units purchased (of each product) by their average margin
             total_purchase_revenue += customer_class.units_purchased_for_each_product[product] * \
                                       price_campaign.average_margin_for_price_in_configuration[product]
-        customer_class.units_purchased_for_each_product = 0
         return total_purchase_revenue
 
     def simulation(self, number_of_products, price_configuration, customer_class, price_campaign, aggregate_conversion):
