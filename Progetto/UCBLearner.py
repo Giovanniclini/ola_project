@@ -1,14 +1,13 @@
 import numpy as np
-# Set the environment
-exp_reward = np.array([0.15, 0.1, 0.1, 0.2, 0.35, 0.2])
-n_arms = len(exp_reward)
-opt = np.max(exp_reward)
-idx_opt = np.argmax(exp_reward)
-deltas = opt - exp_reward
-deltas = np.array([delta for delta in deltas if delta > 0])
 
 
-def UCB1():
+def UCB1(exp_reward, T):
+    n_arms = len(exp_reward)
+    opt = np.max(exp_reward)
+    idx_opt = np.argmax(exp_reward)
+    deltas = opt - exp_reward
+    deltas = np.array([delta for delta in deltas if delta > 0])
+
     ucb1_criterion = np.zeros(n_arms)
     expected_payoffs = np.zeros(n_arms)
     number_of_pulls = np.zeros(n_arms)
@@ -42,4 +41,4 @@ def UCB1():
         # Store results
         regret = np.append(regret, reward_opt - reward)
         pseudo_regret = np.append(pseudo_regret, opt - exp_reward[pulled_arm])
-    return regret, pseudo_regret
+    return regret, pseudo_regret, deltas

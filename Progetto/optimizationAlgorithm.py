@@ -3,10 +3,10 @@ from termcolor import colored
 from SocialInfluence import *
 from Environment import *
 from TSLearner import *
+from UCBLearner import *
 from CustomerClass import CustomerClass
+from StatsManager import *
 
-# define time of experiment (time step is one day, price changes every day)
-T = 1000
 # define number of price configurations (price changes)
 number_of_configurations = 15
 # define four prices for each of the five products (row = four prices for a product)
@@ -41,7 +41,7 @@ max_profit_idx = 5
 check = [True, True, True]
 
 
-def optimizationProblem(step):
+def optimizationProblem(step, T):
     price_configurations, customers, campaigns = initialization(prices, number_of_configurations, step)
     # print all the prices
     print('All the available prices are: \n{0}'.format(prices))
@@ -90,7 +90,6 @@ def optimizationProblem(step):
                         for c in range(3):
                             profit[i] += social.evaluate_profit_aggregate(customers[c], campaigns[idx],
                                                                           configurations[i])
-                            print(customers[c].units_purchased_for_each_product[prod])
                             customers[c].units_purchased_for_each_product[prod] = 0
                 # assign aggregate conversion rate evaluated in social influence
                 ts_p[i] = np.copy(campaigns[idx].aggregate_conversion_rate)
@@ -101,23 +100,28 @@ def optimizationProblem(step):
                         profit[i] += campaigns[idx].sales_per_product[customer_class][prod] * \
                                      campaigns[idx].average_margin_for_price_in_configuration[prod]
             if step == 3:
+                n_repetitions = 5
+                regrets, pseudo_regrets = np.zeros((n_repetitions, T)), np.zeros((n_repetitions, T))
+                for i in range(n_repetitions):
+                    regrets[i], pseudo_regrets[i], deltas = UCB1(ts_p, T)
+                printUCBBound(regrets, pseudo_regrets, T, n_repetitions, deltas)
+                '''
                 ts_env = Environment(n_arms=number_of_products, probabilities=ts_p)
-                # ucb_env = Environment(n_arms=number_of_products, probabilities=ucb_p)
                 ts_learner = TS_Learner(n_arms=number_of_products)
-                # ucb_learner = UCB_Learner(n_arms=number_of_products)
+
                 ts_opt = [1., 1., 1., 1., 1., 1.]
                 ts_idx_opt = np.argmax(ts_p)
-                T = 1000
                 for t in range(0, T):
                     # Thompson Sampling
                     pulled_arm = ts_learner.pull_arm()
                     reward = ts_env.round(pulled_arm)
                     ts_learner.update(pulled_arm, reward)
-
+                
                 # print("Il regret è: ", np.cumsum(ts_opt - ts_learner.collected_rewards))
             # reset value
+            '''
             max_profit_idx = 5
-            print('\nInitial optimal configuration is: {0}'.format(configurations[5]))
+            #print('\nInitial optimal configuration is: {0}'.format(configurations[5]))
             # assign value to the old optimal campaign for later comparison
             old_optimal_campaign[customer_class] = optimal_campaign[customer_class]
             # assign simulation time to number of customer of the customer class
@@ -143,4 +147,4 @@ def optimizationProblem(step):
 
 if __name__ == '__main__':
     print(colored('\n\n---------------------------- STEP 2 ----------------------------', 'blue', attrs=['bold']))
-    optimizationProblem(step=3)
+    optimizationProblem(step=3, T=1000)
