@@ -37,11 +37,105 @@ optimal_campaign = [15, 15, 15]
 old_optimal_campaign = [15, 15, 15]
 # assign the index of the optimal config for each level (always 6 config at each level, optimal is the last one)
 max_profit_idx = 5
-# marginal increase check
-check = [True, True, True]
 
+optimal_campaign_aggregate = 15
+old_optimal_campaign_aggregate =15
+
+def step3(step, T):
+    global optimal_campaign_aggregate
+    check_aggregate = True
+    price_configurations, customers, campaigns = initialization(prices, number_of_configurations, step)
+    # print all the prices
+    print('All the available prices are: \n{0}'.format(prices))
+    # print all the price configurations
+    print('\nAll the available configurations are: ')
+    for config in price_configurations:
+        print(config)
+    for level in range(0, 15, 5):
+        print(colored('\n\n---------------------------- LEVEL {0} ----------------------------', 'blue',
+                      attrs=['bold']).format(int(level / 5)))
+        if not check_aggregate:
+            continue
+        # assign init value to profit increase variable
+        profit_increase = 0.
+        # assign init value to profits
+        profit = [0., 0., 0., 0., 0., 0.]
+        # assign init value to configurations
+        configurations = [0., 0., 0., 0., 0., 0.]
+        # assign init value to conversion rates
+        ts_p = [0., 0., 0., 0., 0., 0.]
+        # for each element of the arrays, set the correct value
+        for i in range(6):
+            # actual index
+            idx = level + i
+            # if i = 0 is the optimal configuration (campaign)
+            if i == 5:
+                idx = optimal_campaign_aggregate
+            # reset value otherwise at each iteration remain the same (why? colab?)
+            configurations[i] = 0
+            # assign actual value of config
+            configurations[i] = np.copy(campaigns[idx].configuration)
+            # simulate social influence episodes to generate the conversion rates for the price configurations
+            social = SocialInfluence()
+            for c in range(3):
+                if campaigns[idx].sales[c] == 0:
+                    social.run_social_influence_simulation(number_of_products, campaigns[idx].configuration, c, campaigns[idx], True, customers)
+            for prod in range(number_of_products):
+                for c in range(3):
+                    profit[i] += social.evaluate_profit_aggregate(customers[c], campaigns[idx], configurations[i])
+                    customers[c].units_purchased_for_each_product[prod] = 0
+            # assign aggregate conversion rate evaluated in social influence
+            ts_p[i] = np.copy(campaigns[idx].aggregate_conversion_rate)
+        ts_env = Environment(n_arms=6, probabilities=ts_p)
+        ts_learner = TS_Learner(n_arms=6)
+        for i in range(6):
+            ts_learner.beta_parameters[i, 0] = campaigns[level + i].aggregate_sales
+            ts_learner.beta_parameters[i, 1] = (customers[0].number_of_customers + customers[1].number_of_customers + customers[2].number_of_customers) - campaigns[level + i].aggregate_sales
+        # UCB Learner
+        n_repetitions = 5
+        regrets, pseudo_regrets = np.zeros((n_repetitions, T)), np.zeros((n_repetitions, T))
+        print(ts_p)
+        deltas = 0.
+        for i in range(n_repetitions):
+            regrets[i], pseudo_regrets[i], deltas = UCB1(ts_p, T)
+        printUCBBound(regrets, pseudo_regrets, T, n_repetitions, deltas)
+
+        # Thompson Sampling
+        ts_opt = [1., 1., 1., 1., 1., 1.]
+        ts_idx_opt = np.argmax(ts_p)
+        ts_conversion_rates = [0., 0., 0., 0., 0., 0.]
+        for t in range(0, T):
+            pulled_arm = ts_learner.pull_arm()
+            reward = ts_env.round(pulled_arm)
+            ts_learner.update(pulled_arm, reward)
+            print("Il regret è: ", np.cumsum(ts_opt - ts_learner.collected_rewards))
+        for i in range(6):
+            ts_conversion_rates[i] = ts_learner.beta_parameters[i, 0] / ts_learner.beta_parameters[i, 1]
+            profit[i] = ts_learner.beta_parameters[i, 0] * campaigns[level + i].average_margin_for_sale
+        max_profit_idx = 5
+        # print('\nInitial optimal configuration is: {0}'.format(configurations[5]))
+        # assign value to the old optimal campaign for later comparison
+        old_optimal_campaign_aggregate = optimal_campaign_aggregate
+        # if the new optimal is different w.r.t the old one, then update values
+        possible_optimal = np.where(max(profit))
+        if possible_optimal[0][0] != max_profit_idx:
+            profit_increase = (profit[possible_optimal[0][0]] / profit[max_profit_idx]) - 1
+            max_profit_idx = possible_optimal[0][0]
+            optimal_campaign_aggregate = level + max_profit_idx
+            if profit_increase > 0.:
+                print(colored('Current marginal increase {0:.2%}', 'green', attrs=['bold']).format(profit_increase))
+            else:
+                check_aggregate = False
+        else:
+            # otherwise, no better solution was found
+            # here the algorithm should terminate for the current customer class
+            print('No better solution found')
+            print(colored('Current marginal increase {0:.2%}', 'red', attrs=['bold']).format(profit_increase))
+            print('The best configuration is number {0}: {1}  '.format(optimal_campaign_aggregate, campaigns[
+                optimal_campaign_aggregate].configuration))
 
 def optimizationProblem(step, T):
+    check = [True, True, True]
     price_configurations, customers, campaigns = initialization(prices, number_of_configurations, step)
     # print all the prices
     print('All the available prices are: \n{0}'.format(prices))
@@ -54,9 +148,8 @@ def optimizationProblem(step, T):
     for c in range(number_of_customer_classes):
         print(customers[c].reservation_prices)
     for level in range(0, 15, 5):
-        print(colored('\n\n---------------------------- LEVEL {0} ----------------------------', 'blue',
-                      attrs=['bold']).format(int(level / 5)))
-        # for each customer class
+        print(colored('\n\n---------------------------- LEVEL {0} ----------------------------', 'blue', attrs=['bold']).format(int(level / 5)))
+        # chek if profit increase was made
         for customer_class in range(number_of_customer_classes):
             if not check[customer_class]:
                 continue
@@ -80,48 +173,14 @@ def optimizationProblem(step, T):
                 configurations[i] = 0
                 # assign actual value of config
                 configurations[i] = np.copy(campaigns[idx].configuration)
-                # simulate social influence episodes to generate the conversion rates for the price configurations
-                social = SocialInfluence()
-                if step == 3:
-                    if campaigns[idx].sales[customer_class] == 0:
-                        social.run_social_influence_simulation(number_of_products, campaigns[idx].configuration,
-                                                               customer_class, campaigns[idx], True, customers)
-                    for prod in range(number_of_products):
-                        for c in range(3):
-                            profit[i] += social.evaluate_profit_aggregate(customers[c], campaigns[idx],
-                                                                          configurations[i])
-                            customers[c].units_purchased_for_each_product[prod] = 0
                 # assign aggregate conversion rate evaluated in social influence
                 ts_p[i] = np.copy(campaigns[idx].aggregate_conversion_rate)
                 # ucb_p = np.copy(campaigns[idx].aggregate_conversion_rate_per_product)
-                if step == 2:
-                    # assign actual profit value (average)
-                    for prod in range(number_of_products):
-                        profit[i] += campaigns[idx].sales_per_product[customer_class][prod] * \
-                                     campaigns[idx].average_margin_for_price_in_configuration[prod]
-            if step == 3:
-                n_repetitions = 5
-                regrets, pseudo_regrets = np.zeros((n_repetitions, T)), np.zeros((n_repetitions, T))
-                for i in range(n_repetitions):
-                    regrets[i], pseudo_regrets[i], deltas = UCB1(ts_p, T)
-                printUCBBound(regrets, pseudo_regrets, T, n_repetitions, deltas)
-                '''
-                ts_env = Environment(n_arms=number_of_products, probabilities=ts_p)
-                ts_learner = TS_Learner(n_arms=number_of_products)
-
-                ts_opt = [1., 1., 1., 1., 1., 1.]
-                ts_idx_opt = np.argmax(ts_p)
-                for t in range(0, T):
-                    # Thompson Sampling
-                    pulled_arm = ts_learner.pull_arm()
-                    reward = ts_env.round(pulled_arm)
-                    ts_learner.update(pulled_arm, reward)
-                
-                # print("Il regret è: ", np.cumsum(ts_opt - ts_learner.collected_rewards))
-            # reset value
-            '''
+                # assign actual profit value (average)
+                for prod in range(number_of_products):
+                    profit[i] += campaigns[idx].sales_per_product[customer_class][prod] * campaigns[idx].average_margin_for_price_in_configuration[prod]
             max_profit_idx = 5
-            #print('\nInitial optimal configuration is: {0}'.format(configurations[5]))
+            print('\nInitial optimal configuration is: {0}'.format(configurations[5]))
             # assign value to the old optimal campaign for later comparison
             old_optimal_campaign[customer_class] = optimal_campaign[customer_class]
             # assign simulation time to number of customer of the customer class
@@ -129,22 +188,27 @@ def optimizationProblem(step, T):
             # if the new optimal is different w.r.t the old one, then update values
             possible_optimal = np.where(max(profit))
             if possible_optimal[0][0] != max_profit_idx:
-                profit_increase = (profit[possible_optimal[0][0]] / profit[max_profit_idx]) - 1
-                max_profit_idx = possible_optimal[0][0]
-                optimal_campaign[customer_class] = level + max_profit_idx
-                if profit_increase > 0.:
+                 profit_increase = (profit[possible_optimal[0][0]] / profit[max_profit_idx]) - 1
+                 max_profit_idx = possible_optimal[0][0]
+                 optimal_campaign[customer_class] = level + max_profit_idx
+                 if profit_increase > 0.:
                     print(colored('Current marginal increase {0:.2%}', 'green', attrs=['bold']).format(profit_increase))
-                else:
+                 else:
                     check[customer_class] = False
             else:
                 # otherwise, no better solution was found
                 # here the algorithm should terminate for the current customer class
                 print('No better solution found')
                 print(colored('Current marginal increase {0:.2%}', 'red', attrs=['bold']).format(profit_increase))
-            print('The best configuration is number {0}: {1}  '.format(optimal_campaign[customer_class], campaigns[
-                optimal_campaign[customer_class]].configuration))
+                print('The best configuration is number {0}: {1}  '.format(optimal_campaign[customer_class], campaigns[optimal_campaign[customer_class]].configuration))
 
 
 if __name__ == '__main__':
-    print(colored('\n\n---------------------------- STEP 2 ----------------------------', 'blue', attrs=['bold']))
-    optimizationProblem(step=3, T=1000)
+    step = 3
+    if step == 2:
+        print(colored('\n\n---------------------------- STEP 2 ----------------------------', 'blue', attrs=['bold']))
+        optimizationProblem(step=step, T=1000)
+    else:
+        print(colored('\n\n---------------------------- STEP 3 ----------------------------', 'blue', attrs=['bold']))
+        step3(step=step, T=1000)
+

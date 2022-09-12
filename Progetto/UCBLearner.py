@@ -20,8 +20,7 @@ def UCB1(exp_reward, T):
         if t < n_arms:
             pulled_arm = t  # round robin for the first n steps
         else:
-            idxs = np.argwhere(ucb1_criterion == ucb1_criterion.max()).reshape(
-                -1)  # there can be more arms with max value
+            idxs = np.argwhere(ucb1_criterion == ucb1_criterion.max()).reshape(-1)  # there can be more arms with max value
             pulled_arm = np.random.choice(idxs)
 
         # Pull an arm
@@ -36,6 +35,9 @@ def UCB1(exp_reward, T):
         expected_payoffs[pulled_arm] = ((expected_payoffs[pulled_arm] * (number_of_pulls[pulled_arm] - 1.0) + reward) /
                                         number_of_pulls[pulled_arm])  # update sample mean for the selected arm
         for k in range(0, n_arms):
+            if number_of_pulls[k] == 0.:
+                print(t)
+                print("Number zero")
             ucb1_criterion[k] = expected_payoffs[k] + np.sqrt(2 * np.log(t) / number_of_pulls[k])
 
         # Store results
