@@ -35,12 +35,9 @@ def UCB1(exp_reward, T):
         expected_payoffs[pulled_arm] = ((expected_payoffs[pulled_arm] * (number_of_pulls[pulled_arm] - 1.0) + reward) /
                                         number_of_pulls[pulled_arm])  # update sample mean for the selected arm
         for k in range(0, n_arms):
-            if number_of_pulls[k] == 0.:
-                print(t)
-                print("Number zero")
             ucb1_criterion[k] = expected_payoffs[k] + np.sqrt(2 * np.log(t) / number_of_pulls[k])
 
         # Store results
         regret = np.append(regret, reward_opt - reward)
         pseudo_regret = np.append(pseudo_regret, opt - exp_reward[pulled_arm])
-    return regret, pseudo_regret, deltas
+    return regret, pseudo_regret, deltas, expected_payoffs
