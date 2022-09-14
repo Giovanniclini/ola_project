@@ -114,7 +114,7 @@ def step3(step, T):
             expected_payoffs = 0.
             for i in range(n_repetitions):
                 regrets[i], pseudo_regrets[i], deltas, expected_payoffs = UCB1(ucb_p, T)
-            printUCBBound(regrets, pseudo_regrets, T, n_repetitions, deltas)
+            #printUCBBound(regrets, pseudo_regrets, T, n_repetitions, deltas)
             for i in range(6):
                 ucb_profit[i] = expected_payoffs[i] * (customers[0].number_of_customers + customers[1].number_of_customers +
                                                      customers[2].number_of_customers) * campaigns[level + i].average_margin_for_sale
@@ -135,10 +135,10 @@ def step3(step, T):
                 reward = ts_env.round(pulled_arm)
                 ts_learner.update(pulled_arm, reward)
             for i in range(6):
-                ts_conversion_rates[i] = ts_learner.beta_parameters[i, 0] / ts_learner.beta_parameters[i, 1]
+                ts_conversion_rates[i] = ts_learner.beta_parameters[i, 0] / (ts_learner.beta_parameters[i, 0] + ts_learner.beta_parameters[i, 1])
                 ts_profit[i] = ts_conversion_rates[i] * (customers[0].number_of_customers + customers[1].number_of_customers +
                                                      customers[2].number_of_customers) * campaigns[level + i].average_margin_for_sale
-
+            print(ts_learner.beta_parameters)
         # if the new optimal is different w.r.t the old one, then update values
         if check_aggregate[0]:
             ts_max_profit_idx = 5
@@ -255,5 +255,5 @@ if __name__ == '__main__':
         optimizationProblem(step=step, T=100000)
     else:
         print(colored('\n\n---------------------------- STEP 3 ----------------------------', 'blue', attrs=['bold']))
-        step3(step=step, T=100)
+        step3(step=step, T=250)
 
