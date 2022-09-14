@@ -5,7 +5,8 @@ class CustomerClass:
     def __init__(self, class_id):
         self.id = class_id
         # assign a random number of customers
-        self.number_of_customers = np.random.randint(10000, 100000)
+        # self.number_of_customers = np.random.randint(10000, 100000)
+        self.number_of_customers = 100
         # assign a random value to alpha probabilities
         self.alpha_probabilities = np.random.dirichlet(np.ones(6), size=1)
         # assign a random value to the total number of purchasable product units

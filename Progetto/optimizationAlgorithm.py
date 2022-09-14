@@ -58,8 +58,8 @@ def step3(step, T):
     for level in range(0, 15, 5):
         print(colored('\n\n---------------------------- LEVEL {0} ----------------------------', 'blue',
                       attrs=['bold']).format(int(level / 5)))
-        if not check_aggregate[0] and check_aggregate[1]:
-            continue
+        if not check_aggregate[0] and not check_aggregate[1]:
+            break
         # assign init value to profit increase variable
         ts_profit_increase = 0.
         # assign init value to profits
@@ -143,35 +143,37 @@ def step3(step, T):
         ts_old_optimal_campaign_aggregate = ts_optimal_campaign_aggregate
         ucb_old_optimal_campaign_aggregate = ucb_optimal_campaign_aggregate
         # if the new optimal is different w.r.t the old one, then update values
-        ts_possible_optimal = np.where(max(ts_profit))
-        ts_profit_increase = (ts_profit[ts_possible_optimal[0][0]] / ts_profit[max_profit_idx]) - 1
-        if check_aggregate[0] and ts_possible_optimal[0][0] != ts_max_profit_idx and ts_profit_increase > 0.:
-            ts_max_profit_idx = ts_possible_optimal[0][0]
+        ts_possible_optimal = ts_profit.index(max(ts_profit))
+        ts_profit_increase = (ts_profit[ts_possible_optimal] / ts_profit[max_profit_idx]) - 1
+        if check_aggregate[0] and ts_possible_optimal != ts_max_profit_idx and ts_profit_increase > 0.:
+            ts_max_profit_idx = ts_possible_optimal
             ts_optimal_campaign_aggregate = level + ts_max_profit_idx
             print('\nThompson Sampling optimal configuration is: {0}'.format(ts_configurations[5]))
             print(colored('Thompson Sampling current marginal increase {0:.2%}', 'green', attrs=['bold']).format(ts_profit_increase))
         else:
+            if check_aggregate[0]:
+                # otherwise, no better solution was found
+                # here the algorithm should terminate for the current customer class
+                print(colored('Thompson Sampling no better solution found: current marginal increase {0:.2%}', 'red', attrs=['bold']).format(ts_profit_increase))
+                print('The best Thompson Sampling configuration is number {0}: {1}  '.format(ts_optimal_campaign_aggregate, campaigns[ts_optimal_campaign_aggregate].configuration))
             check_aggregate[0] = False
-            # otherwise, no better solution was found
-            # here the algorithm should terminate for the current customer class
-            print(colored('Thompson Sampling no better solution found: current marginal increase {0:.2%}', 'red', attrs=['bold']).format(ts_profit_increase))
-            print('The best Thompson Sampling configuration is number {0}: {1}  '.format(ts_optimal_campaign_aggregate, campaigns[
-                ts_optimal_campaign_aggregate].configuration))
-        ucb_possible_optimal = np.where(max(ucb_profit))
-        ucb_profit_increase = (ucb_profit[ucb_possible_optimal[0][0]] / ucb_profit[max_profit_idx]) - 1
-        if check_aggregate[1] and ucb_possible_optimal[0][0] != ucb_max_profit_idx and ucb_profit_increase > 0.:
-            ucb_max_profit_idx = ucb_possible_optimal[0][0]
+        ucb_possible_optimal = ucb_profit.index(max(ucb_profit))
+        ucb_profit_increase = (ucb_profit[ucb_possible_optimal] / ucb_profit[max_profit_idx]) - 1
+        if check_aggregate[1] and ucb_possible_optimal != ucb_max_profit_idx and ucb_profit_increase > 0.:
+            ucb_max_profit_idx = ucb_possible_optimal
             ucb_optimal_campaign_aggregate = level + ucb_max_profit_idx
             print('\nUCB1 optimal configuration is: {0}'.format(ucb_configurations[5]))
             print(colored('UCB1 current marginal increase {0:.2%}', 'green', attrs=['bold']).format(ucb_profit_increase))
         else:
+            if check_aggregate[1]:
+                # otherwise, no better solution was found
+                # here the algorithm should terminate for the current customer class
+                print(colored('UCB1 no better solution found: current marginal increase {0:.2%}', 'red',
+                              attrs=['bold']).format(ucb_profit_increase))
+                print('The best UCB1 configuration is number {0}: {1}  '.format(ucb_optimal_campaign_aggregate, campaigns[
+                    ucb_optimal_campaign_aggregate].configuration))
             check_aggregate[1] = False
-            # otherwise, no better solution was found
-            # here the algorithm should terminate for the current customer class
-            print(colored('UCB1 no better solution found: current marginal increase {0:.2%}', 'red',
-                          attrs=['bold']).format(ts_profit_increase))
-            print('The best UCB1 configuration is number {0}: {1}  '.format(ucb_optimal_campaign_aggregate, campaigns[
-                ucb_optimal_campaign_aggregate].configuration))
+
 
 def optimizationProblem(step, T):
     check = [True, True, True]
@@ -249,5 +251,5 @@ if __name__ == '__main__':
         optimizationProblem(step=step, T=100000)
     else:
         print(colored('\n\n---------------------------- STEP 3 ----------------------------', 'blue', attrs=['bold']))
-        step3(step=step, T=1000000)
+        step3(step=step, T=100)
 
