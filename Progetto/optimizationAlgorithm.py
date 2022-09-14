@@ -101,8 +101,6 @@ def step3(step, T):
                     social.run_social_influence_simulation(number_of_products, campaigns[ucb_idx].configuration, c, campaigns[ucb_idx], True, customers)
             for prod in range(number_of_products):
                 for c in range(3):
-                    ts_profit[i] += social.evaluate_profit_aggregate(customers[c], campaigns[ts_idx], ts_configurations[i])
-                    ucb_profit[i] += social.evaluate_profit_aggregate(customers[c], campaigns[ucb_idx], ucb_configurations[i])
                     customers[c].units_purchased_for_each_product[prod] = 0
             # assign aggregate conversion rate evaluated in social influence
             ts_p[i] = np.copy(campaigns[ts_idx].aggregate_conversion_rate)
@@ -117,8 +115,7 @@ def step3(step, T):
                 regrets[i], pseudo_regrets[i], deltas, expected_payoffs = UCB1(ucb_p, T)
             printUCBBound(regrets, pseudo_regrets, T, n_repetitions, deltas)
         for i in range(6):
-            print(expected_payoffs)
-            ucb_profit[i] = np.mean(expected_payoffs, axis=0) * (customers[0].number_of_customers + customers[1].number_of_customers +
+            ucb_profit[i] = expected_payoffs[i] * (customers[0].number_of_customers + customers[1].number_of_customers +
                                                  customers[2].number_of_customers) * campaigns[level + i].average_margin_for_sale
         # Thompson Sampling
         ts_env = Environment(n_arms=6, probabilities=ts_p)
@@ -138,7 +135,8 @@ def step3(step, T):
                 ts_learner.update(pulled_arm, reward)
         for i in range(6):
             ts_conversion_rates[i] = ts_learner.beta_parameters[i, 0] / ts_learner.beta_parameters[i, 1]
-            ts_profit[i] = ts_learner.beta_parameters[i, 0] * campaigns[level + i].average_margin_for_sale
+            ts_profit[i] = ts_conversion_rates[i] * (customers[0].number_of_customers + customers[1].number_of_customers +
+                                                 customers[2].number_of_customers) * campaigns[level + i].average_margin_for_sale
         ts_max_profit_idx = 5
         ucb_max_profit_idx = 5
         # assign value to the old optimal campaign for later comparison
@@ -159,7 +157,6 @@ def step3(step, T):
             print(colored('Thompson Sampling no better solution found: current marginal increase {0:.2%}', 'red', attrs=['bold']).format(ts_profit_increase))
             print('The best Thompson Sampling configuration is number {0}: {1}  '.format(ts_optimal_campaign_aggregate, campaigns[
                 ts_optimal_campaign_aggregate].configuration))
-        print(ucb_profit)
         ucb_possible_optimal = np.where(max(ucb_profit))
         ucb_profit_increase = (ucb_profit[ucb_possible_optimal[0][0]] / ucb_profit[max_profit_idx]) - 1
         if check_aggregate[1] and ucb_possible_optimal[0][0] != ucb_max_profit_idx and ucb_profit_increase > 0.:
@@ -252,5 +249,5 @@ if __name__ == '__main__':
         optimizationProblem(step=step, T=100000)
     else:
         print(colored('\n\n---------------------------- STEP 3 ----------------------------', 'blue', attrs=['bold']))
-        step3(step=step, T=10000)
+        step3(step=step, T=1000000)
 
