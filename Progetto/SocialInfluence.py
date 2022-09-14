@@ -125,7 +125,7 @@ class SocialInfluence:
                             price_campaign.sales[customer_class] += 1
             # at the end of the loop, evaluate the number of no-sales, by subtracting the number of sales from the
             # total number of customers
-            price_campaign.no_sales[customer_class] = customers[customer_class].number_of_customers - price_campaign.sales[customer_class]
+            price_campaign.no_sales[customer_class] = customers[customer_class].number_of_customers * 5 - price_campaign.sales[customer_class]
             # the conversion rate is equal to the number of sales over the number of customer of the current class.
             # the conversion rate is relative to the whole price campaign (price configuration)
             conversion = price_campaign.sales[customer_class] / customers[customer_class].number_of_customers
