@@ -56,26 +56,27 @@ def step3(step, T):
     for config in price_configurations:
         print(config)
     for level in range(0, 15, 5):
-        print(colored('\n\n---------------------------- LEVEL {0} ----------------------------', 'blue',
-                      attrs=['bold']).format(int(level / 5)))
         if not check_aggregate[0] and not check_aggregate[1]:
             break
-        # assign init value to profit increase variable
-        ts_profit_increase = 0.
-        # assign init value to profits
-        ts_profit = [0., 0., 0., 0., 0., 0.]
-        # assign init value to configurations
-        ts_configurations = [0., 0., 0., 0., 0., 0.]
-        # assign init value to conversion rates
-        ts_p = [0., 0., 0., 0., 0., 0.]
-
-        ucb_profit_increase = 0.
-        # assign init value to profits
-        ucb_profit = [0., 0., 0., 0., 0., 0.]
-        # assign init value to configurations
-        ucb_configurations = [0., 0., 0., 0., 0., 0.]
-        # assign init value to conversion rates
-        ucb_p = [0., 0., 0., 0., 0., 0.]
+        print(colored('\n\n---------------------------- LEVEL {0} ----------------------------', 'blue',
+                      attrs=['bold']).format(int(level / 5)))
+        if check_aggregate[0]:
+            # assign init value to profit increase variable
+            ts_profit_increase = 0.
+            # assign init value to profits
+            ts_profit = [0., 0., 0., 0., 0., 0.]
+            # assign init value to configurations
+            ts_configurations = [0., 0., 0., 0., 0., 0.]
+            # assign init value to conversion rates
+            ts_p = [0., 0., 0., 0., 0., 0.]
+        if check_aggregate[1]:
+            ucb_profit_increase = 0.
+            # assign init value to profits
+            ucb_profit = [0., 0., 0., 0., 0., 0.]
+            # assign init value to configurations
+            ucb_configurations = [0., 0., 0., 0., 0., 0.]
+            # assign init value to conversion rates
+            ucb_p = [0., 0., 0., 0., 0., 0.]
         # for each element of the arrays, set the correct value
         for i in range(6):
             # actual index
@@ -105,46 +106,45 @@ def step3(step, T):
             # assign aggregate conversion rate evaluated in social influence
             ts_p[i] = np.copy(campaigns[ts_idx].aggregate_conversion_rate)
             ucb_p[i] = np.copy(campaigns[ucb_idx].aggregate_conversion_rate)
-        # UCB Learner
-        n_repetitions = 5
-        regrets, pseudo_regrets = np.zeros((n_repetitions, T)), np.zeros((n_repetitions, T))
-        deltas = 0.
-        expected_payoffs = 0.
         if check_aggregate[1]:
+            # UCB Learner
+            n_repetitions = 5
+            regrets, pseudo_regrets = np.zeros((n_repetitions, T)), np.zeros((n_repetitions, T))
+            deltas = 0.
+            expected_payoffs = 0.
             for i in range(n_repetitions):
                 regrets[i], pseudo_regrets[i], deltas, expected_payoffs = UCB1(ucb_p, T)
             printUCBBound(regrets, pseudo_regrets, T, n_repetitions, deltas)
-        for i in range(6):
-            ucb_profit[i] = expected_payoffs[i] * (customers[0].number_of_customers + customers[1].number_of_customers +
-                                                 customers[2].number_of_customers) * campaigns[level + i].average_margin_for_sale
-        # Thompson Sampling
-        ts_env = Environment(n_arms=6, probabilities=ts_p)
-        ts_learner = TS_Learner(n_arms=6)
-        for i in range(6):
-            ts_learner.beta_parameters[i, 0] += campaigns[level + i].aggregate_sales
-            ts_learner.beta_parameters[i, 1] += (customers[0].number_of_customers + customers[1].number_of_customers +
-                                                 customers[2].number_of_customers) - campaigns[
-                                                    level + i].aggregate_sales
-        ts_opt = [1., 1., 1., 1., 1., 1.]
-        ts_idx_opt = np.argmax(ts_p)
-        ts_conversion_rates = [0., 0., 0., 0., 0., 0.]
+            for i in range(6):
+                ucb_profit[i] = expected_payoffs[i] * (customers[0].number_of_customers + customers[1].number_of_customers +
+                                                     customers[2].number_of_customers) * campaigns[level + i].average_margin_for_sale
         if check_aggregate[0]:
+            # Thompson Sampling
+            ts_env = Environment(n_arms=6, probabilities=ts_p)
+            ts_learner = TS_Learner(n_arms=6)
+            for i in range(6):
+                ts_learner.beta_parameters[i, 0] += campaigns[level + i].aggregate_sales
+                ts_learner.beta_parameters[i, 1] += (customers[0].number_of_customers + customers[1].number_of_customers +
+                                                     customers[2].number_of_customers) - campaigns[
+                                                        level + i].aggregate_sales
+            ts_opt = [1., 1., 1., 1., 1., 1.]
+            ts_idx_opt = np.argmax(ts_p)
+            ts_conversion_rates = [0., 0., 0., 0., 0., 0.]
             for t in range(0, T):
                 pulled_arm = ts_learner.pull_arm()
                 reward = ts_env.round(pulled_arm)
                 ts_learner.update(pulled_arm, reward)
-        for i in range(6):
-            ts_conversion_rates[i] = ts_learner.beta_parameters[i, 0] / ts_learner.beta_parameters[i, 1]
-            ts_profit[i] = ts_conversion_rates[i] * (customers[0].number_of_customers + customers[1].number_of_customers +
-                                                 customers[2].number_of_customers) * campaigns[level + i].average_margin_for_sale
-        ts_max_profit_idx = 5
-        ucb_max_profit_idx = 5
-        # assign value to the old optimal campaign for later comparison
-        ts_old_optimal_campaign_aggregate = ts_optimal_campaign_aggregate
-        ucb_old_optimal_campaign_aggregate = ucb_optimal_campaign_aggregate
+            for i in range(6):
+                ts_conversion_rates[i] = ts_learner.beta_parameters[i, 0] / ts_learner.beta_parameters[i, 1]
+                ts_profit[i] = ts_conversion_rates[i] * (customers[0].number_of_customers + customers[1].number_of_customers +
+                                                     customers[2].number_of_customers) * campaigns[level + i].average_margin_for_sale
+
         # if the new optimal is different w.r.t the old one, then update values
-        ts_possible_optimal = ts_profit.index(max(ts_profit))
-        ts_profit_increase = (ts_profit[ts_possible_optimal] / ts_profit[max_profit_idx]) - 1
+        if check_aggregate[0]:
+            ts_max_profit_idx = 5
+            ts_old_optimal_campaign_aggregate = ts_optimal_campaign_aggregate
+            ts_possible_optimal = ts_profit.index(max(ts_profit))
+            ts_profit_increase = (ts_profit[ts_possible_optimal] / ts_profit[max_profit_idx]) - 1
         if check_aggregate[0] and ts_possible_optimal != ts_max_profit_idx and ts_profit_increase > 0.:
             ts_max_profit_idx = ts_possible_optimal
             ts_optimal_campaign_aggregate = level + ts_max_profit_idx
@@ -157,8 +157,12 @@ def step3(step, T):
                 print(colored('Thompson Sampling no better solution found: current marginal increase {0:.2%}', 'red', attrs=['bold']).format(ts_profit_increase))
                 print('The best Thompson Sampling configuration is number {0}: {1}  '.format(ts_optimal_campaign_aggregate, campaigns[ts_optimal_campaign_aggregate].configuration))
             check_aggregate[0] = False
-        ucb_possible_optimal = ucb_profit.index(max(ucb_profit))
-        ucb_profit_increase = (ucb_profit[ucb_possible_optimal] / ucb_profit[max_profit_idx]) - 1
+        if check_aggregate[1]:
+            ucb_max_profit_idx = 5
+            # assign value to the old optimal campaign for later comparison
+            ucb_old_optimal_campaign_aggregate = ucb_optimal_campaign_aggregate
+            ucb_possible_optimal = ucb_profit.index(max(ucb_profit))
+            ucb_profit_increase = (ucb_profit[ucb_possible_optimal] / ucb_profit[max_profit_idx]) - 1
         if check_aggregate[1] and ucb_possible_optimal != ucb_max_profit_idx and ucb_profit_increase > 0.:
             ucb_max_profit_idx = ucb_possible_optimal
             ucb_optimal_campaign_aggregate = level + ucb_max_profit_idx
