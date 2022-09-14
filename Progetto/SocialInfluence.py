@@ -151,6 +151,7 @@ class SocialInfluence:
                                 price_campaign.sales[customer_class] += 1
                                 total_sales += 1
             price_campaign.aggregate_sales = total_sales
+            price_campaign.aggregate_no_sales = (customers[0].number_of_customers + customers[1].number_of_customers + customers[2].number_of_customers) * 5 - total_sales
             # at the end of the loop, evaluate the number of no-sales, by subtracting the number of sales from the
             # total number of customers
             total_conversion = total_sales / (customers[0].number_of_customers + customers[1].number_of_customers + customers[2].number_of_customers)
@@ -196,13 +197,12 @@ class SocialInfluence:
 
     def run_social_influence_simulation(self, number_of_products, price_configuration, customer_class, price_campaign,
                                         aggregate_conversion, customers):
-        if customer_class == 3 and aggregate_conversion:
+        if customer_class == 2 and aggregate_conversion:
             for customer_class in range(3):
                 self.simulation(number_of_products, price_configuration, customer_class, price_campaign,
                                 aggregate_conversion, customers)
             aggregate_conversion_rate = self.evaluate_aggregate_conversion_rate(price_campaign, customers)
-            print('For configuration {0}, the aggregate conversion rate is {1}.'.format(price_campaign.id,
-                                                                                        aggregate_conversion_rate))
+            #print('For configuration {0}, the aggregate conversion rate is {1}.'.format(price_campaign.id, aggregate_conversion_rate))
         else:
             self.simulation(number_of_products, price_configuration, customer_class, price_campaign,
                             aggregate_conversion, customers)

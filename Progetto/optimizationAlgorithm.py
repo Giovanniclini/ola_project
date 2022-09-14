@@ -123,10 +123,12 @@ def step3(step, T):
             ts_env = Environment(n_arms=6, probabilities=ts_p)
             ts_learner = TS_Learner(n_arms=6)
             for i in range(6):
-                ts_learner.beta_parameters[i, 0] += campaigns[level + i].aggregate_sales
-                ts_learner.beta_parameters[i, 1] += (customers[0].number_of_customers + customers[1].number_of_customers +
-                                                     customers[2].number_of_customers) - campaigns[
-                                                        level + i].aggregate_sales
+                if i == 5:
+                    ts_learner.beta_parameters[i, 0] += campaigns[ts_optimal_campaign_aggregate].aggregate_sales
+                    ts_learner.beta_parameters[i, 1] += campaigns[ts_optimal_campaign_aggregate].aggregate_no_sales
+                else:
+                    ts_learner.beta_parameters[i, 0] += campaigns[level + i].aggregate_sales
+                    ts_learner.beta_parameters[i, 1] += campaigns[level + i].aggregate_no_sales
             ts_opt = [1., 1., 1., 1., 1., 1.]
             ts_idx_opt = np.argmax(ts_p)
             ts_conversion_rates = [0., 0., 0., 0., 0., 0.]
@@ -135,10 +137,10 @@ def step3(step, T):
                 reward = ts_env.round(pulled_arm)
                 ts_learner.update(pulled_arm, reward)
             for i in range(6):
-                ts_conversion_rates[i] = ts_learner.beta_parameters[i, 0] / (ts_learner.beta_parameters[i, 0] + ts_learner.beta_parameters[i, 1])
+                ts_conversion_rates[i] = ts_learner.beta_parameters[i, 0] / T
                 ts_profit[i] = ts_conversion_rates[i] * (customers[0].number_of_customers + customers[1].number_of_customers +
                                                      customers[2].number_of_customers) * campaigns[level + i].average_margin_for_sale
-            print(ts_learner.beta_parameters)
+
         # if the new optimal is different w.r.t the old one, then update values
         if check_aggregate[0]:
             ts_max_profit_idx = 5
@@ -255,5 +257,5 @@ if __name__ == '__main__':
         optimizationProblem(step=step, T=100000)
     else:
         print(colored('\n\n---------------------------- STEP 3 ----------------------------', 'blue', attrs=['bold']))
-        step3(step=step, T=250)
+        step3(step=step, T=600)
 
