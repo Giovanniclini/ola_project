@@ -34,7 +34,7 @@ class PricingCampaign:
         self.aggregate_conversion_rate_for_each_product = np.random.uniform(0.01, 0.5, 5)
 
         # history returned for each customer
-        self.global_history = [[] for i in range(3)]
+        self.global_history = [[] for _ in range(3)]
 
 
 # define a function to try an pricing campaign on a customer, TDB Social Inflence

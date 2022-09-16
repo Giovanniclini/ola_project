@@ -16,9 +16,9 @@ class SocialInfluence:
         prob_matrix = np.copy(customers[customer_class].social_influence_transition_probability_matrix)
         np.fill_diagonal(prob_matrix, 0)
         # store_the number of products, i.e, the nodes of the graph
+        # initialize the history
+        history = []
         n_nodes = number_of_products
-        # assign first the history to the initial active nodes array
-        history = np.array([initial_active_nodes])
         # assign the active nodes to the initial active one(s)
         active_nodes = initial_active_nodes
         # assign the new active nodes (nodes active at the end of each iteration) to the initial active one(s)
@@ -31,10 +31,12 @@ class SocialInfluence:
         if customers[customer_class].reservation_prices[int(np.where(active_nodes == 1)[0])] < price_configuration[int(
                 np.where(active_nodes == 1)[0])]:
             return history
+        # assign first the history to the initial active nodes array
+        history = np.array([initial_active_nodes])
         # update transition probability of the new active nodes to zero value so that it is not possible to reach
         # again the same node (product)
         for i in range(prob_matrix.shape[1]):
-            if i == int(np.where(newly_active_nodes == 1)[0]):
+            if i in np.array(np.where(newly_active_nodes == 1)):
                 # from all the nodes to the new active one
                 for j in range(prob_matrix.shape[0]):
                     prob_matrix[j][i] = 0
@@ -75,8 +77,7 @@ class SocialInfluence:
             for i in range(5):
                 # if the chosen secondary product is found, let the costumer actually buy it, by updated the
                 # values related to the units sold and the revenue
-                if (activated_edges[i] == True and customers[customer_class].reservation_prices[i] >=
-                        price_configuration[i]):
+                if activated_edges[i] and customers[customer_class].reservation_prices[i] >= price_configuration[i]:
                     # assign a random amount of units of product purchased by the user
                     units_purchased = np.random.randint(1, 20)
                     # update the amount of unites of product purchased by the class of user
@@ -110,7 +111,6 @@ class SocialInfluence:
     # global history (n. of sales) over the number of customers belonging to the class
 
     def evaluate_conversion_rate(self, customer_class, price_campaign, price_configuration, customers):
-        conversion = 0.0
         # check if the global history is not null (just to be sure)
         if price_campaign.global_history[customer_class] is not None:
             # for each history (relative to one costumer) in the global history
@@ -123,19 +123,18 @@ class SocialInfluence:
                         if 1 in history_step:
                             # increase the global number of sales of the customer class involved
                             price_campaign.sales[customer_class] += 1
-            # at the end of the loop, evaluate the number of no-sales, by subtracting the number of sales from the
-            # total number of customers
-            price_campaign.no_sales[customer_class] = customers[customer_class].number_of_customers * 5 - price_campaign.sales[customer_class]
-            # the conversion rate is equal to the number of sales over the number of customer of the current class.
-            # the conversion rate is relative to the whole price campaign (price configuration)
-            conversion = price_campaign.sales[customer_class] / customers[customer_class].number_of_customers
-            # store the value of the conversion rate
-            price_campaign.conversion_rate[customer_class] = conversion
-            return conversion
+        # at the end of the loop, evaluate the number of no-sales, by subtracting the number of sales from the
+        # total number of customers
+        price_campaign.no_sales[customer_class] = customers[customer_class].number_of_customers * 5 - price_campaign.sales[customer_class]
+        # the conversion rate is equal to the number of sales over the number of customer of the current class.
+        # the conversion rate is relative to the whole price campaign (price configuration)
+        conversion = price_campaign.sales[customer_class] / customers[customer_class].number_of_customers
+        # store the value of the conversion rate
+        price_campaign.conversion_rate[customer_class] = conversion
+        return conversion
 
     def evaluate_aggregate_conversion_rate(self, price_campaign, customers):
         total_sales = 0
-        total_conversion = 0.0
         # check if the global history is not null (just to be sure)
         for customer_class in range(3):
             if price_campaign.global_history[customer_class] is not None:
@@ -150,16 +149,16 @@ class SocialInfluence:
                                 # increase the global number of sales of the customer class involved
                                 price_campaign.sales[customer_class] += 1
                                 total_sales += 1
-            price_campaign.aggregate_sales = total_sales
-            price_campaign.aggregate_no_sales = (customers[0].number_of_customers + customers[1].number_of_customers + customers[2].number_of_customers) * 5 - total_sales
-            # at the end of the loop, evaluate the number of no-sales, by subtracting the number of sales from the
-            # total number of customers
-            total_conversion = total_sales / (customers[0].number_of_customers + customers[1].number_of_customers + customers[2].number_of_customers)
-            # the conversion rate is equal to the number of sales over the number of customer of the current class.
-            # the conversion rate is relative to the whole price campaign (price configuration) store the value of
-            # the conversion rate
-            price_campaign.aggregate_conversion_rate = total_conversion
-            return total_conversion
+        price_campaign.aggregate_sales = total_sales
+        price_campaign.aggregate_no_sales = (customers[0].number_of_customers + customers[1].number_of_customers + customers[2].number_of_customers) * 5 - total_sales
+        # at the end of the loop, evaluate the number of no-sales, by subtracting the number of sales from the
+        # total number of customers
+        total_conversion = total_sales / ((customers[0].number_of_customers + customers[1].number_of_customers + customers[2].number_of_customers) * 5)
+        # the conversion rate is equal to the number of sales over the number of customer of the current class.
+        # the conversion rate is relative to the whole price campaign (price configuration) store the value of
+        # the conversion rate
+        price_campaign.aggregate_conversion_rate = total_conversion
+        return total_conversion
 
     # a function to evaluate the actual profit relative to one price configuration
     def evaluate_profit_aggregate(self, customer_class, price_campaign, price_configuration):

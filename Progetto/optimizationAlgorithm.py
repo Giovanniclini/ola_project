@@ -14,7 +14,7 @@ prices = np.array([[np.random.uniform(100., 1200.) for _ in range(4)] for _ in r
 # sort prices from lowest to highest for each product (axis = 1 = row)
 prices.sort(axis=1)
 # define initial configuration with the lowest prices
-initial_price_configuration = prices[:,0]
+initial_price_configuration = prices[:, 0]
 # define the configuration with the highest prices
 maximum_configuration = prices[:, 3]
 # define number of products

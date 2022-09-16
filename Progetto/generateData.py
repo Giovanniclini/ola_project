@@ -8,13 +8,15 @@ def generate_configuration_levels(prices, number_of_configurations):
     price_configurations2 = []
     for price in range(0, int((number_of_configurations+5)/5) - 1):  # for each price (except the lowest)
         for product in range(int((number_of_configurations+5)/4)):
-            configuration_level = np.copy(np.array(prices[:,price]))
+            configuration_level = np.copy(np.array(prices[:, price]))
             configuration_level[product] = np.copy(prices[product][price+1])
             price_configurations2.append(configuration_level)
     return price_configurations2
 
 
 def initialization(prices, number_of_configurations, step):
+    initial_price_configuration = prices[:, 0]
+    maximum_configuration = prices[:, 3]
     # define all the price configuration levels
     price_configurations = np.copy(generate_configuration_levels(prices, number_of_configurations))
     # define the margin for each price configuration as 18% of prices
