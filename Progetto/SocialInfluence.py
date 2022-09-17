@@ -10,7 +10,7 @@ class SocialInfluence:
     def ecommerce_user_simulation(self, number_of_products, initial_active_nodes, price_configuration, price_campaign,
                                   customer_class, customers):
         # assign a value for the lambda coefficient for the second secondary product
-        lambda_coefficient = 0.5
+        lambda_coefficient = 0.8
         # store probability_matrix of the current customer class
         prob_matrix = 0
         prob_matrix = np.copy(customers[customer_class].social_influence_transition_probability_matrix)
@@ -82,11 +82,8 @@ class SocialInfluence:
                     units_purchased = np.random.randint(1, 20)
                     # update the amount of unites of product purchased by the class of user
                     customers[customer_class].assign_values(units_purchased, i)
-                    # if the purchase cap is not reached, then activate the node to continue the simulation
-                    if customers[customer_class].max_number_of_purchases >= sum(
-                            customers[customer_class].units_purchased_for_each_product):
-                        # assign 1 to the new active nodes
-                        newly_active_nodes[i] = 1
+                    # assign 1 to the new active nodes
+                    newly_active_nodes[i] = 1
             # update transition probability of the new active nodes to zero value so that it is not possible to
             # reach again the same node (product)
             order_of_parallel_product.pop(0)
@@ -135,6 +132,7 @@ class SocialInfluence:
 
     def evaluate_aggregate_conversion_rate(self, price_campaign, customers):
         total_sales = 0
+        total_sales_tmp = 0.
         # check if the global history is not null (just to be sure)
         for customer_class in range(3):
             if price_campaign.global_history[customer_class] is not None:
@@ -142,6 +140,7 @@ class SocialInfluence:
                 for history in price_campaign.global_history[customer_class]:
                     # check if the current step in global history is not null (just to be sure)
                     if history is not None:
+                        total_sales_tmp += len(history)
                         # for each step in the history
                         for history_step in history:
                             # if contains a 1, i.e., a product was bought
@@ -172,13 +171,12 @@ class SocialInfluence:
         return total_purchase_revenue
 
     def simulation(self, number_of_products, price_configuration, customer_class, price_campaign, aggregate_conversion, customers):
-        n = int(customers[customer_class].alpha_probabilities[0][0] * customers[customer_class].number_of_customers)
+        n = int((1-customers[customer_class].alpha_probabilities[0][0]) * customers[customer_class].number_of_customers)
         # for each user belonging to the current class
         for j in range(n):
             # set initial active node, i.e., the first product shown to the user at random
             initial_active_nodes = np.zeros(number_of_products)
-            initial_active_nodes[
-                np.random.choice(np.arange(0, 5), customers[customer_class].alpha_probabilities[1:5])] = 1
+            initial_active_nodes[np.random.choice(np.arange(0, 5), customers[customer_class].alpha_probabilities[1:5])] = 1
             # simulate the ecommerce navigation for a user and store the history
             result = self.ecommerce_user_simulation(number_of_products, initial_active_nodes, price_configuration,
                                                     price_campaign, customer_class, customers)
@@ -189,20 +187,17 @@ class SocialInfluence:
         # evaluate the marginal profit of the current price campaign (price configuration) and customer class
         price_campaign.marginal_profit[customer_class] = self.evaluate_profit_aggregate(CustomerClass(customer_class),
                                                                               price_campaign, price_configuration)
+        #price_campaign.aggreagate_profit += price_campaign.marginal_profit[customer_class]
         if not aggregate_conversion:
-            print(
-                'For customer class {0} and configuration {1}, the conversion rate is {2} and the profit is {3}'.format(
-                    customer_class, price_campaign.id, conversion_rate, price_campaign.marginal_profit[customer_class]))
+            print('For customer class {0} and configuration {1}, the conversion rate is {2} and the profit is {3}'.format(customer_class, price_campaign.id, conversion_rate, price_campaign.marginal_profit[customer_class]))
 
-    def run_social_influence_simulation(self, number_of_products, price_configuration, customer_class, price_campaign,
-                                        aggregate_conversion, customers):
+    def run_social_influence_simulation(self, number_of_products, price_configuration, customer_class, price_campaign, aggregate_conversion, customers):
         if customer_class == 2 and aggregate_conversion:
-            for customer_class in range(3):
-                self.simulation(number_of_products, price_configuration, customer_class, price_campaign,
-                                aggregate_conversion, customers)
+            for i in range(0, 3):
+                self.simulation(number_of_products, price_configuration, i, price_campaign, aggregate_conversion, customers)
             aggregate_conversion_rate = self.evaluate_aggregate_conversion_rate(price_campaign, customers)
             #print('For configuration {0}, the aggregate conversion rate is {1}.'.format(price_campaign.id, aggregate_conversion_rate))
-        else:
+        elif not aggregate_conversion:
             self.simulation(number_of_products, price_configuration, customer_class, price_campaign,
                             aggregate_conversion, customers)
 

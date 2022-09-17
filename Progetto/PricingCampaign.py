@@ -32,6 +32,7 @@ class PricingCampaign:
         self.aggregate_units_sold_per_product = [0, 0, 0, 0, 0]
         self.aggregate_conversion_rate = np.random.uniform(0.01, 0.5)
         self.aggregate_conversion_rate_for_each_product = np.random.uniform(0.01, 0.5, 5)
+        self.aggregate_profit = 0.
 
         # history returned for each customer
         self.global_history = [[] for _ in range(3)]

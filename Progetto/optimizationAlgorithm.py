@@ -10,7 +10,8 @@ from StatsManager import *
 # define number of price configurations (price changes)
 number_of_configurations = 15
 # define four prices for each of the five products (row = four prices for a product)
-prices = np.array([[np.random.uniform(100., 1200.) for _ in range(4)] for _ in range(5)])
+#prices = np.array([[np.random.uniform(100., 1200.) for _ in range(4)] for _ in range(5)])
+prices = np.array([[100, 150, 200, 250], [80, 120, 160, 200], [110, 140, 170, 200], [150, 190, 230, 270], [50, 90, 130, 170]])
 # sort prices from lowest to highest for each product (axis = 1 = row)
 prices.sort(axis=1)
 # define initial configuration with the lowest prices
@@ -55,6 +56,9 @@ def step3(step, T):
     print('\nAll the available configurations are: ')
     for config in price_configurations:
         print(config)
+    print('\nAll the reservation prices are: ')
+    for c in range(number_of_customer_classes):
+        print(customers[c].reservation_prices)
     for level in range(0, 15, 5):
         if not check_aggregate[0] and not check_aggregate[1]:
             break
@@ -106,6 +110,7 @@ def step3(step, T):
             # assign aggregate conversion rate evaluated in social influence
             ts_p[i] = np.copy(campaigns[ts_idx].aggregate_conversion_rate)
             ucb_p[i] = np.copy(campaigns[ucb_idx].aggregate_conversion_rate)
+        #ucb_p = [0.89, 0.47, 0.86, 0.78, 0.67, 0.71]
         if check_aggregate[1]:
             # UCB Learner
             n_repetitions = 5
@@ -116,8 +121,10 @@ def step3(step, T):
                 regrets[i], pseudo_regrets[i], deltas, expected_payoffs = UCB1(ucb_p, T)
             #printUCBBound(regrets, pseudo_regrets, T, n_repetitions, deltas)
             for i in range(6):
-                ucb_profit[i] = expected_payoffs[i] * (customers[0].number_of_customers + customers[1].number_of_customers +
-                                                     customers[2].number_of_customers) * campaigns[level + i].average_margin_for_sale
+                if i == 5:
+                    ucb_profit[i] = expected_payoffs[i] * ((customers[0].number_of_customers + customers[1].number_of_customers + customers[2].number_of_customers) * 5) * campaigns[ucb_optimal_campaign_aggregate].average_margin_for_sale
+                else:
+                    ucb_profit[i] = expected_payoffs[i] * ((customers[0].number_of_customers + customers[1].number_of_customers + customers[2].number_of_customers)*5) * campaigns[level + i].average_margin_for_sale
         if check_aggregate[0]:
             # Thompson Sampling
             ts_env = Environment(n_arms=6, probabilities=ts_p)
@@ -136,10 +143,14 @@ def step3(step, T):
                 pulled_arm = ts_learner.pull_arm()
                 reward = ts_env.round(pulled_arm)
                 ts_learner.update(pulled_arm, reward)
+            ts_profit = [0., 0., 0., 0., 0., 0.]
             for i in range(6):
-                ts_conversion_rates[i] = ts_learner.beta_parameters[i, 0] / T
-                ts_profit[i] = ts_conversion_rates[i] * (customers[0].number_of_customers + customers[1].number_of_customers +
-                                                     customers[2].number_of_customers) * campaigns[level + i].average_margin_for_sale
+                if i == 5:
+                    ts_profit[i] = expected_payoffs[i] * ((customers[0].number_of_customers + customers[1].number_of_customers + customers[2].number_of_customers) * 5) * campaigns[
+                                        ts_optimal_campaign_aggregate].average_margin_for_sale
+                else:
+                    ts_conversion_rates[i] = ts_learner.beta_parameters[i, 0] / T
+                    ts_profit[i] = ts_conversion_rates[i] * ((customers[0].number_of_customers + customers[1].number_of_customers +customers[2].number_of_customers)*5) * campaigns[level + i].average_margin_for_sale
 
         # if the new optimal is different w.r.t the old one, then update values
         if check_aggregate[0]:
@@ -257,5 +268,5 @@ if __name__ == '__main__':
         optimizationProblem(step=step, T=100000)
     else:
         print(colored('\n\n---------------------------- STEP 3 ----------------------------', 'blue', attrs=['bold']))
-        step3(step=step, T=600)
+        step3(step=step, T=1000)
 

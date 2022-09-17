@@ -17,14 +17,15 @@ def generate_configuration_levels(prices, number_of_configurations):
 def initialization(prices, number_of_configurations, step):
     initial_price_configuration = prices[:, 0]
     maximum_configuration = prices[:, 3]
+    margin = 40
     # define all the price configuration levels
     price_configurations = np.copy(generate_configuration_levels(prices, number_of_configurations))
     # define the margin for each price configuration as 18% of prices
     margins_for_each_configuration = np.copy(price_configurations)
-    initial_price_configuration_margin = np.copy(initial_price_configuration * margin)
-    maximum_configuration_margin = np.copy(maximum_configuration * margin)
+    initial_price_configuration_margin = np.copy(initial_price_configuration - margin)
+    maximum_configuration_margin = np.copy(maximum_configuration - margin)
     for i in range(len(margins_for_each_configuration)):
-        margins_for_each_configuration[i] = np.copy(margins_for_each_configuration[i] * margin)
+        margins_for_each_configuration[i] = np.copy(margins_for_each_configuration[i] - margin)
 
     # define the margin means for each price configurations
     margin_means_for_configuration = np.zeros(number_of_configurations)
@@ -35,12 +36,9 @@ def initialization(prices, number_of_configurations, step):
 
     # create all of the pricing campaigns (one for each price configuration = 1 + 15 + 1 = initial + 5 levels + maximum)
     for c in range(number_of_configurations):
-        campaigns.append(PricingCampaign(c, margin_means_for_configuration[c], price_configurations[c],
-                                          margins_for_each_configuration[c]))
-    campaigns.append(PricingCampaign(15, mean_initial_price_configuration_margin, initial_price_configuration,
-                                      initial_price_configuration_margin))
-    campaigns.append(
-        PricingCampaign(16, maximum_configuration_margin, maximum_configuration, maximum_configuration_margin))
+        campaigns.append(PricingCampaign(c, margin_means_for_configuration[c], price_configurations[c], margins_for_each_configuration[c]))
+    campaigns.append(PricingCampaign(15, mean_initial_price_configuration_margin, initial_price_configuration,initial_price_configuration_margin))
+    campaigns.append(PricingCampaign(16, mean_maximum_configuration_margin, maximum_configuration, maximum_configuration_margin))
 
     # create all customer classes
     for c in range(number_of_customer_classes):
@@ -48,7 +46,7 @@ def initialization(prices, number_of_configurations, step):
     if step == 2:
         for camp in campaigns:
             for cus in customers:
-                for prod in range(number_of_products):
+                for prod in range(5):
                     camp.sales_per_product[cus.id][prod] = np.random.randint(cus.number_of_customers/2,
                                                                              cus.number_of_customers)
                     camp.sales[cus.id] += camp.sales_per_product[cus.id][prod]
