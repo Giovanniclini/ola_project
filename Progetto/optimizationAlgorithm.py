@@ -1,3 +1,4 @@
+import StatsManager
 from generateData import *
 from termcolor import colored
 from SocialInfluence import *
@@ -37,123 +38,10 @@ max_profit_idx = 5
 ts_optimal_campaign_aggregate = 15
 ucb_optimal_campaign_aggregate = 15
 
-
-def step3(step, T):
-    global ts_optimal_campaign_aggregate
-    global ucb_optimal_campaign_aggregate
-    check_aggregate = [True, True]
-    price_configurations, customers, campaigns = initialization(prices, number_of_configurations, step)
-    # print all the prices
-    print('All the available prices are: \n{0}'.format(prices))
-    # print all the price configurations
-    print('\nAll the available configurations are: ')
-    for config in price_configurations:
-        print(config)
-    print('\nAll the reservation prices are: ')
-    for c in range(number_of_customer_classes):
-        print(customers[c].reservation_prices)
-    for level in range(0, 15, 5):
-        if not check_aggregate[0] and not check_aggregate[1]:
-            break
-        print(colored('\n\n---------------------------- LEVEL {0} ----------------------------', 'blue',
-                      attrs=['bold']).format(int(level / 5)))
-        # assign init value to configurations
-        ts_configurations = [0., 0., 0., 0., 0., 0.]
-        # assign init value to conversion rates
-        ts_p = [0., 0., 0., 0., 0., 0.]
-        # assign init value to configurations
-        ucb_configurations = [0., 0., 0., 0., 0., 0.]
-        # assign init value to conversion rates
-        ucb_p = [0., 0., 0., 0., 0., 0.]
-        # for each element of the arrays, set the correct value
-        for i in range(6):
-            # actual index
-            ts_idx = level + i
-            ucb_idx = level + i
-            # if i = 0 is the optimal configuration (campaign)
-            if i == 5:
-                ts_idx = ts_optimal_campaign_aggregate
-                ucb_idx = ucb_optimal_campaign_aggregate
-            # reset value otherwise at each iteration remain the same (why? colab?)
-            ts_configurations[i] = 0
-            # assign actual value of config
-            ts_configurations[i] = np.copy(campaigns[ts_idx].configuration)
-            ucb_configurations[i] = 0
-            # assign actual value of config
-            ucb_configurations[i] = np.copy(campaigns[ucb_idx].configuration)
-            # simulate social influence episodes to generate the conversion rates for the price configurations
-            social = SocialInfluence()
-            for c in range(3):
-                if campaigns[ts_idx].sales[c] == 0:
-                    social.run_social_influence_simulation(number_of_products, campaigns[ts_idx].configuration, c, campaigns[ts_idx], True, customers)
-                if campaigns[ucb_idx].sales[c] == 0:
-                    social.run_social_influence_simulation(number_of_products, campaigns[ucb_idx].configuration, c, campaigns[ucb_idx], True, customers)
-            for prod in range(number_of_products):
-                for c in range(3):
-                    customers[c].units_purchased_for_each_product[prod] = 0
-            # assign aggregate conversion rate evaluated in social influence
-            ts_p[i] = np.copy(campaigns[ts_idx].aggregate_conversion_rate)
-            ucb_p[i] = np.copy(campaigns[ucb_idx].aggregate_conversion_rate)
-
-        #UCB1 LEARNER
-        if check_aggregate[1]:
-            ucb1 = BanditManager(id="ucb1", T=T, n_experiments=5, opt=None, idx_opt=None, probabilities=ucb_p, customers=customers)
-            ucb1.executeBandit()
-            ucb1.evaluateProfit(level=level, campaigns=campaigns, optimal_campaign_aggregate=ucb_optimal_campaign_aggregate)
-            ucb_max_profit_idx = 5
-            ucb_possible_optimal = ucb1.profit.index(max(ucb1.profit))
-            ucb_profit_increase = (ucb1.profit[ucb_possible_optimal] / ucb1.profit[max_profit_idx]) - 1
-            if check_aggregate[1] and ucb_possible_optimal != ucb_max_profit_idx and ucb_profit_increase > 0.:
-                ucb_max_profit_idx = ucb_possible_optimal
-                ucb_optimal_campaign_aggregate = level + ucb_max_profit_idx
-                print('\nUCB1 optimal configuration is: {0}'.format(ucb_configurations[5]))
-                print(colored('UCB1 current marginal increase {0:.2%}', 'green', attrs=['bold']).format(ucb_profit_increase))
-            else:
-                if check_aggregate[1]:
-                    print(colored('UCB1 no better solution found: current marginal increase {0:.2%}', 'red',attrs=['bold']).format(ucb_profit_increase))
-                    print('The best UCB1 configuration is number {0}: {1}  '.format(ucb_optimal_campaign_aggregate, campaigns[ucb_optimal_campaign_aggregate].configuration))
-                check_aggregate[1] = False
-
-        #TS LEARNER
-        if check_aggregate[0]:
-            ts_opt = [1., 1., 1., 1., 1., 1.]
-            ts_idx_opt = np.argmax(ts_p)
-            ts = BanditManager(id="ts", T=T, n_experiments=5, opt=ts_opt, idx_opt=ts_idx_opt, probabilities=ts_p, customers=customers)
-            ts.initBandit(n_arms=6, campaigns=campaigns, optimal_campaign_aggregate=ts_optimal_campaign_aggregate, level=level)
-            ts.executeBandit()
-            ts.evaluateProfit(level=level, campaigns=campaigns, optimal_campaign_aggregate=ts_optimal_campaign_aggregate)
-            ts_max_profit_idx = 5
-            ts_possible_optimal = ts.profit.index(max(ts.profit))
-            ts_profit_increase = (ts.profit[ts_possible_optimal] / ts.profit[max_profit_idx]) - 1
-            if check_aggregate[0] and ts_possible_optimal != ts_max_profit_idx and ts_profit_increase > 0.:
-                ts_max_profit_idx = ts_possible_optimal
-                ts_optimal_campaign_aggregate = level + ts_max_profit_idx
-                print('\nThompson Sampling optimal configuration is: {0}'.format(ts_configurations[5]))
-                print(colored('Thompson Sampling current marginal increase {0:.2%}', 'green', attrs=['bold']).format(ts_profit_increase))
-            else:
-                if check_aggregate[0]:
-                    # otherwise, no better solution was found
-                    # here the algorithm should terminate for the current customer class
-                    print(colored('Thompson Sampling no better solution found: current marginal increase {0:.2%}', 'red', attrs=['bold']).format(ts_profit_increase))
-                    print('The best Thompson Sampling configuration is number {0}: {1}  '.format(ts_optimal_campaign_aggregate, campaigns[ts_optimal_campaign_aggregate].configuration))
-                check_aggregate[0] = False
-
-def step4(step, T):
-    return
-
 def optimizationProblem(step, T):
     check = [True, True, True]
     price_configurations, customers, campaigns = initialization(prices, number_of_configurations, step)
-    # print all the prices
-    print('All the available prices are: \n{0}'.format(prices))
-    # print all the price configurations
-    print('\nAll the available configurations are: ')
-    for config in price_configurations:
-        print(config)
-    # print all the reservations prices
-    print('\nAll the reservation prices are: ')
-    for c in range(number_of_customer_classes):
-        print(customers[c].reservation_prices)
+    StatsManager.printData(price_configurations, customers, prices, number_of_customer_classes)
     for level in range(0, 15, 5):
         print(colored('\n\n---------------------------- LEVEL {0} ----------------------------', 'blue', attrs=['bold']).format(int(level / 5)))
         # chek if profit increase was made
@@ -209,7 +97,114 @@ def optimizationProblem(step, T):
                 print(colored('Current marginal increase {0:.2%}', 'red', attrs=['bold']).format(profit_increase))
                 print('The best configuration is number {0}: {1}  '.format(optimal_campaign[customer_class], campaigns[optimal_campaign[customer_class]].configuration))
 
+def step3(step, T):
+    global ts_optimal_campaign_aggregate
+    global ucb_optimal_campaign_aggregate
+    check_aggregate = [True, True]
+    price_configurations, customers, campaigns = initialization(prices, number_of_configurations, step)
+    StatsManager.printData(price_configurations, customers, prices, number_of_customer_classes)
+    for level in range(0, 15, 5):
+        if not check_aggregate[0] and not check_aggregate[1]:
+            break
+        print(colored('\n\n---------------------------- LEVEL {0} ----------------------------', 'blue',
+                      attrs=['bold']).format(int(level / 5)))
+        # assign init value to configurations
+        ts_configurations = [0., 0., 0., 0., 0., 0.]
+        # assign init value to conversion rates
+        ts_p = [0., 0., 0., 0., 0., 0.]
+        # assign init value to configurations
+        ucb_configurations = [0., 0., 0., 0., 0., 0.]
+        # assign init value to conversion rates
+        ucb_p = [0., 0., 0., 0., 0., 0.]
+        # for each element of the arrays, set the correct value
+        ts_configurations, ucb_configurations, ts_p, ucb_p = generate_social_influence_data(level, ts_configurations, ucb_configurations, ts_p, ucb_p, campaigns, number_of_products, customers, ts_optimal_campaign_aggregate, ucb_optimal_campaign_aggregate)
+        #UCB1 LEARNER
+        if check_aggregate[1]:
+            ucb1 = BanditManager(id="ucb1", T=T, n_experiments=5, opt=None, idx_opt=None, probabilities=ucb_p, customers=customers)
+            ucb1.executeBandit()
+            ucb1.evaluateProfit(level=level, campaigns=campaigns, optimal_campaign_aggregate=ucb_optimal_campaign_aggregate)
+            ucb_max_profit_idx = 5
+            ucb_possible_optimal = ucb1.profit.index(max(ucb1.profit))
+            ucb_profit_increase = (ucb1.profit[ucb_possible_optimal] / ucb1.profit[max_profit_idx]) - 1
+            #StatsManager.printRegret(ucb1.regrets, ucb1.pseudo_regrets)
+            #StatsManager.printUCBBound(ucb1.regrets, ucb1.pseudo_regrets, ucb1.T, ucb1.n_experiments, ucb1.deltas)
+            if check_aggregate[1] and ucb_possible_optimal != ucb_max_profit_idx and ucb_profit_increase > 0.:
+                ucb_max_profit_idx = ucb_possible_optimal
+                ucb_optimal_campaign_aggregate = level + ucb_max_profit_idx
+                print('\nUCB1 optimal configuration is: {0}'.format(ucb_configurations[5]))
+                print(colored('UCB1 current marginal increase {0:.2%}', 'green', attrs=['bold']).format(ucb_profit_increase))
+            else:
+                if check_aggregate[1]:
+                    print(colored('UCB1 no better solution found: current marginal increase {0:.2%}', 'red',attrs=['bold']).format(ucb_profit_increase))
+                    print('The best UCB1 configuration is number {0}: {1}  '.format(ucb_optimal_campaign_aggregate, campaigns[ucb_optimal_campaign_aggregate].configuration))
+                check_aggregate[1] = False
+        #TS LEARNER
+        if check_aggregate[0]:
+            ts_opt = [1., 1., 1., 1., 1., 1.]
+            ts_idx_opt = np.argmax(ts_p)
+            ts = BanditManager(id="ts", T=T, n_experiments=5, opt=ts_opt, idx_opt=ts_idx_opt, probabilities=ts_p, customers=customers)
+            ts.initBandit(n_arms=6, campaigns=campaigns, optimal_campaign_aggregate=ts_optimal_campaign_aggregate, level=level)
+            ts.executeBandit()
+            ts.evaluateProfit(level=level, campaigns=campaigns, optimal_campaign_aggregate=ts_optimal_campaign_aggregate)
+            ts.clairvoyant_aggregate()
+            ts_max_profit_idx = 5
+            ts_possible_optimal = ts.profit.index(max(ts.profit))
+            ts_profit_increase = (ts.profit[ts_possible_optimal] / ts.profit[max_profit_idx]) - 1
+            #StatsManager.printTSRegret(ts)
+            #StatsManager.printTSBeta(ts.learner.beta_parameters, ts.exp_clairvoyant)
+            if check_aggregate[0] and ts_possible_optimal != ts_max_profit_idx and ts_profit_increase > 0.:
+                ts_max_profit_idx = ts_possible_optimal
+                ts_optimal_campaign_aggregate = level + ts_max_profit_idx
+                print('\nThompson Sampling optimal configuration is: {0}'.format(ts_configurations[5]))
+                print(colored('Thompson Sampling current marginal increase {0:.2%}', 'green', attrs=['bold']).format(ts_profit_increase))
+            else:
+                if check_aggregate[0]:
+                    # otherwise, no better solution was found
+                    # here the algorithm should terminate for the current customer class
+                    print(colored('Thompson Sampling no better solution found: current marginal increase {0:.2%}', 'red', attrs=['bold']).format(ts_profit_increase))
+                    print('The best Thompson Sampling configuration is number {0}: {1}  '.format(ts_optimal_campaign_aggregate, campaigns[ts_optimal_campaign_aggregate].configuration))
+                check_aggregate[0] = False
 
+def step4(step, T):
+    global ts_optimal_campaign_aggregate
+    global ucb_optimal_campaign_aggregate
+    check_aggregate = [True, True]
+    price_configurations, customers, campaigns = initialization(prices, number_of_configurations, step)
+    StatsManager.printData(price_configurations, customers, prices, number_of_customer_classes)
+    for level in range(0, 15, 5):
+        if not check_aggregate[0] and not check_aggregate[1]:
+            break
+        print(colored('\n\n---------------------------- LEVEL {0} ----------------------------', 'blue',
+                      attrs=['bold']).format(int(level / 5)))
+        # assign init value to configurations
+        ts_configurations = [0., 0., 0., 0., 0., 0.]
+        # assign init value to conversion rates
+        ts_p = [0., 0., 0., 0., 0., 0.]
+        # assign init value to configurations
+        ucb_configurations = [0., 0., 0., 0., 0., 0.]
+        # assign init value to conversion rates
+        ucb_p = [0., 0., 0., 0., 0., 0.]
+        ts_configurations, ucb_configurations, ts_p, ucb_p = generate_social_influence_data(level, ts_configurations,
+                                                                                            ucb_configurations, ts_p,
+                                                                                            ucb_p, campaigns,
+                                                                                            number_of_products,
+                                                                                            customers,
+                                                                                            ts_optimal_campaign_aggregate,
+                                                                                            ucb_optimal_campaign_aggregate)
+        # 1 usare il numero di unità vendute, chiamare il bandit e stimare i valori
+        # 2 usando il numero di vendite stimato dal bandit, calcolare le conversion rate con un altro bandit
+        # 3 che cosa ci facciamo con gli alpha ratios una volta stimati?
+
+
+
+def step5(step, T):
+    return
+
+def step6(step, T):
+    return
+
+def step7(step, T):
+    return
 if __name__ == '__main__':
     step = 3
     if step == 2:
@@ -221,4 +216,13 @@ if __name__ == '__main__':
     elif step == 4:
         print(colored('\n\n---------------------------- STEP 4 ----------------------------', 'blue', attrs=['bold']))
         step4(step=step, T=1000)
+    elif step == 5:
+        print(colored('\n\n---------------------------- STEP 5 ----------------------------', 'blue', attrs=['bold']))
+        step5(step=step, T=1000)
+    elif step == 6:
+        print(colored('\n\n---------------------------- STEP 6 ----------------------------', 'blue', attrs=['bold']))
+        step6(step=step, T=1000)
+    elif step == 7:
+        print(colored('\n\n---------------------------- STEP 7 ----------------------------', 'blue', attrs=['bold']))
+        step7(step=step, T=1000)
 

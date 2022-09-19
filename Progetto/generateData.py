@@ -52,3 +52,36 @@ def initialization(prices, number_of_configurations, step):
                     camp.sales[cus.id] += camp.sales_per_product[cus.id][prod]
                 # camp.no_sales[cus.class_id] = cus.number_of_customers - camp.sales[cus.class_id]
     return price_configurations, customers, campaigns
+
+def generate_social_influence_data(level, ts_configurations, ucb_configurations, ts_p, ucb_p, campaigns, number_of_products, customers, ts_optimal_campaign_aggregate, ucb_optimal_campaign_aggregate):
+    for i in range(6):
+        # actual index
+        ts_idx = level + i
+        ucb_idx = level + i
+        # if i = 0 is the optimal configuration (campaign)
+        if i == 5:
+            ts_idx = ts_optimal_campaign_aggregate
+            ucb_idx = ucb_optimal_campaign_aggregate
+        # reset value otherwise at each iteration remain the same (why? colab?)
+        ts_configurations[i] = 0
+        # assign actual value of config
+        ts_configurations[i] = np.copy(campaigns[ts_idx].configuration)
+        ucb_configurations[i] = 0
+        # assign actual value of config
+        ucb_configurations[i] = np.copy(campaigns[ucb_idx].configuration)
+        # simulate social influence episodes to generate the conversion rates for the price configurations
+        social = SocialInfluence()
+        for c in range(3):
+            if campaigns[ts_idx].sales[c] == 0:
+                social.run_social_influence_simulation(number_of_products, campaigns[ts_idx].configuration, c,
+                                                       campaigns[ts_idx], True, customers)
+            if campaigns[ucb_idx].sales[c] == 0:
+                social.run_social_influence_simulation(number_of_products, campaigns[ucb_idx].configuration, c,
+                                                       campaigns[ucb_idx], True, customers)
+        for prod in range(number_of_products):
+            for c in range(3):
+                customers[c].units_purchased_for_each_product[prod] = 0
+        # assign aggregate conversion rate evaluated in social influence
+        ts_p[i] = np.copy(campaigns[ts_idx].aggregate_conversion_rate)
+        ucb_p[i] = np.copy(campaigns[ucb_idx].aggregate_conversion_rate)
+    return ts_configurations, ucb_configurations, ts_p, ucb_p

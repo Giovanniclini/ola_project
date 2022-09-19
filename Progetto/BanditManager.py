@@ -19,6 +19,10 @@ class BanditManager:
         self.n_customers = ((customers[0].number_of_customers + customers[1].number_of_customers + customers[2].number_of_customers) * 5)
         self.expected_payoffs = []
         self.deltas = 0.
+        self.exp_clairvoyant = []
+        self.best_clairvoyant = 0.
+        self.regret = []
+        self.campaigns_margin = [0., 0., 0., 0., 0., 0.]
 
     def initBandit(self, n_arms, campaigns, optimal_campaign_aggregate, level):
         if self.id == "ts":
@@ -31,6 +35,11 @@ class BanditManager:
                 else:
                     self.learner.beta_parameters[i, 0] += campaigns[level + i].aggregate_sales
                     self.learner.beta_parameters[i, 1] += campaigns[level + i].aggregate_no_sales
+        for i in range(6):
+            if i == 6:
+                self.campaigns_margin[i] = campaigns[optimal_campaign_aggregate].average_margin_for_sale
+            else:
+                self.campaigns_margin[i] = campaigns[level + i].average_margin_for_sale
 
     def executeBandit(self):
         if self.id == "ts":
@@ -56,6 +65,11 @@ class BanditManager:
                     self.profit[i] = self.expected_payoffs[i] * self.n_customers * campaigns[optimal_campaign_aggregate].average_margin_for_sale
                 else:
                     self.profit[i] = self.expected_payoffs[i] * self.n_customers * campaigns[level + i].average_margin_for_sale
+
+    def clairvoyant_aggregate(self):
+        # per ogni categoria calcolo il valore atteso di ogni arm aggregando le tre classi
+        self.exp_clairvoyant = np.multiply(self.conversion_rates, self.campaigns_margin)
+        self.best_clairvoyant = np.max(self.exp_clairvoyant)
 
 
 
