@@ -11,7 +11,7 @@ class CustomerClass:
         self.alpha_probabilities = np.random.dirichlet(np.ones(6), size=1)
         # assign a random value to the reservation price for each product
         #self.reservation_prices = [np.random.uniform(400., 1300.) for _ in range(5)]
-        self.reservation_prices = [180, 150, 150, 150, 150]
+        self.reservation_prices = [180, 150, 200, 200, 150]
         # keep track of number of units sold of each product (global)
         self.units_purchased_for_each_product = np.zeros(5)
         self.units_purchased_per_product_per_campaign = np.zeros((17, 5))

@@ -1,6 +1,7 @@
 from Learner import *
 
-class TS_Learner(Learner):
+
+class TSLearner(Learner):
     def __init__(self, n_arms):
         super().__init__(n_arms)
         self.beta_parameters = np.ones((n_arms, 2))  # size of array is number of arms*2, and betas are initialized to one
