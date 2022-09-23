@@ -57,12 +57,15 @@ class DataManager:
                 second_secondary_node = np.random.randint(0, 5)
             # select from the probability matrix only the rows related to the active nodes
             transition_probabilities_from_the_active_node = (prob_matrix.T * order_of_parallel_product[0]).T
-            # select from the probability rows just the ones related to the active node
-            #print(order_of_parallel_product)
-            #print(np.argwhere(order_of_parallel_product == 1))
             p_row = transition_probabilities_from_the_active_node[order_of_parallel_product[0].index(1)]
             if np.all((p_row == 0)):
-                return history, units_purchased_per_product
+                history2 = []
+                for i in range(len(history)):
+                    if type(history[i]) is np.ndarray:
+                        history2.append(history[i].tolist())
+                    else:
+                        history2.append(history[i])
+                return history2, units_purchased_per_product
             # update the value of the transition probability related to the second secondary product
             p_row[second_secondary_node] = p_row[second_secondary_node] * self.lambda_coefficient
             # assign false to all the activated edges array to keep track of the one that will be selected (
@@ -105,27 +108,33 @@ class DataManager:
                     # list of product for manage the parallel case
                     order_of_parallel_product.append(active_nodes)
         # return the history
+        history2 = []
         for i in range(len(history)):
             if type(history[i]) is np.ndarray:
-                print("SUS", history[i])
-                history[i] = history[i]
-                print("Sos", history[i])
-        for step in history:
-            print(type(step))
-        print(history)
-        return history, units_purchased_per_product
+                history2.append(history[i].tolist())
+            else:
+                history2.append(history[i])
+        return history2, units_purchased_per_product
 
-    def generate_file(self, day, price_configuration, config_id):
+    def generate_file(self, price_configurations):
         users = list()
-        for c in range(self.number_of_users):
-            user_class_dict, user_class = self.generate_dict_with_user_class()
-            alpha = self.generate_alpha_realization()
-            history, units_purchased_per_product = self.generate_history(user_class, alpha, price_configuration)
-            units_purchased_dict = self.generate_dict_with_units_purchased_per_product(units_purchased_per_product)
-            user = dict(id=c, config_id=config_id, user_class=user_class_dict, alpha_parameter=alpha, history=history,
-                        units_purchased=units_purchased_dict)
-            users.append(dict(user=user))
-        data = dict(day=day, users=users)
-        filename = "configurations_data/configurations.json"
-        with open(filename, "a") as outfile:
-            json.dump(data, outfile)
+        for configuration in range(self.number_of_configurations):
+            for c in range(self.number_of_users):
+                user_class_dict, user_class = self.generate_dict_with_user_class()
+                alpha = self.generate_alpha_realization()
+                history, units_purchased_per_product = self.generate_history(user_class, alpha, price_configurations[configuration])
+                units_purchased_dict = self.generate_dict_with_units_purchased_per_product(units_purchased_per_product)
+                user = dict(id=c, config_id=configuration, user_class=user_class_dict, alpha_parameter=alpha,
+                            history=history, units_purchased=units_purchased_dict)
+                users.append(dict(user=user))
+        return users
+
+    def generate_configuration_levels(self, prices):
+        price_configurations2 = [prices[:, 0]]
+        for price in range(0, int((self.number_of_configurations + 5) / 5) - 1):  # for each price (except the lowest)
+            for product in range(int((self.number_of_configurations + 5) / 4)):
+                configuration_level = np.copy(np.array(prices[:, price]))
+                configuration_level[product] = np.copy(prices[product][price + 1])
+                price_configurations2.append(configuration_level)
+        price_configurations2.append(prices[:, 3])
+        return price_configurations2
