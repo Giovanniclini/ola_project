@@ -1,6 +1,7 @@
 from DataManager import *
-from UserClass import *
+from NewProject.data_structures.UserClass import *
 import pandas as pd
+from OptimizationAlgorithm import *
 
 days = 31
 number_of_user_classes = 3
@@ -8,7 +9,7 @@ number_of_users_per_class = [400, 500, 300]
 reservation_prices = [[20, 15, 30, 25, 40],
                       [25, 20, 35, 30, 45],
                       [30, 25, 40, 35, 50]]
-
+production_costs = [3, 4, 9, 8, 2]
 number_of_configurations = 17
 prices = np.array([[10, 15, 20, 25], [8, 12, 16, 20], [11, 14, 17, 20], [15, 19, 23, 27], [5, 9, 13, 17]])
 # sort prices from lowest to highest for each product (axis = 1 = row)
@@ -34,6 +35,7 @@ if __name__ == '__main__':
                                reservation_prices, transition_probabilities)
     price_configurations = data_manager.generate_configuration_levels(prices)
     users = data_manager.generate_file(price_configurations)
+    campaigns = data_manager.generate_pricing_campaigns(price_configurations, production_costs)
     day = 1
     data = dict(day=day, users=users)
     filename = "configurations_data/configurations.json"
@@ -59,3 +61,7 @@ if __name__ == '__main__':
         user_class.units_purchased_per_product = units_purchased_per_product
         user_class.units_purchased = units_purchased
         print("User Class {0}: \n Number of customers: {1}; \n Alpha ratios {2}; \n Reservation prices {3}; \n Units purchased {4}; \n Units purchased per product {5} \n".format(user_class.id, user_class.number_of_customers, user_class.alpha_ratios, user_class.reservation_prices, user_class.units_purchased, user_class.units_purchased_per_product))
+    for user_class in user_classes:
+        print(colored('\nCustomer class {0}:', 'red', attrs=['bold']).format(user_class.id))
+        optimization = OptimizationAlgorithm(False, [], user_class.id, 0, user_classes, campaigns)
+        optimization.execute(-1)

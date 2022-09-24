@@ -1,7 +1,7 @@
 import json
 import random as random
 import numpy as np
-
+from PricingCampaign import *
 
 class DataManager:
     def __init__(self, number_of_users, user_classes, number_of_configurations, reservation_prices,
@@ -138,3 +138,11 @@ class DataManager:
                 price_configurations2.append(configuration_level)
         price_configurations2.append(prices[:, 3])
         return price_configurations2
+
+    def generate_pricing_campaigns(self, configurations, production_costs):
+        campaigns = []
+        for c in range(len(configurations)):
+            margin = np.subtract(configurations[c], production_costs)
+            campaigns.append(PricingCampaign(c, np.mean(margin), configurations[c], margin))
+        return campaigns
+
