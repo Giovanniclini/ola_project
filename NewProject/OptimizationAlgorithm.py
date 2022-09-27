@@ -1,5 +1,6 @@
 from termcolor import colored
 import numpy as np
+from BanditManager import *
 
 
 class OptimizationAlgorithm:
@@ -15,23 +16,62 @@ class OptimizationAlgorithm:
         self.profit = [0., 0., 0., 0., 0., 0]
         self.probabilities = [0., 0., 0., 0., 0., 0.]
 
-    def execute_bandit(self, bandit_index):
-        self.learners[bandit_index].executeBandit()
+    def evaluate_aggregate_conversion_rate(self, customer_class, campaign):
+        if customer_class.global_history[campaign] is not None:
+            # for each history (relative to one costumer) in the global history
+            for history in customer_class.global_history[campaign]:
+                # check if the current step in global history is not null (just to be sure)
+                if history is not None:
+                    # for each step in the history
+                    for history_step in history:
+                        # if contains a 1, i.e., a product was bought
+                        if 1 in history_step:
+                            prod = history_step.index(1)
+                            # increase the global number of sales of the customer class involved
+                            customer_class.number_of_clicks[campaign] += 1
+                            customer_class.number_of_clicks_per_product[campaign][prod] += 1
+        for prod in range(5):
+            customer_class.conversion_rate_per_product[campaign][prod] = customer_class.number_of_clicks_per_product[
+                                                                    campaign][prod] / customer_class.number_of_customers
+        print(customer_class.conversion_rate_per_product[campaign])
 
-    def assign_values(self, level):
+
+    def create_bandit(self, bandit_id, level):
+        if bandit_id == 0:
+            bandit_id = "ts"
+        elif bandit_id == 1:
+            bandit_id = "ucb1"
+        self.learners.append(BanditManager(id=bandit_id, T=self.customers.number_of_customers, n_experiments=1,
+                                           opt=[1., 1., 1., 1., 1., 1.], idx_opt=self.optimal_campaign,
+                                           probabilities=self.probabilities,
+                                           n_customers=self.customers.number_of_customers))
+        self.learners[-1].initBandit(n_arms=6, campaigns=self.campaigns,
+                                     optimal_campaign_aggregate=self.optimal_campaign, level=level)
+
+    def execute_bandit(self, bandit_index, level):
+        self.learners[bandit_index].executeBandit()
+        self.learners[bandit_index].evaluateProfit(level=level, campaigns=self.campaigns,
+                                                   optimal_campaign_aggregate=self.optimal_campaign)
+        self.learners[bandit_index].clairvoyant_aggregate()
+
+    def assign_probabilities(self, i, idx):
+        self.evaluate_aggregate_conversion_rate(self.customers, idx)
+        for prod in range(5):
+            self.probabilities[i] = self.customers.conversion_rate_per_product[idx][prod]
+
+    def assign_values(self, level, bandit_index):
         configurations = [0, 0, 0, 0, 0, 0]
         self.profit = [0., 0., 0., 0., 0., 0]
         for i in range(6):
-            # actual index
             idx = level + i
-            # if i = 0 is the optimal configuration (campaign)
             if i == 0:
                 idx = self.optimal_campaign
-            # reset value otherwise at each iteration remain the same (why? colab?)
             configurations[i] = 0
-            # assign actual value of config
             configurations[i] = np.copy(self.campaigns[idx].configuration)
-            self.evaluate_profit(i, idx)
+            if bandit_index != -1:
+                self.assign_probabilities(i, idx)
+            else:
+                self.evaluate_profit(i, idx)
         return configurations
 
     def evaluate_profit(self, i, idx):
@@ -44,11 +84,13 @@ class OptimizationAlgorithm:
                 return
             print(colored('\n\n---------------------------- LEVEL {0} ----------------------------', 'blue',
                           attrs=['bold']).format(int(level / 5)))
-            configurations = self.assign_values(level)
+            configurations = self.assign_values(level, bandit_index)
             print('\nInitial optimal configuration is: {0}'.format(configurations[0]))
-            if bandit_index != -1:
-                #self.assign_probabilities()
-                self.execute_bandit(bandit_index)
+            if bandit_index != -1 and self.aggregate:
+                self.create_bandit(bandit_index, level)
+                self.execute_bandit(bandit_index, level)
+                print(self.learners[bandit_index].profit)
+                self.profit = self.learners[bandit_index].profit
             max_profit_idx = 0
             possible_optimal = self.profit.index(max(self.profit))
             self.profit_increase = (self.profit[possible_optimal] / self.profit[max_profit_idx]) - 1
