@@ -6,7 +6,7 @@ class SocialInfluence:
                  super_arm, n_prod):
         self.n_users = n_users
         self.reward = 0.
-        self.alpha_means = alpha_means
+        self.dirchlet_probs = alpha_means
         self.lambda_coeff = lambda_coeff
         self.graph_probs = click_probabilities
         self.customer_class = customer_class
@@ -19,6 +19,7 @@ class SocialInfluence:
     def simulation(self):
         for u in range(self.n_users):
             initial_active_nodes = np.zeros(self.n_prod)
+            # usare multinomial sull'output di np.random.dirichlet per ottere il primo prodotto mostrato
             initial_active_nodes[np.random.choice(np.arange(0, 5), self.customer_class.alpha_probabilities[1:5])] = 1
             self.global_history.append(self.graph_search(initial_active_nodes))
         self.evaluate_reward()
@@ -29,7 +30,8 @@ class SocialInfluence:
         # for each product
         for product in range(5):
             # evaluate the profit (margin) by multiplying the units purchased (of each product) by their average margin
-            self.reward += self.units_sold[product] * self.configuration[product] * self.conversion_rates[product]
+            self.reward += self.units_sold[product] * self.configuration[product] * self.dirchlet_probs[product]
+        self.reward = self.reward / self.n_users
 
     def graph_search(self, initial_active_nodes):
 
