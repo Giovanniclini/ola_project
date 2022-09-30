@@ -1,16 +1,16 @@
 import numpy as np
 import random
 
+
 class SocialInfluence:
-    def __init__(self, n_users, alpha_means, lambda_coeff, click_probabilities, customer_class,
-                 super_arm, n_prod):
-        self.n_users = n_users
+    def __init__(self, lambda_coeff, customer_class, price_configuration, n_prod):
+        self.n_users = customer_class.number_of_customers
         self.reward = 0.
-        self.dirchlet_probs = alpha_means
+        self.dirchlet_probs = customer_class.alpha_probabilities
         self.lambda_coeff = lambda_coeff
-        self.graph_probs = click_probabilities
+        self.graph_probs = customer_class.social_influence_transition_probability_matrix
         self.customer_class = customer_class
-        self.configuration = super_arm
+        self.configuration = price_configuration
         # da mettere un grafo per lo step 5
         self.n_prod = n_prod
         self.units_sold = [0.] * n_prod
