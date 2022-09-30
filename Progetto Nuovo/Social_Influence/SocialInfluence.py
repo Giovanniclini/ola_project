@@ -34,7 +34,6 @@ class SocialInfluence:
         self.reward = self.reward / self.n_users
 
     def graph_search(self, initial_active_nodes):
-
         # store_the number of products, i.e, the nodes of the graph
         prob_matrix = np.copy(self.graph_probs)
         # initialize the history
@@ -123,6 +122,13 @@ class SocialInfluence:
                     order_of_parallel_product.append(active_nodes)
         # return the history
         return history
+
+    def run_social_influence_simulation(self, customer_class, aggregate_conversion):
+        if customer_class == 2 and aggregate_conversion:
+            for i in range(3):
+                self.simulation()
+        elif not aggregate_conversion:
+            self.simulation()
 
 
 

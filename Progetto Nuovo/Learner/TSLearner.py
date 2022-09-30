@@ -13,12 +13,12 @@ class TSLearner(Learner):
         return idx
 
     # update beta_parameters after pulled arm
-    def update(self, price, arm, reward):
+    def update(self, price, arm, bought, total):
         self.t += 1
-        self.update_observations(price, reward)
-        self.beta_parameters[price, arm, 0] = self.beta_parameters[price, arm, 0] + reward
+        self.update_observations(price, bought)
+        self.beta_parameters[price, arm, 0] = self.beta_parameters[price, arm, 0] + bought
         # first parameter counts how many successes we have
-        self.beta_parameters[price, arm, 1] = self.beta_parameters[price, arm, 1] + 1.0 - reward
+        self.beta_parameters[price, arm, 1] = self.beta_parameters[price, arm, 1] + total - bought
         # second parameters does the opposite
 
     def succ_prob_arm(self, arm):
