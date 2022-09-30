@@ -1,20 +1,20 @@
 from Learner import *
 import math
 
+
 class TSLearner(Learner):
     def __init__(self, n_prices, n_products):
         super().__init__(n_prices)
-        self.beta_parameters = np.ones((n_prices, n_products, 2))  # size of array is number of arms*2, and betas are initialized to one
+        self.beta_parameters = np.ones((n_prices, n_products, 2))
 
     def pull_arm(self):
-        idx = np.argmax(np.random.beta(self.beta_parameters[:, 0], self.beta_parameters[:, 1]))
-        # with argmax select the index of the maximum value and with the function
-        # random beta we update the value of beta parameters
+        idx = np.argmax(np.random.beta(self.beta_parameters[:, :, 0], self.beta_parameters[:, :, 1]))
         return idx
 
-    # update beta_parameters after pulled arm
     def update(self, price, arm, bought, total):
+        # increase time
         self.t += 1
+        #
         self.update_observations(price, bought)
         self.beta_parameters[price, arm, 0] = self.beta_parameters[price, arm, 0] + bought
         # first parameter counts how many successes we have

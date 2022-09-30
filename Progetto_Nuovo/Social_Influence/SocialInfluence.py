@@ -5,23 +5,44 @@ import random
 class SocialInfluence:
     def __init__(self, lambda_coeff, customer_class, price_configuration, n_prod):
         self.n_users = customer_class.number_of_customers
+        # number of users in the simulation
+        self.n_users = n_users
+        # reward of the simulation
         self.reward = 0.
         self.dirchlet_probs = customer_class.alpha_probabilities
+        # average alpha ratios known
+        self.alpha_means = alpha_means
+        # lamdba decay coefficient
         self.lambda_coeff = lambda_coeff
         self.graph_probs = customer_class.social_influence_transition_probability_matrix
+        # transition probabilities graph edges
+        self.graph_probs = click_probabilities
+        # customer class in the simulation
         self.customer_class = customer_class
         self.configuration = price_configuration
         # da mettere un grafo per lo step 5
+        # configuration in the simulation
+        self.configuration = super_arm
+        # number of products
         self.n_prod = n_prod
+        # number of units sold per product in the simulation
         self.units_sold = [0.] * n_prod
+        # history of the simulation
         self.global_history = []
+        # dirichlet distribution given alphas
+        self.dirichlet_probs = [0.] * n_prod
+        # TODO: aggiungere variabile graph che indica il grafo su cui fare la simulazione, noto a priori. Poi assegnare le graph_probs della class di utente (prob matrix)
 
     def simulation(self):
+        # generate dirichlet distribution given alphas
+        self.dirichlet_probs = np.random.dirichlet(self.alpha_means)
+        # for each user, make a simulation
         for u in range(self.n_users):
-            initial_active_nodes = np.zeros(self.n_prod)
-            # usare multinomial sull'output di np.random.dirichlet per ottere il primo prodotto mostrato
-            initial_active_nodes[np.random.choice(np.arange(0, 5), self.customer_class.alpha_probabilities[1:5])] = 1
-            self.global_history.append(self.graph_search(initial_active_nodes))
+            # assign initial product shown to the user, given the dirichlet distribution
+            initial_products = np.random.multinomial(1, self.dirichlet_probs)
+            # make a simulation, append history
+            self.global_history.append(self.graph_search(initial_products))
+        # evaluate reward of the simulation
         self.evaluate_reward()
 
     def evaluate_reward(self):
@@ -29,8 +50,9 @@ class SocialInfluence:
         self.reward = 0.
         # for each product
         for product in range(5):
-            # evaluate the profit (margin) by multiplying the units purchased (of each product) by their average margin
-            self.reward += self.units_sold[product] * self.configuration[product] * self.dirchlet_probs[product]
+            # evaluate the reward for
+            self.reward += self.units_sold[product] * self.configuration[product] * self.dirichlet_probs[product]
+        # average reward over all the simulations
         self.reward = self.reward / self.n_users
 
     def graph_search(self, initial_active_nodes):
@@ -122,13 +144,6 @@ class SocialInfluence:
                     order_of_parallel_product.append(active_nodes)
         # return the history
         return history
-
-    def run_social_influence_simulation(self, customer_class, aggregate_conversion):
-        if customer_class == 2 and aggregate_conversion:
-            for i in range(3):
-                self.simulation()
-        elif not aggregate_conversion:
-            self.simulation()
 
 
 
