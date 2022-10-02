@@ -1,4 +1,4 @@
-from Social_Influence.SocialInfluence import *
+from Progetto_Nuovo.Social_Influence.SocialInfluence import *
 
 
 class Environment:

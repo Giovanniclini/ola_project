@@ -1,25 +1,15 @@
-import numpy as np
-#import StatsManager
 from Progetto_Nuovo.generateData import *
 from termcolor import colored
-#from Social_Influence.SocialInfluence import *
-#from BanditManager import *
+from Progetto_Nuovo.Social_Influence.SocialInfluence import *
 
 # define number of price configurations (price changes)
 number_of_configurations = 15
 # define four prices for each of the five products (row = four prices for a product)
-#prices = np.array([[np.random.uniform(100., 1200.) for _ in range(4)] for _ in range(5)])
-prices = np.array([[100, 150, 200, 250], [80, 120, 160, 200], [110, 140, 170, 200], [150, 190, 230, 270], [50, 90, 130, 170]])
+prices = np.array([[np.random.uniform(20., 300.) for _ in range(4)] for _ in range(5)])
 # sort prices from lowest to highest for each product (axis = 1 = row)
 prices.sort(axis=1)
-# define initial configuration with the lowest prices
-initial_price_configuration = prices[:, 0]
-# define the configuration with the highest prices
-maximum_configuration = prices[:, 3]
 # define number of products
 number_of_products = 5
-# define number of pricing campaigns, 5 + 1, one for each price configuration + optimal
-number_of_pricing_campaigns = 5 + 1
 # define number of customer classes
 number_of_customer_classes = 3
 # define a list to hold the customer class objects
@@ -27,15 +17,14 @@ customers = []
 # define the price configurations
 price_configurations = []
 # define known margin, same for each product (at the moment)
-margin = [20, 30, 40, 50, 60]
+margin = [15, 19, 18, 7, 14]
 # initialize optimal campaigns
 optimal_config = [15, 15, 15]
-# old campaign used to check difference with the new found at each iteration
-old_optimal_config = [15, 15, 15]
-# assign the index of the optimal config for each level (always 6 config at each level, optimal is the last one)
-max_profit_idx = 5
-ts_optimal_campaign_aggregate = 15
-ucb_optimal_campaign_aggregate = 15
+# old profit
+old_profit = 0.
+# maximum profit for every costumer class
+maximum_profit = [0., 0., 0.]
+
 
 def optimizationProblem():
     check = [True, True, True]
@@ -51,38 +40,33 @@ def optimizationProblem():
             # assign init value to profit increase variable
             profit_increase = 0.
             # assign init value to profits
-            profit = [0., 0., 0., 0., 0., 0.]
-            # assign init value to configurations
-            configurations = [0., 0., 0., 0., 0., 0.]
-            # for each element of the arrays, set the correct value
-            for i in range(6):
-                # actual index
-                idx = level + i
-                # if i = 0 is the optimal configuration (campaign)
-                if i == 5:
-                    idx = optimal_config[customer_class]
-                # reset value otherwise at each iteration remain the same (why? colab?)
-                configurations[i] = 0
-                # assign actual profit value (average)
-                social = SocialInfluence(0.5, customers[customer_class], price_configurations[i], number_of_products)
+            profit = [0., 0., 0., 0., 0.]
+            if level == 0:
+                social = SocialInfluence(0.5, customers[customer_class], price_configurations[15], number_of_products)
                 social.simulation()
                 for prod in range(number_of_products):
-                    profit[i] += (price_configurations[i][prod] - margin[prod]) * social.units_sold[prod]
-            max_profit_idx = 5
-            print('\nInitial optimal configuration is: {0}'.format(configurations[5]))
-            # assign value to the old optimal campaign for later comparison
-            old_optimal_config[customer_class] = optimal_config[customer_class]
-            # assign simulation time to number of customer of the customer class
-            T = customers[customer_class].number_of_customers #OCCHIO IL TIME ORIZON VA CAMBIATO
+                    maximum_profit[customer_class] += (price_configurations[15][prod] - margin[prod]) * social.units_sold[prod]
+            # for each configuration of the arrays, set the correct value
+            for i in range(5):
+                # actual index
+                idx = level + i
+                # assign actual profit value (average)
+                social = SocialInfluence(0.5, customers[customer_class], price_configurations[idx], number_of_products)
+                social.simulation()
+                for prod in range(number_of_products):
+                    profit[i] += (price_configurations[idx][prod] - margin[prod]) * social.units_sold[prod]
             # if the new optimal is different w.r.t the old one, then update values
-            possible_optimal = np.where(max(profit))
-            if possible_optimal[0][0] != max_profit_idx:
-                 profit_increase = (profit[possible_optimal[0][0]] / profit[max_profit_idx]) - 1
-                 max_profit_idx = possible_optimal[0][0]
-                 optimal_config[customer_class] = level + max_profit_idx
-                 if profit_increase > 0.:
+            possible_optimal = np.where(profit == np.max(profit))
+            if profit[possible_optimal[0][0]] > maximum_profit[customer_class]:
+                profit_increase = (profit[possible_optimal[0][0]] / maximum_profit[customer_class]) - 1
+                max_profit_idx = possible_optimal[0][0]
+                maximum_profit[customer_class] = profit[max_profit_idx]
+                optimal_config[customer_class] = level + max_profit_idx
+                if profit_increase > 0.:
                     print(colored('Current marginal increase {0:.2%}', 'green', attrs=['bold']).format(profit_increase))
-                 else:
+                    print('The best configuration is number {0}: {1}  '.
+                          format(optimal_config[customer_class], price_configurations[optimal_config[customer_class]]))
+                else:
                     check[customer_class] = False
             else:
                 # otherwise, no better solution was found
@@ -91,6 +75,7 @@ def optimizationProblem():
                 print(colored('Current marginal increase {0:.2%}', 'red', attrs=['bold']).format(profit_increase))
                 print('The best configuration is number {0}: {1}  '.
                       format(optimal_config[customer_class], price_configurations[optimal_config[customer_class]]))
+
 
 if __name__ == '__main__':
     optimizationProblem()

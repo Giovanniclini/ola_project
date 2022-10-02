@@ -10,4 +10,3 @@ def evaluate_aggregate_alphas(customer_classes):
 def evaluate_aggregate_graph_probabilities(customer_classes):
 
 def generate_configurations(prices):
-

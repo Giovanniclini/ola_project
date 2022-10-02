@@ -1,7 +1,6 @@
 import numpy as np
-from Data_Structures.CustomerClass import CustomerClass
-from Social_Influence.SocialInfluence import *
-from optimizationAlgorithm import *
+from Progetto_Nuovo.Data_Structures.CustomerClass import CustomerClass
+from Progetto_Nuovo.Social_Influence.SocialInfluence import *
 
 
 def generate_configuration_levels(prices, number_of_configurations):
@@ -11,6 +10,8 @@ def generate_configuration_levels(prices, number_of_configurations):
             configuration_level = np.copy(np.array(prices[:, price]))
             configuration_level[product] = np.copy(prices[product][price+1])
             price_configurations.append(configuration_level)
+    # set the 15th configuration
+    price_configurations.append(np.array(prices[:, 0]))
     return price_configurations
 
 

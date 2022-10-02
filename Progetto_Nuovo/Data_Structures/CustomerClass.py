@@ -12,13 +12,14 @@ class CustomerClass:
         # assign a random value to alpha probabilities
         self.alpha_probabilities = np.random.dirichlet(np.ones(6), size=1)
         # assign a random value to the reservation price for each product
-        #self.reservation_prices = [np.random.uniform(400., 1300.) for _ in range(5)]
-        self.reservation_prices = [180, 150, 200, 200, 150]
+        self.reservation_prices = [np.random.uniform(20., 400.) for _ in range(5)]
         # keep track of number of units sold of each product (global)
         self.units_purchased_for_each_product = np.zeros(5)
         self.units_purchased_per_product_per_campaign = np.random.randint(0, 20, size=(17, 5))
         # assign a random value to the social influence transition probability matrix to navigate among the products
-        self.social_influence_transition_probability_matrix = np.fill_diagonal(np.random.uniform(0, 1, (5, 5)), 0)
+        self.social_influence_transition_probability_matrix = np.random.uniform(0, 1, (5, 5))
+        # put zero the diagonal because a product already seen cannot be seen anymore
+        np.fill_diagonal(self.social_influence_transition_probability_matrix, 0)
         # assign empty global history
         self.global_history = []
 

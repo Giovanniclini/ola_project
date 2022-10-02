@@ -6,23 +6,21 @@ class SocialInfluence:
     def __init__(self, lambda_coeff, customer_class, price_configuration, n_prod):
         self.n_users = customer_class.number_of_customers
         # number of users in the simulation
-        self.n_users = n_users
+        self.n_users = customer_class.number_of_customers
         # reward of the simulation
         self.reward = 0.
         self.dirchlet_probs = customer_class.alpha_probabilities
         # average alpha ratios known
-        self.alpha_means = alpha_means
+        self.alpha_means = customer_class.alpha_probabilities[0, :]
         # lamdba decay coefficient
         self.lambda_coeff = lambda_coeff
-        self.graph_probs = customer_class.social_influence_transition_probability_matrix
         # transition probabilities graph edges
-        self.graph_probs = click_probabilities
+        self.graph_probs = customer_class.social_influence_transition_probability_matrix
         # customer class in the simulation
         self.customer_class = customer_class
-        self.configuration = price_configuration
         # da mettere un grafo per lo step 5
         # configuration in the simulation
-        self.configuration = super_arm
+        self.configuration = price_configuration
         # number of products
         self.n_prod = n_prod
         # number of units sold per product in the simulation
@@ -40,8 +38,10 @@ class SocialInfluence:
         for u in range(self.n_users):
             # assign initial product shown to the user, given the dirichlet distribution
             initial_products = np.random.multinomial(1, self.dirichlet_probs)
-            # make a simulation, append history
-            self.global_history.append(self.graph_search(initial_products))
+            if initial_products[0] == 0:
+                initial_products = initial_products[1:]
+                # make a simulation, append history
+                self.global_history.append(self.graph_search(initial_products))
         # evaluate reward of the simulation
         self.evaluate_reward()
 
@@ -54,6 +54,7 @@ class SocialInfluence:
             self.reward += self.units_sold[product] * self.configuration[product] * self.dirichlet_probs[product]
         # average reward over all the simulations
         self.reward = self.reward / self.n_users
+        return self.reward
 
     def graph_search(self, initial_active_nodes):
         # store_the number of products, i.e, the nodes of the graph
