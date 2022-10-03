@@ -57,7 +57,7 @@ def optimizationProblem():
                     profit[i] += (price_configurations[idx][prod] - margin[prod]) * social.units_sold[prod]
             # if the new optimal is different w.r.t the old one, then update values
             possible_optimal = np.where(profit == np.max(profit))
-            if profit[possible_optimal[0][0]] > maximum_profit[customer_class]:
+            if profit[possible_optimal[0][0]] > maximum_profit[customer_class] and check[customer_class]:
                 profit_increase = (profit[possible_optimal[0][0]] / maximum_profit[customer_class]) - 1
                 max_profit_idx = possible_optimal[0][0]
                 maximum_profit[customer_class] = profit[max_profit_idx]
