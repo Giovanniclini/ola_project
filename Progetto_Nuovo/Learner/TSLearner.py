@@ -4,22 +4,20 @@ import math
 
 class TSLearner(Learner):
     def __init__(self, n_prices, n_products):
-        super().__init__(n_prices)
-        self.beta_parameters = np.ones((n_prices, n_products, 2))
+        super().__init__(n_prices, n_products)
+        self.beta_parameters = np.ones((n_products, n_prices, 2))
 
     def pull_arm(self):
-        idx = np.argmax(np.random.beta(self.beta_parameters[:, :, 0], self.beta_parameters[:, :, 1]))
-        return idx
+        pulled_config_indxes = np.argmax(np.random.beta(self.beta_parameters[:, :, 0], self.beta_parameters[:, :, 1]), axis=1)
+        return pulled_config_indxes
 
-    def update(self, price, arm, bought, total):
+    def update(self, pulled_config, bought, total):
         # increase time
         self.t += 1
-        #
-        self.update_observations(price, bought)
-        self.beta_parameters[price, arm, 0] = self.beta_parameters[price, arm, 0] + bought
-        # first parameter counts how many successes we have
-        self.beta_parameters[price, arm, 1] = self.beta_parameters[price, arm, 1] + total - bought
-        # second parameters does the opposite
+        for product in range(len(pulled_config)):
+            self.update_observations(pulled_config[product], bought[product], product)
+            self.beta_parameters[product, pulled_config[product], 0] = self.beta_parameters[product, pulled_config[product], 0] + bought[product]
+            self.beta_parameters[product, pulled_config[product], 1] = self.beta_parameters[product, pulled_config[product], 1] + total - bought[product]
 
     def succ_prob_arm(self, arm):
         arm_successes = self.beta_parameters[arm][0]

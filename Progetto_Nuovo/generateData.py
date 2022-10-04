@@ -15,7 +15,7 @@ def generate_configuration_levels(prices, number_of_configurations):
     return price_configurations
 
 
-def initialization(prices, number_of_configurations):
+def initialization_step2(prices, number_of_configurations):
     margin = 40
     # define all the price configuration levels
     price_configurations = np.copy(generate_configuration_levels(prices, number_of_configurations))
@@ -32,3 +32,16 @@ def initialization(prices, number_of_configurations):
     for c in range(3):
         customers.append(CustomerClass(c))
     return price_configurations, customers
+
+def generate_all_configurations(prices):
+    # TODO: generare tutte le possibili configurazioni di prezzo
+    return None
+
+def initialization_other_steps(prices):
+    margin = 40
+    price_configurations = np.copy(generate_all_configurations(prices))
+    margins_for_each_configuration = np.copy(price_configurations)
+    for i in range(len(margins_for_each_configuration)):
+        margins_for_each_configuration[i] = np.copy(margins_for_each_configuration[i] - margin)
+        # create all customer classes
+    return price_configurations
