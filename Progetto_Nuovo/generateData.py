@@ -1,4 +1,4 @@
-import numpy as np
+from itertools import product
 from Progetto_Nuovo.Data_Structures.CustomerClass import CustomerClass
 from Progetto_Nuovo.Social_Influence.SocialInfluence import *
 
@@ -33,9 +33,11 @@ def initialization_step2(prices, number_of_configurations):
         customers.append(CustomerClass(c))
     return price_configurations, customers
 
+
 def generate_all_configurations(prices):
-    # TODO: generare tutte le possibili configurazioni di prezzo
-    return None
+    price_configurations = product(*prices)
+    return list(price_configurations)
+
 
 def initialization_other_steps(prices):
     margin = 40

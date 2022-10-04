@@ -8,7 +8,7 @@ class Environment:
         self.lambda_coeff = lambda_coeff
         self.n_prod = n_prod
 
-    def round(self, configuration):
+    def round(self, configuration, prices):
         # TODO: convertire indici dei prezzi in valori
         simulator = SocialInfluence(self.lambda_coeff, self.customer_class, configuration, self.n_prod)
         return simulator.reward, simulator.units_sold

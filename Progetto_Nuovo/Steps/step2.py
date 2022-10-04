@@ -28,7 +28,7 @@ maximum_profit = [0., 0., 0.]
 
 def optimizationProblem():
     check = [True, True, True]
-    price_configurations, customers = initialization(prices, number_of_configurations)
+    price_configurations, customers = initialization_step2(prices, number_of_configurations)
     # StatsManager.printData(price_configurations, customers, prices, number_of_customer_classes)
     for level in range(0, 15, 5):
         print(colored('\n\n---------------------------- LEVEL {0} ----------------------------', 'blue', attrs=['bold']).format(int(level / 5)))
