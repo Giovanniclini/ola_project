@@ -13,11 +13,14 @@ class UCBLearner(Learner):
         pulled_config_indexes = np.argmax(self.means + self.upper_bound)
         return pulled_config_indexes
 
-    def update(self, pulled_config, bought, seen, tot_seen, tot_samples):
+    def update(self, pulled_config, bought, seen, tot_seen, tot_samples, reward):
         for product in range(len(pulled_config)):
-            self.update_observations(pulled_config[product], bought[product], product)
-            self.means[product, pulled_config[product]] = (self.means[product, pulled_config[product]] * seen[product, pulled_config[product]] + bought[product]) / tot_seen[product, pulled_config[product]]
-            self.upper_bound[product, pulled_config[product]] = m.sqrt((2 * m.log10(tot_samples[product])) / tot_seen[product, pulled_config[product]])
+            self.update_observations(pulled_config[product], bought[product], product, reward)
+            self.means[product, pulled_config[product]] = (self.means[product, pulled_config[product]] *
+                                                           seen[product, pulled_config[product]] + bought[product]) / \
+                                                          tot_seen[product, pulled_config[product]]
+            self.upper_bound[product, pulled_config[product]] = m.sqrt((2 * m.log10(tot_samples[product])) /
+                                                                       tot_seen[product, pulled_config[product]])
 
     def conversion_rate(self):
         return self.means + self.upper_bound

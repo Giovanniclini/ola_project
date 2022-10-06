@@ -62,7 +62,7 @@ if __name__ == '__main__':
                 total_seen_ucb[product, pulled_config_indexes_ucb[product]] += total_seen_daily_ucb
                 total_seen_product_ucb[product] += total_seen_daily_ucb
             ucb_learner.update(pulled_config_indexes_ucb, units_sold_ucb, total_seen_since_daybefore_ucb, total_seen_ucb,
-                               total_seen_product_ucb)
+                               total_seen_product_ucb, reward_ucb)
 
         # append collected reward of current experiment TS
         rewards_per_experiment_ts.append(ts_learner.collected_rewards)
