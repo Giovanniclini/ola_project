@@ -12,6 +12,26 @@ def get_customer_class_from_json(filename):
     customer_class.social_influence_transition_probability_matrix = data["graph_probabilities"]
     return customer_class
 
+
+def evaluate_clairvoyant(configurations, max_units_sold, reservation_prices, n_users):
+    max_reward = 0.
+    for config in configurations:
+        print(config)
+        opt_reward = 0.
+        # for each product
+        for product in range(5):
+            if reservation_prices[product] >= config[product]:
+                # evaluate the reward for
+                opt_reward += max_units_sold * n_users * config[product]
+        # average reward over all the simulations
+        opt_reward = opt_reward / n_users
+        if opt_reward > max_reward:
+            max_reward = opt_reward
+    return max_reward
+
+
+
+
 def get_customer_class_from_json_aggregate(file_name_class_1, file_name_class_2, file_name_class_3):
     # Load file customer class non aggregate
     file_class_1 = open(file_name_class_1)

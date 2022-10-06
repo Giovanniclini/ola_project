@@ -4,7 +4,10 @@ import random
 
 class SocialInfluence:
     def __init__(self, lambda_coeff, customer_class, price_configuration, n_prod):
+<<<<<<< HEAD
         # number of users in the simulation
+=======
+>>>>>>> c1796b5 (clairvoyant)
         self.n_users = customer_class.number_of_customers
         # reward of the simulation
         self.reward = 0.
@@ -54,7 +57,7 @@ class SocialInfluence:
         # for each product
         for product in range(5):
             # evaluate the reward for
-            self.reward += self.units_sold[product] * self.configuration[product] * self.dirichlet_probs[product]
+            self.reward += self.units_sold[product] * self.configuration[product] #* self.dirichlet_probs[product]
         # average reward over all the simulations
         self.reward = self.reward / self.n_users
 

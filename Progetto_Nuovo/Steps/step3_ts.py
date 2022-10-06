@@ -9,11 +9,12 @@ from Progetto_Nuovo.generateData import *
 n_prices = 4
 n_products = 5
 lambda_coefficient = 0.2
-number_of_days = 300
+number_of_days = 30
 number_of_experiments = 5
 graph_filename = "../Data/graph.json"
 prices_filename = "../Data/prices.json"
 user_class_filename = "../Data/user_class_aggregate.json"
+max_units_sold = 20
 
 
 if __name__ == '__main__':
@@ -31,7 +32,8 @@ if __name__ == '__main__':
     # init reward collection for each experiment
     rewards_per_experiment = []
 
-
+    clairvoyant = evaluate_clairvoyant(configurations, max_units_sold, customer_class.reservation_prices[0],
+                                       customer_class.number_of_customers)
     # for each experiment
     for e in range(number_of_experiments):
         # for each day
@@ -47,7 +49,8 @@ if __name__ == '__main__':
             learner.update(pulled_config_indexes, units_sold, total_seen, reward)
         # append collected reward of current experiment
         rewards_per_experiment.append(learner.collected_rewards)
+
         #printTSBeta(learner.beta_parameters[:, 0, :], rewards_per_experiment[0])
         #print("SOS", learner.collected_rewards[0])
-        #printTSRegret(learner)
+        printTSRegret(learner, clairvoyant)
 

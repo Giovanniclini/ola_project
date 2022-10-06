@@ -24,11 +24,13 @@ def printRegret(regret, pseudo_regret):
   plt.grid()
   plt.show()
 
-def printTSRegret(learner):
+
+def printTSRegret(learner, clairvoyant):
   plt.figure(figsize=(16, 9))
   plt.xlabel("t")
   plt.ylabel("Regret")
-  plt.plot(np.cumsum(learner.collected_rewards), 'r')
+  plt.axhline(y=clairvoyant, color='r', linestyle='-')
+  plt.plot(learner.collected_rewards, 'b')
   plt.grid()
   plt.show()
 
