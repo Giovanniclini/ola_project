@@ -16,7 +16,8 @@ class UCBLearner(Learner):
     def update(self, pulled_config, bought, seen, tot_seen, tot_samples):
         for product in range(len(pulled_config)):
             self.update_observations(pulled_config[product], bought[product], product)
-            self.means[product, pulled_config[product]] = (self.means[product, pulled_config[product]] * seen + bought[product]) / tot_seen
+            self.means[product, pulled_config[product]] = (self.means[product, pulled_config[product]] * seen +
+                                                           bought[product]) / tot_seen
             self.upper_bound[product, pulled_config[product]] = m.sqrt((2 * m.log10(tot_samples)) / seen)
 
     def conversion_rate(self):
