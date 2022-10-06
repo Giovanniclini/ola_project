@@ -2,9 +2,10 @@ from scipy.stats import beta
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 def printTSBeta(beta_parameters, exp_reward):
   plt.figure(figsize=(16, 9))
-  x = np.linspace(0,1,1000)
+  x = np.linspace(0, 1, 1000)
   colors = ['red', 'green', 'blue', 'purple', 'orange']
   for params, rew, color in zip(beta_parameters, exp_reward, colors):
     rv = beta(*params)
@@ -14,7 +15,7 @@ def printTSBeta(beta_parameters, exp_reward):
   plt.show()
 
 def printRegret(regret, pseudo_regret):
-  plt.figure(figsize=(16,9))
+  plt.figure(figsize=(16, 9))
   plt.ylabel("Regret")
   plt.xlabel("t")
   plt.plot(np.cumsum(pseudo_regret), color='r', label='Pseudo-regret')

@@ -11,6 +11,6 @@ class Environment:
     def round(self, configuration, prices):
         prices_configuration = np.zeros(self.n_prod)
         for product in range(self.n_prod):
-            prices_configuration[product] = prices[configuration[product]][product]
+            prices_configuration[product] = prices[product][configuration[product]]
         simulator = SocialInfluence(self.lambda_coeff, self.customer_class, prices_configuration, self.n_prod)
-        return simulator.reward, simulator.units_sold
+        return simulator.reward, simulator.units_sold, simulator.actual_users

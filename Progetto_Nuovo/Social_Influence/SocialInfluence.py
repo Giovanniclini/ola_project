@@ -11,7 +11,7 @@ class SocialInfluence:
         self.reward = 0.
         self.dirchlet_probs = customer_class.alpha_probabilities
         # average alpha ratios known
-        self.alpha_means = customer_class.alpha_probabilities[0, :]
+        self.alpha_means = customer_class.alpha_probabilities
         # lamdba decay coefficient
         self.lambda_coeff = lambda_coeff
         # transition probabilities graph edges
@@ -24,11 +24,12 @@ class SocialInfluence:
         # number of products
         self.n_prod = n_prod
         # number of units sold per product in the simulation
-        self.units_sold = [0.] * n_prod
+        self.units_sold = np.zeros(5)
         # history of the simulation
         self.global_history = []
         # dirichlet distribution given alphas
-        self.dirichlet_probs = [0.] * n_prod
+        self.dirichlet_probs = np.zeros(5)
+        self.actual_users = 0
         # TODO: aggiungere variabile graph che indica il grafo su cui fare la simulazione, noto a priori. Poi assegnare le graph_probs della class di utente (prob matrix)
 
     def simulation(self):
@@ -39,6 +40,7 @@ class SocialInfluence:
             # assign initial product shown to the user, given the dirichlet distribution
             initial_products = np.random.multinomial(1, self.dirichlet_probs)
             if initial_products[0] == 0:
+                self.actual_users += 1
                 initial_products = initial_products[1:]
                 # make a simulation, append history
                 self.global_history.append(self.graph_search(initial_products))
