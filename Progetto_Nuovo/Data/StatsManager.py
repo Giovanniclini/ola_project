@@ -24,11 +24,11 @@ def printRegret(regret, pseudo_regret):
   plt.grid()
   plt.show()
 
-def printTSRegret(ts):
-  plt.figure(figsize=(16,9))
+def printTSRegret(learner):
+  plt.figure(figsize=(16, 9))
   plt.xlabel("t")
   plt.ylabel("Regret")
-  plt.plot(np.cumsum(ts.best_clairvoyant - ts.learner.collected_rewards), 'r')
+  plt.plot(np.cumsum(learner.collected_rewards), 'r')
   plt.grid()
   plt.show()
 
@@ -60,6 +60,7 @@ def printUCBBound(regrets, pseudo_regrets, T, n_repetitions, deltas):
   plt.legend()
   plt.grid()
   plt.show()
+
 
 def printData(price_configurations, customers, prices, number_of_customer_classes):
   # print all the prices
