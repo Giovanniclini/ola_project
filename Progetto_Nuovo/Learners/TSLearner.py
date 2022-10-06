@@ -1,4 +1,5 @@
-from Learner import *
+from Progetto_Nuovo.Learners.Learner import *
+import numpy as np
 import math
 
 
@@ -8,8 +9,8 @@ class TSLearner(Learner):
         self.beta_parameters = np.ones((n_products, n_prices, 2))
 
     def pull_arm(self):
-        pulled_config_indxes = np.argmax(np.random.beta(self.beta_parameters[:, :, 0], self.beta_parameters[:, :, 1]), axis=1)
-        return pulled_config_indxes
+        pulled_config_indexes = np.argmax(np.random.beta(self.beta_parameters[:, :, 0], self.beta_parameters[:, :, 1]), axis=1)
+        return pulled_config_indexes
 
     def update(self, pulled_config, bought, total):
         # increase time

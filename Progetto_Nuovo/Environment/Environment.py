@@ -1,4 +1,4 @@
-from Social_Influence.SocialInfluence import *
+from Progetto_Nuovo.Social_Influence.SocialInfluence import *
 
 
 class Environment:
@@ -9,6 +9,8 @@ class Environment:
         self.n_prod = n_prod
 
     def round(self, configuration, prices):
-        # TODO: convertire indici dei prezzi in valori
-        simulator = SocialInfluence(self.lambda_coeff, self.customer_class, configuration, self.n_prod)
+        prices_configuration = np.zeros(self.n_prod)
+        for product in range(self.n_prod):
+            prices_configuration[product] = prices[configuration[product]][product]
+        simulator = SocialInfluence(self.lambda_coeff, self.customer_class, prices_configuration, self.n_prod)
         return simulator.reward, simulator.units_sold
