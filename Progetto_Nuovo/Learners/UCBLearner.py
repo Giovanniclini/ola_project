@@ -23,7 +23,7 @@ class UCBLearner(Learner):
         return self.means + self.upper_bound
 
 
-    def UCB1(exp_reward, T):
+    def UCB1(self, exp_reward, T):
         n_arms = len(exp_reward)
         opt = np.max(exp_reward)
         idx_opt = np.argmax(exp_reward)

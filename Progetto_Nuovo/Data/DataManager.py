@@ -12,25 +12,6 @@ def get_customer_class_from_json(filename):
     customer_class.social_influence_transition_probability_matrix = data["graph_probabilities"]
     return customer_class
 
-
-def get_graph_from_json(filename):
-    return None
-
-
-def get_prices_from_json(filename):
-    file = open(filename)
-    data = json.load(file)
-    prices = data["prices"]
-    return prices
-
-
-def evaluate_aggregate_conversion_rates(customer_classes):
-    return None
-
-
-def evaluate_aggregate_alphas(customer_classes):
-    return None
-
 def get_customer_class_from_json_aggregate(file_name_class_1, file_name_class_2, file_name_class_3):
     # Load file customer class non aggregate
     file_class_1 = open(file_name_class_1)
@@ -57,7 +38,26 @@ def get_customer_class_from_json_aggregate(file_name_class_1, file_name_class_2,
     customer_class_aggregate.alpha_probabilities = temp_matrix / customer_class_aggregate.number_of_customers
 
     return customer_class_aggregate
-    
+
+def get_graph_from_json(filename):
+    return None
+
+
+def get_prices_from_json(filename):
+    file = open(filename)
+    data = json.load(file)
+    prices = data["prices"]
+    return prices
+
+
+def evaluate_aggregate_conversion_rates(customer_classes):
+    return None
+
+
+def evaluate_aggregate_alphas(customer_classes):
+    return None
+
+
 def evaluate_aggregate_graph_probabilities(customer_classes):
     return None
 

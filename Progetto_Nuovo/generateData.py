@@ -42,7 +42,6 @@ def generate_all_configurations(prices):
 def initialization_other_steps(prices):
     margin = [3, 2, 4, 1, 2]
     price_configurations = np.copy(generate_all_configurations(prices))
-    print(price_configurations)
     margins_for_each_configuration = np.copy(price_configurations)
     for i in range(len(margins_for_each_configuration)):
         for prod in range(5):

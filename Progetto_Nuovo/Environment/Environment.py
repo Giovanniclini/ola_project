@@ -13,4 +13,5 @@ class Environment:
         for product in range(self.n_prod):
             prices_configuration[product] = prices[product][configuration[product]]
         simulator = SocialInfluence(self.lambda_coeff, self.customer_class, prices_configuration, self.n_prod)
-        return simulator.reward, simulator.units_sold, simulator.actual_users
+        simulator.simulation()
+        return simulator.reward, simulator.bought, simulator.actual_users

@@ -25,6 +25,8 @@ class SocialInfluence:
         self.n_prod = n_prod
         # number of units sold per product in the simulation
         self.units_sold = np.zeros(5)
+        # units sold per product in the simulation
+        self.bought = np.zeros(5)
         # history of the simulation
         self.global_history = []
         # dirichlet distribution given alphas
@@ -56,7 +58,6 @@ class SocialInfluence:
             self.reward += self.units_sold[product] * self.configuration[product] * self.dirichlet_probs[product]
         # average reward over all the simulations
         self.reward = self.reward / self.n_users
-        return self.reward
 
     def graph_search(self, initial_active_nodes):
         # store_the number of products, i.e, the nodes of the graph
@@ -72,7 +73,7 @@ class SocialInfluence:
         # assign value to n_steps_max,
         n_steps_max = 5
         # check if the first product displayed has a price higher than the reservation price; if yes, return
-        if self.customer_class.reservation_prices[int(np.where(active_nodes == 1)[0])] < self.configuration[int(
+        if self.customer_class.reservation_prices[0][int(np.where(active_nodes == 1)[0])] < self.configuration[int(
                 np.where(active_nodes == 1)[0])]:
             return history
         # assign first the history to the initial active nodes array
@@ -121,11 +122,12 @@ class SocialInfluence:
             for i in range(5):
                 # if the chosen secondary product is found, let the costumer actually buy it, by updated the
                 # values related to the units sold and the revenue
-                if activated_edges[i] and self.customer_class.reservation_prices[i] >= self.configuration[i]:
+                if activated_edges[i] and self.customer_class.reservation_prices[0][i] >= self.configuration[i]:
                     # assign a random amount of units of product purchased by the user
                     units_purchased = np.random.randint(1, 20)
                     # update the amount of unites of product purchased by the class of user
                     self.units_sold[i] += units_purchased
+                    self.bought[i] += 1
                     # assign 1 to the new active nodes
                     newly_active_nodes[i] = 1
             # update transition probability of the new active nodes to zero value so that it is not possible to
