@@ -12,11 +12,11 @@ class TSLearner(Learner):
         pulled_config_indexes = np.argmax(np.random.beta(self.beta_parameters[:, :, 0], self.beta_parameters[:, :, 1]), axis=1)
         return pulled_config_indexes
 
-    def update(self, pulled_config, bought, total):
+    def update(self, pulled_config, bought, total, reward):
         # increase time
         self.t += 1
         for product in range(len(pulled_config)):
-            self.update_observations(pulled_config[product], bought[product], product)
+            self.update_observations(pulled_config[product], bought[product], product, reward)
             self.beta_parameters[product, pulled_config[product], 0] = self.beta_parameters[product, pulled_config[product], 0] + bought[product]
             self.beta_parameters[product, pulled_config[product], 1] = self.beta_parameters[product, pulled_config[product], 1] + total - bought[product]
 

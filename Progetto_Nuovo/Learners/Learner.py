@@ -13,6 +13,6 @@ class Learner:
         # global collected rewards
         self.collected_rewards = [np.array([]) for i in range(n_products)]
 
-    def update_observations(self, pulled_arm, reward, product):
-        self.rewards_per_arm[pulled_arm][product].append(reward)
+    def update_observations(self, pulled_arm, bought, product, reward):
+        self.rewards_per_arm[product][pulled_arm].append(reward)
         self.collected_rewards[product] = np.append(self.collected_rewards, reward)
