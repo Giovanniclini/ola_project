@@ -16,7 +16,6 @@ def get_customer_class_from_json(filename):
 def evaluate_clairvoyant(configurations, max_units_sold, reservation_prices, n_users):
     max_reward = 0.
     for config in configurations:
-        print(config)
         opt_reward = 0.
         # for each product
         for product in range(5):

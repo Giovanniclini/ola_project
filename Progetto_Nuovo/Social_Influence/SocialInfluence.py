@@ -4,10 +4,6 @@ import random
 
 class SocialInfluence:
     def __init__(self, lambda_coeff, customer_class, price_configuration, n_prod):
-<<<<<<< HEAD
-        # number of users in the simulation
-=======
->>>>>>> c1796b5 (clairvoyant)
         self.n_users = customer_class.number_of_customers
         # reward of the simulation
         self.reward = 0.
