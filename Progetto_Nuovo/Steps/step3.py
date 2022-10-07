@@ -4,12 +4,13 @@ from Progetto_Nuovo.Learners.TSLearner import *
 from Progetto_Nuovo.Learners.UCBLearner import *
 from Progetto_Nuovo.generateData import *
 from Progetto_Nuovo.Data.DataManager import *
-
+from Progetto_Nuovo.Data.StatsManager import *
+from tqdm import tqdm
 
 n_prices = 4
 n_products = 5
 lambda_coefficient = 0.2
-number_of_days = 30
+number_of_days = 200
 number_of_experiments = 5
 graph_filename = "../Data/graph.json"
 prices_filename = "../Data/prices.json"
@@ -27,6 +28,7 @@ if __name__ == '__main__':
     configurations = initialization_other_steps(prices)
     # generate the customer class from json (aggregate)
     customer_class = get_customer_class_from_json(user_class_filename)
+
     # init reward collection for each experiment TS
     rewards_per_experiment_ts = []
     # init reward collection for each experiment UCB
@@ -36,6 +38,7 @@ if __name__ == '__main__':
                                        customer_class.number_of_customers)
 
     for e in range(number_of_experiments):
+        print("Experiment {0}...".format(e))
         # init environment
         env = Environment(n_prices, customer_class, lambda_coefficient, n_products)
         # init Thompson Sampling learner
@@ -71,9 +74,12 @@ if __name__ == '__main__':
         rewards_per_experiment_ts.append(ts_learner.collected_rewards)
         # append collected reward of current experiment UCB
         rewards_per_experiment_ucb.append(ucb_learner.collected_rewards)
-        print("exp step")
         # printTSBeta(learner.beta_parameters[:, 0, :], rewards_per_experiment[0])
         # print("SOS", learner.collected_rewards[0])
-        # printTSRegret(learner, clairvoyant)
+    printReward(rewards_per_experiment_ts, clairvoyant)
+    printReward(rewards_per_experiment_ucb, clairvoyant)
+
+    printRegret(rewards_per_experiment_ts, clairvoyant)
+    printRegret(rewards_per_experiment_ucb, clairvoyant)
 
 
