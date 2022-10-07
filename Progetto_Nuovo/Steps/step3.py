@@ -27,13 +27,6 @@ if __name__ == '__main__':
     configurations = initialization_other_steps(prices)
     # generate the customer class from json (aggregate)
     customer_class = get_customer_class_from_json(user_class_filename)
-
-    # init environment
-    env = Environment(n_prices, customer_class, lambda_coefficient, n_products)
-    # init Thompson Sampling learner
-    ts_learner = TSLearner(n_prices, n_products)
-    # init UCB-1
-    ucb_learner = UCBLearner(n_prices, n_products)
     # init reward collection for each experiment TS
     rewards_per_experiment_ts = []
     # init reward collection for each experiment UCB
@@ -43,6 +36,12 @@ if __name__ == '__main__':
                                        customer_class.number_of_customers)
 
     for e in range(number_of_experiments):
+        # init environment
+        env = Environment(n_prices, customer_class, lambda_coefficient, n_products)
+        # init Thompson Sampling learner
+        ts_learner = TSLearner(n_prices, n_products)
+        # init UCB-1
+        ucb_learner = UCBLearner(n_prices, n_products)
         total_seen_ucb = np.zeros((n_products, n_prices))
         total_seen_product_ucb = np.zeros(n_products)
         # for each day

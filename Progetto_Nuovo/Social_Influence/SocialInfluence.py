@@ -3,13 +3,10 @@ import random
 
 
 class SocialInfluence:
-    def __init__(self, lambda_coeff, customer_class, price_configuration, n_prod):
+    def __init__(self, lambda_coeff, alpha_ratios, customer_class, price_configuration, n_prod):
         self.n_users = customer_class.number_of_customers
         # reward of the simulation
         self.reward = 0.
-        self.dirchlet_probs = customer_class.alpha_probabilities
-        # average alpha ratios known
-        self.alpha_means = customer_class.alpha_probabilities
         # lamdba decay coefficient
         self.lambda_coeff = lambda_coeff
         # transition probabilities graph edges
@@ -28,19 +25,18 @@ class SocialInfluence:
         # history of the simulation
         self.global_history = []
         # dirichlet distribution given alphas
-        self.dirichlet_probs = np.zeros(5)
-        self.actual_users = 0
+        self.dirichlet_probs = alpha_ratios
+        # users for every alpha
+        self.actual_users = np.zeros(6)
         # TODO: aggiungere variabile graph che indica il grafo su cui fare la simulazione, noto a priori. Poi assegnare le graph_probs della class di utente (prob matrix)
 
     def simulation(self):
-        # generate dirichlet distribution given alphas
-        self.dirichlet_probs = np.random.dirichlet(self.alpha_means)
         # for each user, make a simulation
         for u in range(self.n_users):
             # assign initial product shown to the user, given the dirichlet distribution
             initial_products = np.random.multinomial(1, self.dirichlet_probs)
+            self.actual_users[np.where(initial_products == 1)[0]] += 1
             if initial_products[0] == 0:
-                self.actual_users += 1
                 initial_products = initial_products[1:]
                 # make a simulation, append history
                 self.global_history.append(self.graph_search(initial_products))
@@ -53,7 +49,7 @@ class SocialInfluence:
         # for each product
         for product in range(5):
             # evaluate the reward for
-            self.reward += self.units_sold[product] * self.configuration[product] #* self.dirichlet_probs[product]
+            self.reward += self.units_sold[product] * self.configuration[product]
         # average reward over all the simulations
         self.reward = self.reward / self.n_users
 
