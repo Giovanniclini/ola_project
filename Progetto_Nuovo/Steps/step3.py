@@ -49,24 +49,25 @@ if __name__ == '__main__':
         total_seen_product_ucb = np.zeros(n_products)
         # for each day
         for t in range(0, number_of_days):
+            alpha_ratios = np.random.dirichlet(customer_class.alpha_probabilities)
             # THOMPSON SAMPLING
             # pull prices belonging to a configuration (super arm)
             pulled_config_indexes_ts = ts_learner.pull_arm()
             # collect reward trough e-commerce simulation for all the users
-            reward_ts, units_sold_ts, total_seen_ts = env.round(pulled_config_indexes_ts, prices)
+            reward_ts, units_sold_ts, total_seen_ts = env.round(pulled_config_indexes_ts, prices, alpha_ratios)
             # update TS learner parameters
-            ts_learner.update(pulled_config_indexes_ts, units_sold_ts, total_seen_ts, reward_ts)
+            ts_learner.update(pulled_config_indexes_ts, units_sold_ts, np.sum(total_seen_ts[1:]), reward_ts)
 
             # UCB-1
             pulled_config_indexes_ucb = ucb_learner.pull_arm()
             pulled_config_indexes_ucb = np.array(np.transpose(pulled_config_indexes_ucb))[0]
-            reward_ucb, units_sold_ucb, total_seen_daily_ucb = env.round(pulled_config_indexes_ucb, prices)
+            reward_ucb, units_sold_ucb, total_seen_daily_ucb = env.round(pulled_config_indexes_ucb, prices, alpha_ratios)
             # seen since day before
             total_seen_since_daybefore_ucb = np.copy(total_seen_ucb)
             # seen til now
             for product in range(len(pulled_config_indexes_ucb)):
-                total_seen_ucb[product, pulled_config_indexes_ucb[product]] += total_seen_daily_ucb
-                total_seen_product_ucb[product] += total_seen_daily_ucb
+                total_seen_ucb[product, pulled_config_indexes_ucb[product]] += np.sum(total_seen_daily_ucb[1:])
+                total_seen_product_ucb[product] += np.sum(total_seen_daily_ucb[1:])
             ucb_learner.update(pulled_config_indexes_ucb, units_sold_ucb, total_seen_since_daybefore_ucb, total_seen_ucb,
                                total_seen_product_ucb, reward_ucb)
 

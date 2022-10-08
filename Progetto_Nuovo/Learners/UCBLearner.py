@@ -19,7 +19,6 @@ class UCBLearner(Learner):
             self.means[product, pulled_config[product]] = (self.means[product, pulled_config[product]] *
                                                            seen[product, pulled_config[product]] + bought[product]) / \
                                                           tot_seen[product, pulled_config[product]]
-            print(tot_samples[product])
             self.upper_bound[product, pulled_config[product]] = m.sqrt((2 * m.log10(tot_samples[product])) /
                                                                        tot_seen[product, pulled_config[product]])
 

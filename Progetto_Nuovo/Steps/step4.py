@@ -4,7 +4,8 @@ from Progetto_Nuovo.Learners.TSLearner import *
 from Progetto_Nuovo.Learners.UCBLearner import *
 from Progetto_Nuovo.generateData import *
 from Progetto_Nuovo.Data.DataManager import *
-
+from Progetto_Nuovo.Data.StatsManager import *
+from tqdm import tqdm
 
 n_prices = 4
 n_products = 5
@@ -20,6 +21,8 @@ max_units_sold = 20
 def estimate_alpha_ratios(old_starts, starts):
     new_starts = old_starts + starts
     return new_starts / np.sum(new_starts)
+
+#def estimate_items_for_each_product(mean, seen, bought, )
 
 
 if __name__ == '__main__':
@@ -50,6 +53,8 @@ if __name__ == '__main__':
         ucb_learner = UCBLearner(n_prices, n_products)
         total_seen_ucb = np.zeros((n_products, n_prices))
         total_seen_product_ucb = np.zeros(n_products)
+        total_seen_ts = np.zeros((n_products, n_prices))
+        total_seen_product_ts = np.zeros(n_products)
         # initialize alpha ratios for TS
         alpha_ratios_ts = [0.0, 0.2, 0.2, 0.2, 0.2, 0.2]
         # initialize alpha ratios for UCB
@@ -58,21 +63,39 @@ if __name__ == '__main__':
         old_starts_ts = np.zeros(6)
         # starts of day before UCB
         old_starts_ucb = np.zeros(6)
+        # number of unit bought for each price
+        unit_bought = np.ones((n_products, n_prices))
+        # mean of product TS
+        mean_product_ts = np.zeros((n_products, n_prices))
+        # mean of product UCB
+        mean_product_ucb = np.zeros((n_products, n_prices))
         # for each day
         for t in range(0, number_of_days):
-            # THOMPSON SAMPLING
+            # ---------------------------------------THOMPSON SAMPLING----------------------------------
             # pull prices belonging to a configuration (super arm)
             pulled_config_indexes_ts = ts_learner.pull_arm()
             # collect reward trough e-commerce simulation for all the users
-            reward_ts, units_sold_ts, total_seen_ts = env.round(pulled_config_indexes_ts, prices, alpha_ratios_ts)
+            reward_ts, units_sold_ts, total_seen_daily_ts = env.round(pulled_config_indexes_ts, prices, alpha_ratios_ts)
             # update TS learner parameters
-            ts_learner.update(pulled_config_indexes_ts, units_sold_ts, np.sum(total_seen_ts[1:]), reward_ts)
-            # append collected reward of current experiment TS
-            rewards_per_experiment_ts.append(ts_learner.collected_rewards)
-            # call alpha estimate for TS
-            alpha_ratios_ts = estimate_alpha_ratios(old_starts_ts, total_seen_ts)
+            ts_learner.update(pulled_config_indexes_ts, units_sold_ts, np.sum(total_seen_daily_ts[1:]), reward_ts)
 
-            # ------------------------------------------------------------------------------------------------------
+            # ------------------------------------------alpha ratio-------------------------------------
+
+            # call alpha estimate for TS
+            alpha_ratios_ts = estimate_alpha_ratios(old_starts_ts, total_seen_daily_ts)
+
+            # ------------------------------------------unit bought-------------------------------------
+
+            # seen since day before
+            total_seen_since_daybefore_ts = np.copy(total_seen_ts[1:])
+            # seen til now
+            for product in range(len(pulled_config_indexes_ts)):
+                total_seen_ts[product, pulled_config_indexes_ts[product]] += np.sum(total_seen_daily_ts[1:])
+                total_seen_product_ucb[product] += np.sum(total_seen_daily_ts[1:])
+            # call unit bought for product estimate
+
+
+            # ---------------------------------------------UCB-------------------------------------------
 
             # UCB-1
             pulled_config_indexes_ucb = ucb_learner.pull_arm()
@@ -87,14 +110,21 @@ if __name__ == '__main__':
                 total_seen_product_ucb[product] += np.sum(total_seen_daily_ucb[1:])
             ucb_learner.update(pulled_config_indexes_ucb, units_sold_ucb, total_seen_since_daybefore_ucb,
                                total_seen_ucb, total_seen_product_ucb, reward_ucb)
-            # append collected reward of current experiment UCB
-            rewards_per_experiment_ucb.append(ucb_learner.collected_rewards)
+
+            # ------------------------------------------alpha ratio-------------------------------------
+
             # call alpha estimate for UCB
             alpha_ratios_ucb = estimate_alpha_ratios(old_starts_ucb, total_seen_daily_ucb)
 
-        print("exp step")
-        # printTSBeta(learner.beta_parameters[:, 0, :], rewards_per_experiment[0])
-        # print("SOS", learner.collected_rewards[0])
-        # printTSRegret(learner, clairvoyant)
+        # append collected reward of current experiment TS
+        rewards_per_experiment_ts.append(ts_learner.collected_rewards)
+        # append collected reward of current experiment UCB
+        rewards_per_experiment_ucb.append(ucb_learner.collected_rewards)
+
+        printReward(rewards_per_experiment_ts, clairvoyant)
+        printReward(rewards_per_experiment_ucb, clairvoyant)
+
+        printRegret(rewards_per_experiment_ts, clairvoyant)
+        printRegret(rewards_per_experiment_ucb, clairvoyant)
 
 
