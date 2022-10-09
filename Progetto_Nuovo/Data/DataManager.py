@@ -10,6 +10,7 @@ def get_customer_class_from_json(filename):
     customer_class.alpha_probabilities = data["average_alphas"]
     customer_class.reservation_prices = data["reservation_prices"]
     customer_class.social_influence_transition_probability_matrix = data["graph_probabilities"]
+    customer_class.item_sold_mean = data["average_items_sold"]
     return customer_class
 
 
