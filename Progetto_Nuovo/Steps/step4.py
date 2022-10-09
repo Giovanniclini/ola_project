@@ -22,7 +22,9 @@ def estimate_alpha_ratios(old_starts, starts):
     new_starts = old_starts + starts
     return new_starts / np.sum(new_starts)
 
-#def estimate_items_for_each_product(mean, seen, bought, )
+
+def estimate_items_for_each_product(mean, seen_since_day_before, unit_sold, total_sold):
+    return (mean * seen_since_day_before + unit_sold) / total_sold
 
 
 if __name__ == '__main__':
@@ -51,10 +53,13 @@ if __name__ == '__main__':
         ts_learner = TSLearner(n_prices, n_products)
         # init UCB-1
         ucb_learner = UCBLearner(n_prices, n_products)
+
         total_seen_ucb = np.zeros((n_products, n_prices))
         total_seen_product_ucb = np.zeros(n_products)
         total_seen_ts = np.zeros((n_products, n_prices))
-        total_seen_product_ts = np.zeros(n_products)
+        total_sold_product_ts = np.zeros((n_products, n_prices))
+        total_sold_product_ucb = np.zeros((n_products, n_prices))
+
         # initialize alpha ratios for TS
         alpha_ratios_ts = [0.0, 0.2, 0.2, 0.2, 0.2, 0.2]
         # initialize alpha ratios for UCB
@@ -69,13 +74,18 @@ if __name__ == '__main__':
         mean_product_ts = np.zeros((n_products, n_prices))
         # mean of product UCB
         mean_product_ucb = np.zeros((n_products, n_prices))
+        # initialize item sold mean TS
+        item_sold_mean_ts = [[3/2 for _ in range(n_prices)] for _ in range(n_products)]
+        # initialize item sold mean UCB
+        item_sold_mean_ucb = [[3/2 for _ in range(n_prices)] for _ in range(n_products)]
         # for each day
         for t in range(0, number_of_days):
             # ---------------------------------------THOMPSON SAMPLING----------------------------------
             # pull prices belonging to a configuration (super arm)
             pulled_config_indexes_ts = ts_learner.pull_arm()
             # collect reward trough e-commerce simulation for all the users
-            reward_ts, units_sold_ts, total_seen_daily_ts = env.round(pulled_config_indexes_ts, prices, alpha_ratios_ts)
+            reward_ts, units_sold_ts, total_seen_daily_ts = env.round(pulled_config_indexes_ts, prices, alpha_ratios_ts,
+                                                                      item_sold_mean_ts)
             # update TS learner parameters
             ts_learner.update(pulled_config_indexes_ts, units_sold_ts, np.sum(total_seen_daily_ts[1:]), reward_ts)
 
@@ -87,13 +97,16 @@ if __name__ == '__main__':
             # ------------------------------------------unit bought-------------------------------------
 
             # seen since day before
-            total_seen_since_daybefore_ts = np.copy(total_seen_ts[1:])
+            total_seen_since_day_before_ts = np.copy(total_seen_ts)
             # seen til now
-            for product in range(len(pulled_config_indexes_ts)):
-                total_seen_ts[product, pulled_config_indexes_ts[product]] += np.sum(total_seen_daily_ts[1:])
-                total_seen_product_ucb[product] += np.sum(total_seen_daily_ts[1:])
-            # call unit bought for product estimate
-
+            for p in range(len(pulled_config_indexes_ts)):
+                total_seen_ts[p, pulled_config_indexes_ts[p]] += np.sum(total_seen_daily_ts[1:])
+                total_sold_product_ts[p, pulled_config_indexes_ts[p]] += units_sold_ts[p]
+                # call unit bought for product estimate
+                item_sold_mean_ts[p][pulled_config_indexes_ts[p]] = estimate_items_for_each_product(
+                    item_sold_mean_ts[p][pulled_config_indexes_ts[p]],
+                    total_seen_since_day_before_ts[p, pulled_config_indexes_ts[p]], units_sold_ts[p],
+                    total_sold_product_ts[p, pulled_config_indexes_ts[p]])
 
             # ---------------------------------------------UCB-------------------------------------------
 
@@ -101,20 +114,31 @@ if __name__ == '__main__':
             pulled_config_indexes_ucb = ucb_learner.pull_arm()
             pulled_config_indexes_ucb = np.array(np.transpose(pulled_config_indexes_ucb))[0]
             reward_ucb, units_sold_ucb, total_seen_daily_ucb = env.round(pulled_config_indexes_ucb, prices,
-                                                                         alpha_ratios_ucb)
+                                                                         alpha_ratios_ucb, item_sold_mean_ucb)
             # seen since day before
-            total_seen_since_daybefore_ucb = np.copy(total_seen_ucb)
+            total_seen_since_day_before_ucb = np.copy(total_seen_ucb)
             # seen til now
-            for product in range(len(pulled_config_indexes_ucb)):
-                total_seen_ucb[product, pulled_config_indexes_ucb[product]] += np.sum(total_seen_daily_ucb[1:])
-                total_seen_product_ucb[product] += np.sum(total_seen_daily_ucb[1:])
-            ucb_learner.update(pulled_config_indexes_ucb, units_sold_ucb, total_seen_since_daybefore_ucb,
+            for p in range(len(pulled_config_indexes_ucb)):
+                total_seen_ucb[p, pulled_config_indexes_ucb[p]] += np.sum(total_seen_daily_ucb[1:])
+                total_seen_product_ucb[p] += np.sum(total_seen_daily_ucb[1:])
+            ucb_learner.update(pulled_config_indexes_ucb, units_sold_ucb, total_seen_since_day_before_ucb,
                                total_seen_ucb, total_seen_product_ucb, reward_ucb)
 
             # ------------------------------------------alpha ratio-------------------------------------
 
             # call alpha estimate for UCB
             alpha_ratios_ucb = estimate_alpha_ratios(old_starts_ucb, total_seen_daily_ucb)
+
+            # ------------------------------------------unit bought-------------------------------------
+
+            # seen til now
+            for p in range(len(pulled_config_indexes_ucb)):
+                total_sold_product_ucb[p, pulled_config_indexes_ucb[p]] += units_sold_ucb[p]
+                # call unit bought for product estimate
+                item_sold_mean_ucb[p][pulled_config_indexes_ucb[p]] = estimate_items_for_each_product(
+                    item_sold_mean_ucb[p][pulled_config_indexes_ucb[p]],
+                    total_seen_since_day_before_ucb[p][pulled_config_indexes_ucb[p]],
+                    units_sold_ucb[p], total_sold_product_ucb[p][pulled_config_indexes_ucb[p]])
 
         # append collected reward of current experiment TS
         rewards_per_experiment_ts.append(ts_learner.collected_rewards)

@@ -3,7 +3,8 @@ import random
 
 
 class SocialInfluence:
-    def __init__(self, lambda_coeff, alpha_ratios, item_sold_mean, customer_class, price_configuration, n_prod, configuration):
+    def __init__(self, lambda_coeff, alpha_ratios, item_sold_mean, customer_class, price_configuration, n_prod,
+                 configuration):
         self.n_users = customer_class.number_of_customers
         # reward of the simulation
         self.reward = 0.
@@ -29,7 +30,7 @@ class SocialInfluence:
         # users for every alpha
         self.actual_users = np.zeros(6)
         # mean of sold item
-        self.item_sold_mean = np.transpose(item_sold_mean)
+        self.item_sold_mean = item_sold_mean
         # configuration with price indexes
         self.configuration_indexes = configuration
         # TODO: aggiungere variabile graph che indica il grafo su cui fare la simulazione, noto a priori. Poi assegnare le graph_probs della class di utente (prob matrix)
