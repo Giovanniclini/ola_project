@@ -14,11 +14,13 @@ def printTSBeta(beta_parameters, exp_reward):
   plt.grid()
   plt.show()
 
+
 def printRegret(rewards, clairvoyant):
   plt.figure(figsize=(16, 9))
   plt.ylabel("Regret")
   plt.xlabel("t")
   #plt.plot(np.cumsum(pseudo_regret), color='r', label='Pseudo-regret')
+  plt.axhline(y=clairvoyant, color='r', linestyle='-')
   plt.plot(np.mean(clairvoyant - rewards, axis=0), color='g', label='Regret')
   plt.legend()
   plt.grid()
@@ -28,7 +30,7 @@ def printRegret(rewards, clairvoyant):
 def printReward(rewards, clairvoyant):
   plt.figure(figsize=(16, 9))
   plt.xlabel("t")
-  plt.ylabel("Regret")
+  plt.ylabel("Reward")
   plt.axhline(y=clairvoyant, color='r', linestyle='-')
   plt.plot(np.mean(rewards, axis=0), 'b')
   plt.grid()

@@ -29,7 +29,7 @@ class SocialInfluence:
         # users for every alpha
         self.actual_users = np.zeros(6)
         # mean of sold item
-        self.item_sold_mean = item_sold_mean
+        self.item_sold_mean = np.transpose(item_sold_mean)
         # configuration with price indexes
         self.configuration_indexes = configuration
         # TODO: aggiungere variabile graph che indica il grafo su cui fare la simulazione, noto a priori. Poi assegnare le graph_probs della class di utente (prob matrix)
@@ -122,9 +122,9 @@ class SocialInfluence:
                 # values related to the units sold and the revenue
                 if activated_edges[i] and self.customer_class.reservation_prices[0][i] >= self.configuration[i]:
                     # assign a random amount of units of product purchased by the user
-                    units_purchased = np.random.randint(1, (items_sold_mean[i]*2)-1)
+                    units_purchased = np.random.randint(1, (self.item_sold_mean[i][self.configuration_indexes[i]]*2))
                     # update the amount of unites of product purchased by the class of user
-                    self.units_sold[i][self.configuration_indexes[i]] += units_purchased
+                    self.units_sold[i] += units_purchased
                     self.bought[i] += 1
                     # assign 1 to the new active nodes
                     newly_active_nodes[i] = 1
