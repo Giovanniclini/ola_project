@@ -120,7 +120,7 @@ class SocialInfluence:
                 # values related to the units sold and the revenue
                 if activated_edges[i] and self.customer_class.reservation_prices[0][i] >= self.configuration[i]:
                     # assign a random amount of units of product purchased by the user
-                    
+
                     units_purchased = np.random.randint(1, 20)
                     # update the amount of unites of product purchased by the class of user
                     self.units_sold[i] += units_purchased
