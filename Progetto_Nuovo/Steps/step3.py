@@ -80,6 +80,7 @@ if __name__ == '__main__':
     printReward(rewards_per_experiment_ts, clairvoyant)
     printReward(rewards_per_experiment_ucb, clairvoyant)
 
+    evaluate_mean_std_rewards(rewards_per_experiment_ts)
     printRegret(rewards_per_experiment_ts, clairvoyant)
     printRegret(rewards_per_experiment_ucb, clairvoyant)
 

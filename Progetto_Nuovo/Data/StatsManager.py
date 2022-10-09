@@ -3,6 +3,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+def evaluate_mean_std_rewards(rewards):
+  mean = np.mean(rewards, axis=0)
+  std = np.std(rewards, axis=0)
+  plt.figure(figsize=(9,6))
+  plt.plot(range(len(mean)), mean)
+  plt.fill_between(range(len(mean)), (mean - std), (mean + std), color='b', alpha=.1)
+  plt.show()
+  return mean, std
+
+
 def printTSBeta(beta_parameters, exp_reward):
   plt.figure(figsize=(16, 9))
   x = np.linspace(0, 1, 1000)
@@ -16,7 +26,7 @@ def printTSBeta(beta_parameters, exp_reward):
 
 
 def printRegret(rewards, clairvoyant):
-  plt.figure(figsize=(16, 9))
+  plt.figure(figsize=(9, 6))
   plt.ylabel("Regret")
   plt.xlabel("t")
   #plt.plot(np.cumsum(pseudo_regret), color='r', label='Pseudo-regret')
@@ -28,7 +38,7 @@ def printRegret(rewards, clairvoyant):
 
 
 def printReward(rewards, clairvoyant):
-  plt.figure(figsize=(16, 9))
+  plt.figure(figsize=(9, 6))
   plt.xlabel("t")
   plt.ylabel("Reward")
   plt.axhline(y=clairvoyant, color='r', linestyle='-')
