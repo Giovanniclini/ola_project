@@ -31,6 +31,7 @@ class SocialInfluence:
         # mean of sold item
         self.item_sold_mean = item_sold_mean
         # TODO: aggiungere variabile graph che indica il grafo su cui fare la simulazione, noto a priori. Poi assegnare le graph_probs della class di utente (prob matrix)
+        self.graph = customer_class.graph_probabilities
 
     def simulation(self):
         # for each user, make a simulation
