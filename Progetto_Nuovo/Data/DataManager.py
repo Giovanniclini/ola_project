@@ -54,8 +54,11 @@ def get_customer_class_from_json_aggregate(file_name_class_1, file_name_class_2,
     temp_matrix = data_class_1['n_users'] * data_class_1['reservation_prices'] + data_class_2['n_users'] * data_class_2['reservation_prices'] + data_class_3['n_users'] * data_class_3['reservation_prices']
     customer_class_aggregate.alpha_probabilities = temp_matrix / customer_class_aggregate.number_of_customers
     # Agg graph probabilities
-    temp_matrix = data_class_1['n_users'] * data_class_1['graph_probabilities'] + data_class_2['n_users'] * data_class_2['graph_probabilities'] + data_class_3['n_users'] * data_class_3['grapg_probabilities']
+    temp_matrix = data_class_1['n_users'] * data_class_1['graph_probabilities'] + data_class_2['n_users'] * data_class_2['graph_probabilities'] + data_class_3['n_users'] * data_class_3['graph_probabilities']
     customer_class_aggregate.alpha_probabilities = temp_matrix / customer_class_aggregate.number_of_customers
+    # Agg average item sold
+    temp_matrix = data_class_1['n_users'] * data_class_1['average_items_sold'] + data_class_2['n_users'] * data_class_2['average_items_sold'] + data_class_3['n_users'] * data_class_3['average_items_sold']
+    customer_class_aggregate.item_sold_mean = temp_matrix / customer_class_aggregate.number_of_customers
 
     return customer_class_aggregate
 
