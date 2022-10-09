@@ -65,6 +65,7 @@ def get_customer_class_from_json_aggregate(file_name_class_1, file_name_class_2,
     return customer_class_aggregate
 
 def get_graph_from_json(filename):
+
     return None
 
 

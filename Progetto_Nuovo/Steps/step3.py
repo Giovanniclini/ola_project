@@ -10,12 +10,12 @@ from tqdm import tqdm
 n_prices = 4
 n_products = 5
 lambda_coefficient = 0.2
-number_of_days = 200
+number_of_days = 50
 number_of_experiments = 5
 graph_filename = "../Data/graph.json"
 prices_filename = "../Data/prices.json"
 user_class_filename = "../Data/user_class_aggregate.json"
-max_units_sold = 20
+max_units_sold = 3
 
 if __name__ == '__main__':
     print(colored('\n\n---------------------------- STEP 3 ----------------------------', 'blue', attrs=['bold']))
@@ -48,7 +48,7 @@ if __name__ == '__main__':
         total_seen_ucb = np.zeros((n_products, n_prices))
         total_seen_product_ucb = np.zeros(n_products)
         # for each day
-        for t in range(0, number_of_days):
+        for t in tqdm(range (0, number_of_days)):
             alpha_ratios = np.random.dirichlet(customer_class.alpha_probabilities)
             # THOMPSON SAMPLING
             # pull prices belonging to a configuration (super arm)
@@ -80,6 +80,7 @@ if __name__ == '__main__':
     printReward(rewards_per_experiment_ts, clairvoyant)
     printReward(rewards_per_experiment_ucb, clairvoyant)
 
+    evaluate_mean_std_rewards(rewards_per_experiment_ts)
     printRegret(rewards_per_experiment_ts, clairvoyant)
     printRegret(rewards_per_experiment_ucb, clairvoyant)
 
