@@ -19,6 +19,7 @@ class CDUCBLearner(Learner):
         return pulled_config_indexes
 
     def update(self, pulled_config, bought, seen, tot_seen, tot_samples, reward):
+        self.t += 1
         for product in range(len(pulled_config)):
             self.update_observations(pulled_config[product], bought[product], product, reward)
             self.means[product, pulled_config[product]] = (self.means[product, pulled_config[product]] *
