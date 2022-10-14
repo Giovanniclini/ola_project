@@ -15,4 +15,5 @@ class Learner:
 
     def update_observations(self, pulled_arm, bought, product, reward):
         self.rewards_per_arm[product][pulled_arm].append(reward)
-        self.collected_rewards = np.append(self.collected_rewards, reward)
+        if product == 0:
+            self.collected_rewards = np.append(self.collected_rewards, reward)
