@@ -4,15 +4,15 @@ import math as m
 
 
 class CDUCBLearner(Learner):
-    def __init__(self, n_prices, n_products, range=6, delta=0.2):
+    def __init__(self, n_prices, n_products, size=6, delta=0.2):
         super().__init__(n_prices, n_products)
         self.means = np.zeros((n_products, n_prices))
         self.upper_bound = np.matrix(np.ones((n_products, n_prices)) * np.inf)
         self.phase = 0
         self.phase_sizes = []
-        self.range = range
+        self.size = size
         self.delta = delta
-        self.conversion_rates = np.zeros((n_products, n_prices))
+        self.conversion_rates = [[[] for _ in range(n_prices)] for _ in range(n_products)]
 
     def pull_arm(self):
         pulled_config_indexes = np.argmax(self.means + self.upper_bound, axis=1)
@@ -39,8 +39,8 @@ class CDUCBLearner(Learner):
             change_detected = False
             if not change_detected:
                 for product in range(len(pulled_config)):
-                    last_mean = np.mean(self.conversion_rates[product][pulled_config[product]][:-range])
-                    new_mean = np.mean(self.conversion_rates[product][pulled_config[product]][-range:])
+                    last_mean = np.mean(self.conversion_rates[product][pulled_config[product]][:-self.size])
+                    new_mean = np.mean(self.conversion_rates[product][pulled_config[product]][-self.size:])
 
                     if last_mean/new_mean >= self.delta or new_mean/last_mean >= self.delta:
                         change_detected = True
