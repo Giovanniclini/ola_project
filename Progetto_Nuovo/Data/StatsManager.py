@@ -31,7 +31,7 @@ def printRegret(rewards, clairvoyant):
   plt.xlabel("t")
   #plt.plot(np.cumsum(pseudo_regret), color='r', label='Pseudo-regret')
   plt.axhline(y=clairvoyant, color='r', linestyle='-')
-  plt.plot(np.mean(clairvoyant - rewards, axis=0), color='g', label='Regret')
+  plt.plot(np.cumsum(np.mean(clairvoyant - rewards, axis=0)), color='g', label='Regret')
   plt.legend()
   plt.grid()
   plt.show()

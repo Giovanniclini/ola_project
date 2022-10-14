@@ -10,12 +10,12 @@ from tqdm import tqdm
 n_prices = 4
 n_products = 5
 lambda_coefficient = 0.2
-number_of_days = 50
+number_of_days = 200
 number_of_experiments = 5
 graph_filename = "../Data/graph.json"
 prices_filename = "../Data/prices.json"
 user_class_filename = "../Data/user_class_aggregate.json"
-max_units_sold = 3
+max_units_sold = 2
 
 if __name__ == '__main__':
     print(colored('\n\n---------------------------- STEP 3 ----------------------------', 'blue', attrs=['bold']))
