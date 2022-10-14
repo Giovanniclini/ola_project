@@ -43,8 +43,8 @@ class CDUCBLearner(Learner):
                     if last_mean/new_mean >= self.delta or new_mean/last_mean >= self.delta:
                         change_detected = True
                         self.phase += 1
-                        self.means = np.zeros((n_products, n_prices))
-                        self.upper_bound = np.matrix(np.ones((n_products, n_prices)) * np.inf)
+                        self.means = np.zeros((self.n_products, self.n_arms))
+                        self.upper_bound = np.matrix(np.ones((self.n_products, self.n_arms)) * np.inf)
                         self.phase_sizes.append(self.t)
 
 
