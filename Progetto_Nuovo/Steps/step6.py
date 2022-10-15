@@ -54,7 +54,7 @@ if __name__ == '__main__':
         total_seen_product_ucb = np.zeros(n_products)
         total_seen_product_per_window_ucb = np.zeros(n_products)
         # for each day
-        for t in tqdm(range (0, number_of_days)):
+        for t in tqdm(range(0, number_of_days)):
             alpha_ratios = np.random.dirichlet(customer_class.alpha_probabilities)
             item_sold_mean = customer_class.item_sold_mean
 
@@ -90,8 +90,8 @@ if __name__ == '__main__':
             for product in range(len(pulled_config_indexes_cducb)):
                 total_seen_cducb[product, pulled_config_indexes_cducb[product]] += np.sum(total_seen_daily_cducb[1:])
                 total_seen_product_cducb[product] += np.sum(total_seen_daily_cducb[1:])
-            cd_ucb_learner.update(pulled_config_indexes_cducb, units_sold_cducb, total_seen_since_daybefore_cducb, total_seen_cducb,
-                               total_seen_product_cducb, reward_cducb)
+            cd_ucb_learner.update(pulled_config_indexes_cducb, units_sold_cducb, total_seen_since_daybefore_cducb,
+                                  total_seen_cducb, total_seen_product_cducb, reward_cducb)
             if cd_ucb_learner.detect_change(pulled_config_indexes_cducb):
                 total_seen_cducb = np.zeros((n_products, n_prices))
                 total_seen_product_per_window_cducb = np.zeros(n_products)

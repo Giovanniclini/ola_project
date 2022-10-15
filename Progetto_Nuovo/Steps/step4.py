@@ -10,12 +10,12 @@ from tqdm import tqdm
 n_prices = 4
 n_products = 5
 lambda_coefficient = 0.2
-number_of_days = 30
-number_of_experiments = 5
+number_of_days = 100
+number_of_experiments = 2
 graph_filename = "../Data/graph.json"
 prices_filename = "../Data/prices.json"
 user_class_filename = "../Data/user_class_aggregate.json"
-max_units_sold = 20
+max_units_sold = 1
 
 
 def estimate_alpha_ratios(old_starts, starts):
@@ -24,6 +24,10 @@ def estimate_alpha_ratios(old_starts, starts):
 
 
 def estimate_items_for_each_product(mean, seen_since_day_before, unit_sold, total_sold):
+    if mean * seen_since_day_before + unit_sold == 0:
+        return 0.
+    if total_sold == 0:
+        print("ciao")
     return (mean * seen_since_day_before + unit_sold) / total_sold
 
 
@@ -96,8 +100,9 @@ if __name__ == '__main__':
 
             # ------------------------------------------unit bought-------------------------------------
 
-            # seen since day before
-            total_seen_since_day_before_ts = np.copy(total_seen_ts)
+            # bought since day before
+            total_bought_since_day_before_ts = np.copy(total_sold_product_ts)
+
             # seen til now
             for p in range(len(pulled_config_indexes_ts)):
                 total_seen_ts[p, pulled_config_indexes_ts[p]] += np.sum(total_seen_daily_ts[1:])
@@ -105,7 +110,7 @@ if __name__ == '__main__':
                 # call unit bought for product estimate
                 item_sold_mean_ts[p][pulled_config_indexes_ts[p]] = estimate_items_for_each_product(
                     item_sold_mean_ts[p][pulled_config_indexes_ts[p]],
-                    total_seen_since_day_before_ts[p, pulled_config_indexes_ts[p]], units_sold_ts[p],
+                    total_bought_since_day_before_ts[p, pulled_config_indexes_ts[p]], units_sold_ts[p],
                     total_sold_product_ts[p, pulled_config_indexes_ts[p]])
 
             # ---------------------------------------------UCB-------------------------------------------
@@ -131,13 +136,16 @@ if __name__ == '__main__':
 
             # ------------------------------------------unit bought-------------------------------------
 
+            # seen since day before
+            total_bought_since_day_before_ucb = np.copy(total_sold_product_ucb)
+
             # seen til now
             for p in range(len(pulled_config_indexes_ucb)):
                 total_sold_product_ucb[p, pulled_config_indexes_ucb[p]] += units_sold_ucb[p]
                 # call unit bought for product estimate
                 item_sold_mean_ucb[p][pulled_config_indexes_ucb[p]] = estimate_items_for_each_product(
                     item_sold_mean_ucb[p][pulled_config_indexes_ucb[p]],
-                    total_seen_since_day_before_ucb[p][pulled_config_indexes_ucb[p]],
+                    total_bought_since_day_before_ucb[p][pulled_config_indexes_ucb[p]],
                     units_sold_ucb[p], total_sold_product_ucb[p][pulled_config_indexes_ucb[p]])
 
         # append collected reward of current experiment TS
