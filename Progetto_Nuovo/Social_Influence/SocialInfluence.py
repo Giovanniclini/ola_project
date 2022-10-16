@@ -10,8 +10,6 @@ class SocialInfluence:
         self.reward = 0.
         # lamdba decay coefficient
         self.lambda_coeff = lambda_coeff
-        # transition probabilities graph edges
-        self.graph_probs = customer_class.social_influence_transition_probability_matrix
         # customer class in the simulation
         self.customer_class = customer_class
         # da mettere un grafo per lo step 5
@@ -33,8 +31,8 @@ class SocialInfluence:
         self.item_sold_mean = item_sold_mean
         # configuration with price indexes
         self.configuration_indexes = configuration
-        # TODO: aggiungere variabile graph che indica il grafo su cui fare la simulazione, noto a priori. Poi assegnare le graph_probs della class di utente (prob matrix)
-        self.graph = customer_class.graph_probabilities
+        # initialize graph probabilities
+        self.graph_probs = customer_class.graph_probabilities
 
     def simulation(self):
         # for each user, make a simulation
@@ -64,6 +62,10 @@ class SocialInfluence:
         prob_matrix = np.copy(self.graph_probs)
         # initialize the history
         history = []
+        # initialize the index of the activated node
+        index = 0
+        # initialize the history of the activated edges in the simulation
+        activated_edges_simulation = [False for _ in range(5)]
         # assign the active nodes to the initial active one(s)
         active_nodes = initial_active_nodes
         # assign the new active nodes (nodes active at the end of each iteration) to the initial active one(s)
@@ -82,24 +84,25 @@ class SocialInfluence:
         # again the same node (product)
         for i in range(prob_matrix.shape[1]):
             if i in np.array(np.where(newly_active_nodes == 1)):
-                # from all the nodes to the new active one
-                for j in range(prob_matrix.shape[0]):
-                    prob_matrix[j][i] = 0
+                # saving the index of the recent active node
+                index = i
         # while the number of max steps is not reached and there are still active nodes, continue simulation
         order_of_parallel_product = [active_nodes]
         while t < n_steps_max and len(order_of_parallel_product) != 0:
+            index = np.where(order_of_parallel_product[0] == 1)[0][0]
             # assign at random value the first secondary node
-            first_secondary_node = np.random.randint(0, 5)
+            # first_secondary_node = np.random.randint(0, 5)
+            first_secondary_node = np.random.choice(range(len(prob_matrix[index, :])), p=prob_matrix[index, :])
             # assign at random value the second secondary node
-            second_secondary_node = np.random.randint(0, 5)
+            second_secondary_node = np.random.choice(range(len(prob_matrix[index, :])), p=prob_matrix[index, :])
             # repeat assignment until the two products are different
             while second_secondary_node == first_secondary_node:
-                second_secondary_node = np.random.randint(0, 5)
+                second_secondary_node = np.random.choice(range(len(prob_matrix[index, :])), p=prob_matrix[index, :])
             # select from the probability matrix only the rows related to the active nodes
             transition_probabilities_from_the_active_node = (prob_matrix.T * order_of_parallel_product[0]).T
             # select from the probability rows just the ones related to the active node
-            p_row = transition_probabilities_from_the_active_node[np.where(order_of_parallel_product[0] == 1)][0]
-            if np.all((p_row == 0)):
+            p_row = transition_probabilities_from_the_active_node[index]
+            if np.all(activated_edges_simulation):  # if all activated_edges_simulation == True
                 return history
             # update the value of the transition probability related to the second secondary product
             p_row[second_secondary_node] = p_row[second_secondary_node] * self.lambda_coeff
@@ -110,12 +113,12 @@ class SocialInfluence:
             # of the index of the secondary product selected by the user (select one, but maybe could be two)
             num_prod_clicked = np.random.randint(1, 3)
             indx = random.choices(np.arange(0, 5), p_row, k=num_prod_clicked)
-            # check if the probability related to the chosen index if > 0.0; if yes, activate the edge (set true)
+            # check if the clicked node is already activated in activated_edges_simulation
             for z in range(num_prod_clicked):
-                if (p_row[indx[z]]) > 0.0:
+                if activated_edges_simulation[indx[z]] is False:  # if indx[z] is not in activated_edges_simulation
                     activated_edges[indx[z]] = True
+                    activated_edges_simulation[indx[z]] = True
             # if ((p != 0) == activated_edges) it is False, empty the matrix
-            prob_matrix = prob_matrix * ((transition_probabilities_from_the_active_node != 0) == activated_edges)
             # assign 0 to the new active nodes (reset values)
             newly_active_nodes = np.zeros(5)
             # for each product, find the chosen one
@@ -135,9 +138,8 @@ class SocialInfluence:
             order_of_parallel_product.pop(0)
             for i in range(prob_matrix.shape[1]):
                 if i in np.array(np.where(newly_active_nodes == 1)):
+                    index = i
                     # from all the nodes to the new active one
-                    for j in range(prob_matrix.shape[0]):
-                        prob_matrix[j][i] = 0
                     # update the active nodes
                     active_nodes = np.zeros(5)
                     active_nodes[i] = 1
