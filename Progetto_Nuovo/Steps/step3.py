@@ -15,7 +15,7 @@ number_of_experiments = 5
 graph_filename = "../Data/graph.json"
 prices_filename = "../Data/prices.json"
 user_class_filename = "../Data/user_class_aggregate.json"
-max_units_sold = 2
+max_units_sold = 1
 
 if __name__ == '__main__':
     print(colored('\n\n---------------------------- STEP 3 ----------------------------', 'blue', attrs=['bold']))
