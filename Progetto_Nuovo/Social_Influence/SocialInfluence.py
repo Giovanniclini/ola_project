@@ -92,12 +92,12 @@ class SocialInfluence:
             index = np.where(order_of_parallel_product[0] == 1)[0][0]
             # assign at random value the first secondary node
             # first_secondary_node = np.random.randint(0, 5)
-            first_secondary_node = np.random.choice(range(len(prob_matrix[index, :])), p=prob_matrix[index, :])
+            first_secondary_node = random.choices(range(len(prob_matrix[index, :])), prob_matrix[index, :], k=1)[0]
             # assign at random value the second secondary node
-            second_secondary_node = np.random.choice(range(len(prob_matrix[index, :])), p=prob_matrix[index, :])
+            second_secondary_node = random.choices(range(len(prob_matrix[index, :])), prob_matrix[index, :], k=1)[0]
             # repeat assignment until the two products are different
             while second_secondary_node == first_secondary_node:
-                second_secondary_node = np.random.choice(range(len(prob_matrix[index, :])), p=prob_matrix[index, :])
+                second_secondary_node = random.choices(range(len(prob_matrix[index, :])), prob_matrix[index, :], k=1)[0]
             # select from the probability matrix only the rows related to the active nodes
             transition_probabilities_from_the_active_node = (prob_matrix.T * order_of_parallel_product[0]).T
             # select from the probability rows just the ones related to the active node
