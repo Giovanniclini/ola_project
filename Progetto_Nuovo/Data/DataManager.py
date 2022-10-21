@@ -33,6 +33,21 @@ def evaluate_clairvoyant(configurations, max_units_sold, reservation_prices, n_u
             max_reward = opt_reward
     return max_reward
 
+def evaluate_abrupt_changes_clairvoyant(configurations, max_units_sold, reservation_prices, n_users, n_phases):
+    max_reward = np.zeros(n_phases)
+    for phase in range(n_phases):
+        for config in configurations:
+            opt_reward = 0.
+            # for each product
+            for product in range(5):
+                if reservation_prices[phase][product] >= config[product]:
+                    # evaluate the reward for
+                    opt_reward += max_units_sold * n_users * config[product]
+            # average reward over all the simulations
+            opt_reward = opt_reward / n_users
+            if opt_reward > max_reward[phase]:
+                max_reward[phase] = opt_reward
+    return max_reward
 
 def get_customer_class_from_json_aggregate(file_name_class_1, file_name_class_2, file_name_class_3):
     # Load file customer class non aggregate
