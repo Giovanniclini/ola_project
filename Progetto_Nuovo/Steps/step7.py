@@ -78,21 +78,30 @@ if __name__ == '__main__':
         # initialize item sold mean UCB
         item_sold_mean_ucb = [[3 / 2 for _ in range(n_prices)] for _ in range(n_products)]
         # for each day
+
+        ucb_learners = []
+        ts_learner = []
+
         for t in range(0, number_of_days):
-            if t == 0:
-                contexts_learners.append(ContextClass("aggregate"))
-                reward_ts, reward_ucb = contexts_learners[0].run_aggregate_context()
-            if t % 14 == 0 and t != 0:
-                contexts_learners = []
-                context_1 = ContextClass("")
-                context_2 = ContextClass("")
-                contexts_learners.append(context_1)
-                contexts_learners.append(context_2)
-            for context in contexts_learners:
-                context.learner.pull_arm()
-                env.round(pulled_config_indexes_ts, prices, alpha_ratios_ts,
+            if t % 14 == 0:
+                # UCB LEARNER
+                ucb_learners = []
+                context_ucb = ContextClass()
+                context_ucb.split()
+                for split in context_ucb.current_split:
+                    ucb_learners.append(UCBLearner(n_prices, n_products))
+
+                # TS LEARNER
+                ts_learners = []
+                context_ts = ContextClass()
+                context_ts.split()
+                for split in context_ucb.current_split:
+                    ts_learners.append(TSLearner(n_prices, n_products))
+
+            context.learner.pull_arm()
+            env.round(pulled_config_indexes_ts, prices, alpha_ratios_ts,
                           item_sold_mean_ts)
-                context.learner.update(pulled_config_indexes_ts, units_sold_ts, np.sum(total_seen_daily_ts[1:]), reward_ts)
+            context.learner.update(pulled_config_indexes_ts, units_sold_ts, np.sum(total_seen_daily_ts[1:]), reward_ts)
 
             # ---------------------------------------THOMPSON SAMPLING----------------------------------
             # pull prices belonging to a configuration (super arm)

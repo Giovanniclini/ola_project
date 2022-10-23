@@ -14,15 +14,14 @@ class ContextClass:
         self.collected_rewards.append(reward)
 
 
-    def split(self):
-        if len(self.current_split) == 0:
+    def split(self, check = True, l_reward = -1, r_reward = -1):
+        if len(self.current_split) == 0 and l_reward == -1 and r_reward == -1:
             self.current_split.append(split_list[0])
-        if current_split[0] == [-1, -1]:
+        elif current_split[0] == [-1, -1]:
             self.current_split.pop(0)
             self.split_list.pop(0)
             self.current_split.append(self.split_list[:2])
-        if self.current_split[0] == [0, -1] and self.current_split[1] == [1, -1]:
-            check, l_reward, r_reward = self.evaluate_split_condition()
+        elif self.current_split[0] == [0, -1] and self.current_split[1] == [1, -1]:
             if check:
                 if l_reward > r_reward:
                     self.pending_list.append(self.current_split[1])
@@ -32,8 +31,7 @@ class ContextClass:
                 else:
                     self.pending_list.append(self.current_split[0])
                     self.current_split = self.split_list[2:4]
-        if any(-1 not in sublist for sublist in self.split_list):
-            check, l_reward, r_reward = self.evaluate_split_condition()
+        elif any(-1 not in sublist for sublist in self.split_list):
             if check:
                 if l_reward > r_reward:
                     self.pending_list.append(self.current_split[1])
@@ -57,8 +55,8 @@ class ContextClass:
 
 
     def evaluate_split_condition(self):
-        return check, l_reward, r_reward
 
+        return check, l_reward, r_reward
 
     def generate_context_bandit(self):
 
