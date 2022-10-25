@@ -9,18 +9,17 @@ class ContextClass:
         self.split_list = [[-1, -1], [0, -1], [1, -1], [0, 0], [0, 1], [1, 0], [1, 1]]
         self.pending_list = []
         self.pending_list_lower_bounds = []
+        self.pending_list_prob = []
         self.father_lower_bound = []
         self.reward_index = -1
-
 
     def update(self, reward):
         self.collected_rewards.append(reward)
 
-
-    def split(self, check = True, l_reward = -1, r_reward = -1):
+    def split(self, check=True, l_reward=-1, r_reward=-1):
         if len(self.current_split) == 0 and l_reward == -1 and r_reward == -1:
-            self.current_split.append(split_list[0])
-        elif current_split[0] == [-1, -1]:
+            self.current_split.append(self.split_list[0])
+        elif self.current_split[0] == [-1, -1]:
             self.current_split.pop(0)
             self.split_list.pop(0)
             self.current_split.append(self.split_list[:2])
@@ -58,11 +57,11 @@ class ContextClass:
 
     def evaluate_split_condition(self, rewards):
         # TODO: calcolare l'average delle reward e il lower bound, poi calcolo della split condition e restituire i valori
-
-
         return check, l_reward, r_reward
-
 
     def assign_father_lower_bound(self, rewards):
         # TODO: fare il conto
         self.father_lower_bound = rewards
+
+    def assign_prob_context_occur(self, time):
+        self.pending_list_prob.append(1 / (2 ** (time / 14)) * 100)

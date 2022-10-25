@@ -1,11 +1,10 @@
 from termcolor import colored
-from Progetto_Nuovo.Environment.Environment import *
+from Progetto_Nuovo.Environment.ContextualEnvironment import ContextualEnvironment
 from Progetto_Nuovo.Learners.TSLearner import *
 from Progetto_Nuovo.Learners.UCBLearner import *
 from Progetto_Nuovo.generateData import *
 from Progetto_Nuovo.Data.DataManager import *
 from Progetto_Nuovo.Data.StatsManager import *
-from tqdm import tqdm
 from Progetto_Nuovo.Data_Structures.ContextClass import *
 
 n_prices = 4
@@ -21,6 +20,19 @@ user_class_3 = "../Data/user_class_3.json"
 max_units_sold = 1
 
 
+def estimate_alpha_ratios(old_starts, starts):
+    new_starts = old_starts + starts
+    return new_starts / np.sum(new_starts)
+
+
+def estimate_items_for_each_product(mean, seen_since_day_before, unit_sold, total_sold):
+    if mean * seen_since_day_before + unit_sold == 0:
+        return 0.
+    if total_sold == 0:
+        print("ciao")
+    return (mean * seen_since_day_before + unit_sold) / total_sold
+
+
 if __name__ == '__main__':
     print(colored('\n\n---------------------------- STEP 7 ----------------------------', 'blue', attrs=['bold']))
 
@@ -31,10 +43,8 @@ if __name__ == '__main__':
     # generate all the possible price configurations
     configurations = initialization_other_steps(prices)
     # generate the customer class from json (aggregate)
-    customer_classes = []
-    customer_classes.append(get_customer_class_from_json(user_class_1))
-    customer_classes.append(get_customer_class_from_json(user_class_2))
-    customer_classes.append(get_customer_class_from_json(user_class_3))
+    customer_classes = [get_customer_class_from_json(user_class_1), get_customer_class_from_json(user_class_2),
+                        get_customer_class_from_json(user_class_3)]
     # init reward collection for each experiment TS
     rewards_per_experiment_ts = []
     # init reward collection for each experiment UCB
@@ -105,7 +115,8 @@ if __name__ == '__main__':
                             ucb_collected_rewards.append(ucb_split_rewards[1])
                             context_ucb.father_lower_bound = r_reward
                     else:
-                        context_ucb.pending_list_lower_bounds.append(ucb_collected_rewards(-1))
+                        context_ucb.pending_list_lower_bounds.append(ucb_collected_rewards[-1])
+                        context_ucb.pending_list_prob(t)
                         context_ucb.split(check, l_reward, r_reward)
 
                 for split in context_ucb.current_split:
@@ -131,7 +142,8 @@ if __name__ == '__main__':
                             ucb_collected_rewards.append(ts_split_rewards[1])
                             context_ts.father_lower_bound = r_reward
                     else:
-                        context_ts.pending_list_lower_bounds.append(ts_split_rewards(-1))
+                        context_ts.pending_list_lower_bounds.append(ts_split_rewards[-1])
+                        context_ts.pending_list_prob(t)
                         context_ts.split(check, l_reward, r_reward)
 
                 for split in context_ts.current_split:
