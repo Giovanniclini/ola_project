@@ -1,3 +1,4 @@
+import numpy as np
 
 
 class ContextClass:
@@ -22,7 +23,8 @@ class ContextClass:
         elif self.current_split[0] == [-1, -1]:
             self.current_split.pop(0)
             self.split_list.pop(0)
-            self.current_split.append(self.split_list[:2])
+            self.current_split.append(self.split_list[0])
+            self.current_split.append(self.split_list[1])
         elif self.current_split[0] == [0, -1] and self.current_split[1] == [1, -1]:
             if check:
                 if l_reward > r_reward:
@@ -53,15 +55,22 @@ class ContextClass:
                 if self.pending_list[0] == [1, -1] or self.pending_list[0][1] == 1:
                     self.pending_list.pop(0)
                     self.current_split = self.split_list[2:4]
-                self.split()
 
-    def evaluate_split_condition(self, rewards):
-        # TODO: calcolare l'average delle reward e il lower bound, poi calcolo della split condition e restituire i valori
-        return check, l_reward, r_reward
+    def evaluate_split_condition(self, rewards0, rewards1, time):
+        check = False
+        l_lowerbound = self.lower_bound(rewards0, 5, 14)
+        r_lowerbound = self.lower_bound(rewards1, 5, 14)
+        p = self.assign_prob_context_occur(time)
+        if p * (l_lowerbound + r_lowerbound) >= self.father_lower_bound:
+            check = True
+        return check, l_lowerbound, r_lowerbound
 
     def assign_father_lower_bound(self, rewards):
-        # TODO: fare il conto
-        self.father_lower_bound = rewards
+        self.father_lower_bound = self.lower_bound(rewards, 5, 14)
+
+    def lower_bound(self, rewards, confidence, cardinality):
+        return rewards - np.sqrt(-np.log10(confidence)/(cardinality * 2))
 
     def assign_prob_context_occur(self, time):
-        self.pending_list_prob.append(1 / (2 ** (time / 14)) * 100)
+        return 1 / (2 ** (time / 14)) * 100
+
