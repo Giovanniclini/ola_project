@@ -28,31 +28,26 @@ def estimate_alpha_ratios(old_starts, starts):
 def estimate_items_for_each_product(mean, seen_since_day_before, unit_sold, total_sold):
     if mean * seen_since_day_before + unit_sold == 0:
         return 0.
-    if total_sold == 0:
-        print("ciao")
     return (mean * seen_since_day_before + unit_sold) / total_sold
 
 
 if __name__ == '__main__':
     print(colored('\n\n---------------------------- STEP 7 ----------------------------', 'blue', attrs=['bold']))
-
-    # assign graph from json file
+    # INIT PARAMETERS
     graph = get_graph_from_json(graph_filename)
-    # assign prices per products from json file
     prices = get_prices_from_json(prices_filename)
-    # generate all the possible price configurations
     configurations = initialization_other_steps(prices)
-    # generate the customer class from json (aggregate)
-    customer_classes = [get_customer_class_from_json(user_class_1), get_customer_class_from_json(user_class_2),
-                        get_customer_class_from_json(user_class_3)]
-    # init reward collection for each experiment TS
+    customer_classes = [get_customer_class_from_json(user_class_1), get_customer_class_from_json(user_class_2), get_customer_class_from_json(user_class_3)]
+    customer_classes.append(get_customer_class_from_json_aggregate(user_class_1, user_class_2, user_class_3))
+    customer_class_zero, customer_class_one = get_customer_class_one_feature(user_classes)
+    customer_classes.append(customer_class_zero)
+    customer_classes.append(customer_class_one)
+
     rewards_per_experiment_ts = []
-    # init reward collection for each experiment UCB
     rewards_per_experiment_ucb = []
 
-    # TODO: fare clairvoyant per classi non aggregate
-    clairvoyant = evaluate_clairvoyant(configurations, max_units_sold, customer_class.reservation_prices[0],
-                                       customer_class.number_of_customers)
+    # EVALUATE CLAIRVOYANT
+    clairvoyant = evaluate_contextual_clairvoyant(configurations, customer_classes)
 
     for e in range(number_of_experiments):
         # init environment
