@@ -26,7 +26,6 @@ class CustomerClass:
         # assign empty global history
         self.global_history = []
 
-
     def assign_values(self, units, index):
         self.units_purchased_for_each_product[index] += units
         # self.units_purchased_per_product_per_campaign = units_purchased_per_product_per_campaign

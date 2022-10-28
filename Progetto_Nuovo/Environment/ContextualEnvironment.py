@@ -2,9 +2,9 @@ from Progetto_Nuovo.Social_Influence.SocialInfluence import *
 
 
 class ContextualEnvironment:
-    def __init__(self, n_arms, customer_class, lambda_coeff, n_prod):
+    def __init__(self, n_arms, lambda_coeff, n_prod):
         self.n_arms = n_arms
-        self.customer_class = customer_class
+        self.customer_class = None
         self.lambda_coeff = lambda_coeff
         self.n_prod = n_prod
 
@@ -16,3 +16,6 @@ class ContextualEnvironment:
                                     prices_configuration, self.n_prod, configuration)
         simulator.simulation()
         return simulator.reward, simulator.bought, simulator.actual_users
+
+    def select_costumer_class(self, customer_class):
+        self.customer_class = customer_class

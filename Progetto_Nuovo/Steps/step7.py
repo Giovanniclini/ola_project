@@ -56,7 +56,6 @@ if __name__ == '__main__':
 
     for e in range(number_of_experiments):
         # init environment
-        env = ContextualEnvironment(n_prices, customer_class, lambda_coefficient, n_products)
 
         total_seen_ucb = np.zeros((n_products, n_prices))
         total_seen_product_ucb = np.zeros(n_products)
@@ -86,12 +85,16 @@ if __name__ == '__main__':
 
         ucb_learners = []
         ts_learners = []
+        env = ContextualEnvironment(n_prices, lambda_coefficient, n_products)
 
         ucb_split_rewards = []
         ts_split_rewards = []
 
         ts_collected_rewards = []
         ucb_collected_rewards = []
+
+        context_ts = None
+        context_ucb = None
 
         for t in range(0, number_of_days):
             # every 14 days run context and do a split
@@ -131,44 +134,54 @@ if __name__ == '__main__':
                         context_ucb.pending_list_lower_bounds.pop(0)
                         context_ucb.pending_list_prob.pop(0)
 
-                for split in context_ucb.current_split:
-                    ucb_learners.append(UCBLearner(n_prices, n_products))
 
                 # TS LEARNER
                 ts_learners = []
                 context_ts = ContextClass()
                 if t == 0:
+                    ts_learners.append(TSLearner(n_prices, n_products))
                     context_ts.split()
                 elif t == 14:
+                    ts_learners.append(TSLearner(n_prices, n_products))
+                    ts_learners.append(TSLearner(n_prices, n_products))
                     ucb_collected_rewards.append(ts_split_rewards)
                     context_ts.assign_father_lower_bound(ts_split_rewards)
                     context_ts.split()
                 else:
                     check, l_reward, r_reward = context_ts.evaluate_split_condition(ts_split_rewards[0],
                                                                                     ts_split_rewards[1], t)
+                    ts_learners.append(TSLearner(n_prices, n_products))
+                    ts_learners.append(TSLearner(n_prices, n_products))
                     context_ts.split(check, l_reward, r_reward)
                     if check:
                         if l_reward > r_reward:
-                            ucb_collected_rewards.append(ts_split_rewards[0])
+                            # 0 -> left, 1 -> right
+                            ts_collected_rewards.append(ts_split_rewards[0])
                             context_ts.father_lower_bound = l_reward
+                            context_ts.pending_list_lower_bounds.append(
+                                context_ts.lower_bound(ts_split_rewards[1], 5, 14))
+                            context_ts.pending_list_prob.append(context_ts.assign_prob_context_occur(t))
                         else:
-                            ucb_collected_rewards.append(ts_split_rewards[1])
+                            ts_collected_rewards.append(ts_split_rewards[1])
                             context_ts.father_lower_bound = r_reward
+                            context_ts.pending_list_lower_bounds.append(
+                                context_ts.lower_bound(ts_split_rewards[0], 5, 14))
+                            context_ts.pending_list_prob.append(context_ts.assign_prob_context_occur(t))
                     else:
-                        context_ts.pending_list_lower_bounds.append(ts_split_rewards[-1])
-                        context_ts.pending_list_prob.append(context_ts.assign_prob_context_occur(t))
-                        context_ts.split(check, l_reward, r_reward)
-
-                for split in context_ts.current_split:
-                    ts_learners.append(TSLearner(n_prices, n_products))
+                        context_ts.father_lower_bound = context_ts.pending_list_lower_bounds[0]
+                        context_ts.pending_list_lower_bounds.pop(0)
+                        context_ts.pending_list_prob.pop(0)
 
             # ---------------------------------------THOMPSON SAMPLING----------------------------------
             i = 0
-            for ts_learner in ts_learners:
-                pulled_config_indexes_ts = ts_learner.pull_arm()
-                reward_ts, units_sold_ts, total_seen_daily_ts = env.round(pulled_config_indexes_ts, prices, alpha_ratios_ts, item_sold_mean_ts)
+            for split in context_ts.current_split:
+                ts_learners.append(TSLearner(n_prices, n_products))
+                pulled_config_indexes_ts = ts_learners[i].pull_arm()
+                env.select_costumer_class(customer_classes[get_json_from_binary_feature(split)])
+                reward_ts, units_sold_ts, total_seen_daily_ts = env.round(pulled_config_indexes_ts, prices,
+                                                                          alpha_ratios_ts, item_sold_mean_ts)
                 ts_split_rewards[i].append(reward_ts)
-                ts_learner.update(pulled_config_indexes_ts, units_sold_ts, np.sum(total_seen_daily_ts[1:]), reward_ts)
+                ts_learners[i].update(pulled_config_indexes_ts, units_sold_ts, np.sum(total_seen_daily_ts[1:]), reward_ts)
                 alpha_ratios_ts = estimate_alpha_ratios(old_starts_ts, total_seen_daily_ts)
                 total_bought_since_day_before_ts = np.copy(total_sold_product_ts)
                 for p in range(len(pulled_config_indexes_ts)):
@@ -182,9 +195,11 @@ if __name__ == '__main__':
 
             # ---------------------------------------------UCB-------------------------------------------
             i = 0
-            for ucb_learner in ucb_learners:
-                pulled_config_indexes_ucb = ucb_learner.pull_arm()
+            for split in context_ucb.current_split:
+                ucb_learners.append(UCBLearner(n_prices, n_products))
+                pulled_config_indexes_ucb = ucb_learners[i].pull_arm()
                 pulled_config_indexes_ucb = np.array(np.transpose(pulled_config_indexes_ucb))[0]
+                env.select_costumer_class(customer_classes[get_json_from_binary_feature(split)])
                 reward_ucb, units_sold_ucb, total_seen_daily_ucb = env.round(pulled_config_indexes_ucb, prices,
                                                                              alpha_ratios_ucb, item_sold_mean_ucb)
                 ucb_split_rewards[i].append(reward_ucb)
@@ -192,7 +207,7 @@ if __name__ == '__main__':
                 for p in range(len(pulled_config_indexes_ucb)):
                     total_seen_ucb[p, pulled_config_indexes_ucb[p]] += np.sum(total_seen_daily_ucb[1:])
                     total_seen_product_ucb[p] += np.sum(total_seen_daily_ucb[1:])
-                ucb_learner.update(pulled_config_indexes_ucb, units_sold_ucb, total_seen_since_day_before_ucb,
+                ucb_learners[i].update(pulled_config_indexes_ucb, units_sold_ucb, total_seen_since_day_before_ucb,
                                    total_seen_ucb, total_seen_product_ucb, reward_ucb)
                 alpha_ratios_ucb = estimate_alpha_ratios(old_starts_ucb, total_seen_daily_ucb)
                 total_bought_since_day_before_ucb = np.copy(total_sold_product_ucb)

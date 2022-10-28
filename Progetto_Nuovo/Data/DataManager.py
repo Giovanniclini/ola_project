@@ -18,6 +18,20 @@ def get_customer_class_from_json(filename):
     return customer_class
 
 
+def get_json_from_binary_feature(binary_feature):
+    if binary_feature == [0, 0]:
+        return 0
+    elif binary_feature == [1, 0] or binary_feature == [0, 1]:
+        return 1
+    elif binary_feature == [1, 1]:
+        return 2
+    elif binary_feature == [-1, -1]:
+        return 3
+    elif binary_feature == [0, -1]:
+        return 4
+    return 5
+
+
 def evaluate_clairvoyant(configurations, max_units_sold, reservation_prices, n_users):
     max_reward = 0.
     for config in configurations:
@@ -32,6 +46,7 @@ def evaluate_clairvoyant(configurations, max_units_sold, reservation_prices, n_u
         if opt_reward > max_reward:
             max_reward = opt_reward
     return max_reward
+
 
 def evaluate_abrupt_changes_clairvoyant(configurations, max_units_sold, reservation_prices, n_users, n_phases):
     max_reward = np.zeros(n_phases)
@@ -48,6 +63,7 @@ def evaluate_abrupt_changes_clairvoyant(configurations, max_units_sold, reservat
             if opt_reward > max_reward[phase]:
                 max_reward[phase] = opt_reward
     return max_reward
+
 
 def get_customer_class_from_json_aggregate(file_name_class_1, file_name_class_2, file_name_class_3):
     # Load file customer class non aggregate
