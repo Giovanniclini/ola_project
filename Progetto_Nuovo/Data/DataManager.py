@@ -14,7 +14,7 @@ def get_customer_class_from_json(filename):
     customer_class.reservation_prices = data["reservation_prices"]
     customer_class.graph_probabilities = data["graph_probabilities"]
     customer_class.item_sold_mean = data["average_items_sold"]
-
+    customer_class.conversion_rates = data["conversion_rates"]
     return customer_class
 
 
@@ -30,6 +30,25 @@ def get_json_from_binary_feature(binary_feature):
     elif binary_feature == [0, -1]:
         return 4
     return 5
+
+
+def evaluate_rewards_per_combination(configurations, customer_class):
+    rewards_per_combination = []
+    for i in range(len(configurations)):
+        current_reward = 0.
+        for product in range(5):
+            for price in range(4):
+                current_reward += prices[product][price] * customer_class.conversion_rates[product][price] * \
+                                  customer_class.average_alphas[product] * average_items_sold[price][product]
+        rewards_per_combination.append(current_reward)
+    return max(rewards_per_combination)
+
+
+def evaluate_contextual_clairvoyant(configurations, customer_classes):
+    rewards_per_customer_class = []
+    for customer_class in customer_classes:
+        rewards_per_customer_class.append(evaluate_rewards_per_combination(configurations, customer_class))
+    return rewards_per_customer_class
 
 
 def evaluate_clairvoyant(configurations, max_units_sold, reservation_prices, n_users):
@@ -92,7 +111,6 @@ def get_customer_class_from_json_aggregate(file_name_class_1, file_name_class_2,
     # Agg average item sold
     temp_matrix = data_class_1['n_users'] * data_class_1['average_items_sold'] + data_class_2['n_users'] * data_class_2['average_items_sold'] + data_class_3['n_users'] * data_class_3['average_items_sold']
     customer_class_aggregate.item_sold_mean = temp_matrix / customer_class_aggregate.number_of_customers
-
     return customer_class_aggregate
 
 
@@ -128,6 +146,35 @@ def get_customer_class_from_json_aggregate_unknown_graph(file_name_class_1, file
     return customer_class_aggregate
 
 
+def get_customer_class_one_feature(user_classes):
+    # Assign aggregate values tu agg customer class
+    customer_class_feature_zero = CustomerClass(0)
+    customer_class_feature_one = CustomerClass(0)
+    # Agg number of customers
+    customer_class_feature_zero.number_of_customers = user_classes[0].number_of_customers + user_classes[2].number_of_customers
+    customer_class_feature_zero.number_of_customers = user_classes[1].number_of_customers
+    # Agg average alphas
+    temp_matrix = user_classes[0].number_of_customers * user_classes[0].alpha_probabilities + user_classes[2].number_of_customers * user_classes[2].alpha_probabilities
+    customer_class_feature_zero.alpha_probabilities = temp_matrix / customer_class_feature_zero.number_of_customers
+    customer_class_feature_one.alpha_probabilities = user_classes[1].alpha_probabilities
+
+    # Agg reservation prices
+    temp_matrix = user_classes[0].number_of_customers * user_classes[0].reservation_prices + user_classes[2].number_of_customers * user_classes[2].reservation_prices
+    customer_class_feature_zero.reservation_prices = temp_matrix / customer_class_feature_zero.number_of_customers
+    customer_class_feature_one.reservation_prices = user_classes[1].reservation_prices
+
+    # Agg graph probabilities
+    temp_matrix = user_classes[0].number_of_customers * user_classes[0].graph_probabilities + user_classes[2].number_of_customers * \
+                  user_classes[2].graph_probabilities
+    customer_class_feature_zero.graph_probabilities = temp_matrix / customer_class_feature_zero.number_of_customers
+    customer_class_feature_one.graph_probabilities = user_classes[1].graph_probabilities
+
+    # Agg average item sold
+    temp_matrix = user_classes[0].number_of_customers * user_classes[0].item_sold_mean + user_classes[2].number_of_customers * user_classes[2].item_sold_mean
+    customer_class_feature_zero.item_sold_mean = temp_matrix / customer_class_feature_zero.number_of_customers
+    customer_class_feature_one.number_of_customers = user_classes[1].number_of_customers
+    return customer_class_feature_zero, customer_class_feature_one
+
 def get_graph_from_json(filename):
 
     return None
@@ -139,18 +186,3 @@ def get_prices_from_json(filename):
     prices = data["prices"]
     return prices
 
-
-def evaluate_aggregate_conversion_rates(customer_classes):
-    return None
-
-
-def evaluate_aggregate_alphas(customer_classes):
-    return None
-
-
-def evaluate_aggregate_graph_probabilities(customer_classes):
-    return None
-
-
-def generate_configurations(prices):
-    return None

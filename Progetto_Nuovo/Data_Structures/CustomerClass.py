@@ -6,6 +6,7 @@ import numpy as np
 class CustomerClass:
     def __init__(self, class_id):
         self.id = class_id
+        self.conversion_rates = np.zeros(5)
         # assign a random number of customers
         self.number_of_customers = np.random.randint(180, 220)
         # assign a random value to alpha probabilities
