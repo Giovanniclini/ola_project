@@ -6,11 +6,35 @@ import numpy as np
 def evaluate_mean_std_rewards(rewards):
   mean = np.mean(rewards, axis=0)
   std = np.std(rewards, axis=0)
-  plt.figure(figsize=(9,6))
+  plt.figure(figsize=(9, 6))
   plt.plot(range(len(mean)), mean)
   plt.fill_between(range(len(mean)), (mean - std), (mean + std), color='b', alpha=.1)
   plt.show()
   return mean, std
+
+
+def printRegret(rewards, clairvoyant, tag):
+  plt.figure(figsize=(9, 6))
+  plt.ylabel("Regret")
+  plt.xlabel("t")
+  plt.plot(np.cumsum(np.mean(clairvoyant - rewards, axis=0)), color='g', label='Regret')
+  plt.legend()
+  plt.grid()
+  plt.show()
+
+
+def printReward(rewards, clairvoyant):
+  mean = np.mean(rewards, axis=0)
+  std = np.std(rewards, axis=0)
+  plt.figure(figsize=(9, 6))
+  plt.xlabel("t")
+  plt.ylabel("Reward")
+  plt.axhline(y=clairvoyant, color='r', linestyle='-', label='Clairvoyant')
+  plt.plot(mean, color='b', label='Reward')
+  plt.fill_between(range(len(mean)), (mean - std), (mean + std), color='b', alpha=.1)
+  plt.grid()
+  plt.show()
+
 
 
 def printTSBeta(beta_parameters, exp_reward):
@@ -23,29 +47,6 @@ def printTSBeta(beta_parameters, exp_reward):
     #plt.axvline(rew, linestyle='--', color=color)
   plt.grid()
   plt.show()
-
-
-def printRegret(rewards, clairvoyant):
-  plt.figure(figsize=(9, 6))
-  plt.ylabel("Regret")
-  plt.xlabel("t")
-  #plt.plot(np.cumsum(pseudo_regret), color='r', label='Pseudo-regret')
-  plt.axhline(y=clairvoyant, color='r', linestyle='-')
-  plt.plot(np.cumsum(np.mean(clairvoyant - rewards, axis=0)), color='g', label='Regret')
-  plt.legend()
-  plt.grid()
-  plt.show()
-
-
-def printReward(rewards, clairvoyant):
-  plt.figure(figsize=(9, 6))
-  plt.xlabel("t")
-  plt.ylabel("Reward")
-  plt.axhline(y=clairvoyant, color='r', linestyle='-')
-  plt.plot(np.mean(rewards, axis=0), 'b')
-  plt.grid()
-  plt.show()
-
 
 def printUCBBound(regrets, pseudo_regrets, T, n_repetitions, deltas):
   # Compute the cumulative sum
@@ -86,7 +87,7 @@ def printData(price_configurations, customers, prices, number_of_customer_classe
   print('\nAll the reservation prices are: ')
   for c in range(number_of_customer_classes):
     print(customers[c].reservation_prices)
-
+'''
 def print_conversion_rates(prices, products, conversion_rates):
   x = prices  # list of prices
   categories = categories  # list of categories
@@ -103,3 +104,12 @@ def print_conversion_rates(prices, products, conversion_rates):
 
   plt.legend()
   plt.show()
+'''
+
+def print_contextual_graphs(rewards_per_experiment, clairvoyant):
+    for customer_class in range(4):
+        for exp_rewards in rewards_per_experiment:
+            exp_rewards.flatten()
+            printReward(exp_rewards, clairvoyant)
+            printRegret(exp_rewards, clairvoyant)
+

@@ -47,7 +47,7 @@ if __name__ == '__main__':
     rewards_per_experiment_ucb = []
 
     # EVALUATE CLAIRVOYANT
-    clairvoyant = evaluate_contextual_clairvoyant(configurations, customer_classes)
+    clairvoyant = evaluate_contextual_clairvoyant(configurations, customer_classes, prices)
 
     for e in range(number_of_experiments):
         # init environment
@@ -214,14 +214,8 @@ if __name__ == '__main__':
                         units_sold_ucb[p], total_sold_product_ucb[p][pulled_config_indexes_ucb[p]])
                 i += 1
 
-        # append collected reward of current experiment TS
         rewards_per_experiment_ts.append(ts_collected_rewards)
-        # append collected reward of current experiment UCB
         rewards_per_experiment_ucb.append(ucb_collected_rewards)
 
-        printReward(rewards_per_experiment_ts, clairvoyant)
-        printReward(rewards_per_experiment_ucb, clairvoyant)
-
-        printRegret(rewards_per_experiment_ts, clairvoyant)
-        printRegret(rewards_per_experiment_ucb, clairvoyant)
-
+        print_contextual_graphs(rewards_per_experiment_ts, clairvoyant)
+        print_contextual_graphs(rewards_per_experiment_ucb, clairvoyant)
