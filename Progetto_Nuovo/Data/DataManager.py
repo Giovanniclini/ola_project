@@ -1,7 +1,4 @@
 import json
-
-import numpy as np
-
 from Progetto_Nuovo.Data_Structures.CustomerClass import *
 
 
@@ -32,14 +29,14 @@ def get_json_from_binary_feature(binary_feature):
     return 5
 
 
-def evaluate_rewards_per_combination(configurations, customer_class):
+def evaluate_rewards_per_combination(configurations, customer_class, prices):
     rewards_per_combination = []
     for i in range(len(configurations)):
         current_reward = 0.
         for product in range(5):
             for price in range(4):
                 current_reward += prices[product][price] * customer_class.conversion_rates[product][price] * \
-                                  customer_class.average_alphas[product] * average_items_sold[price][product]
+                                  customer_class.average_alphas[product] * customer_class.average_items_sold[price][product]
         rewards_per_combination.append(current_reward)
     return max(rewards_per_combination)
 
@@ -96,12 +93,12 @@ def get_customer_class_from_json_aggregate(file_name_class_1, file_name_class_2,
     data_class_3 = json.load(file_class_3)
 
     # Assign aggregate values tu agg customer class
-    customer_class_aggregate = CustomerClass(0)
+    customer_class_aggregate = CustomerClass()
     # Agg number of customers
     customer_class_aggregate.number_of_customers = data_class_1['n_users'] + data_class_2['n_users'] + data_class_3['n_users']
     # Agg average alphas
     temp_matrix = data_class_1['n_users'] * data_class_1['average_alphas'] + data_class_2['n_users'] * data_class_2['average_alphas'] + data_class_3['n_users'] * data_class_3['average_alphas']
-    customer_class_aggregate.alpha_probabilities = temp_matrix / customer_class_aggregate.number_of_customers
+    customer_class_aggregate.alpha_probabilities = list(np.array(temp_matrix) / customer_class_aggregate.number_of_customers)
     # Agg reservation prices
     temp_matrix = data_class_1['n_users'] * data_class_1['reservation_prices'] + data_class_2['n_users'] * data_class_2['reservation_prices'] + data_class_3['n_users'] * data_class_3['reservation_prices']
     customer_class_aggregate.reservation_prices = temp_matrix / customer_class_aggregate.number_of_customers
@@ -126,7 +123,7 @@ def get_customer_class_from_json_aggregate_unknown_graph(file_name_class_1, file
     data_class_3 = json.load(file_class_3)
 
     # Assign aggregate values tu agg customer class
-    customer_class_aggregate = CustomerClass(0)
+    customer_class_aggregate = CustomerClass()
     # Agg number of customers
     customer_class_aggregate.number_of_customers = data_class_1['n_users'] + data_class_2['n_users'] + data_class_3['n_users']
     # Agg average alphas
@@ -148,8 +145,8 @@ def get_customer_class_from_json_aggregate_unknown_graph(file_name_class_1, file
 
 def get_customer_class_one_feature(user_classes):
     # Assign aggregate values tu agg customer class
-    customer_class_feature_zero = CustomerClass(0)
-    customer_class_feature_one = CustomerClass(0)
+    customer_class_feature_zero = CustomerClass()
+    customer_class_feature_one = CustomerClass()
     # Agg number of customers
     customer_class_feature_zero.number_of_customers = user_classes[0].number_of_customers + user_classes[2].number_of_customers
     customer_class_feature_zero.number_of_customers = user_classes[1].number_of_customers
@@ -175,8 +172,8 @@ def get_customer_class_one_feature(user_classes):
     customer_class_feature_one.number_of_customers = user_classes[1].number_of_customers
     return customer_class_feature_zero, customer_class_feature_one
 
-def get_graph_from_json(filename):
 
+def get_graph_from_json(filename):
     return None
 
 
