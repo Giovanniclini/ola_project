@@ -151,29 +151,48 @@ def get_customer_class_one_feature(user_classes):
     # Assign aggregate values tu agg customer class
     customer_class_feature_zero = CustomerClass()
     customer_class_feature_one = CustomerClass()
+
     # Agg number of customers
+    # class 0
     customer_class_feature_zero.number_of_customers = user_classes[0].number_of_customers + user_classes[2].number_of_customers
-    customer_class_feature_zero.number_of_customers = user_classes[1].number_of_customers
+    # class 1
+    customer_class_feature_one.number_of_customers = user_classes[1].number_of_customers + user_classes[2].number_of_customers
     # Agg average alphas
+    # class 0
     temp_matrix = user_classes[0].number_of_customers * user_classes[0].alpha_probabilities + user_classes[2].number_of_customers * user_classes[2].alpha_probabilities
     customer_class_feature_zero.alpha_probabilities = np.asarray(temp_matrix) / customer_class_feature_zero.number_of_customers
-    customer_class_feature_one.alpha_probabilities = user_classes[1].alpha_probabilities
+    # class 1
+    temp_matrix = user_classes[1].number_of_customers * user_classes[1].alpha_probabilities + user_classes[
+        2].number_of_customers * user_classes[2].alpha_probabilities
+    customer_class_feature_one.alpha_probabilities = np.asarray(temp_matrix) / customer_class_feature_one.number_of_customers
 
     # Agg reservation prices
+    # class 0
     temp_matrix = user_classes[0].number_of_customers * user_classes[0].reservation_prices + user_classes[2].number_of_customers * user_classes[2].reservation_prices
     customer_class_feature_zero.reservation_prices = np.asarray(temp_matrix) / customer_class_feature_zero.number_of_customers
-    customer_class_feature_one.reservation_prices = user_classes[1].reservation_prices
+    # class 1
+    temp_matrix = user_classes[1].number_of_customers * user_classes[1].reservation_prices + user_classes[
+        2].number_of_customers * user_classes[2].reservation_prices
+    customer_class_feature_one.reservation_prices = np.asarray(temp_matrix) / customer_class_feature_one.number_of_customers
 
     # Agg graph probabilities
+    # class 0
     temp_matrix = user_classes[0].number_of_customers * user_classes[0].graph_probabilities + user_classes[2].number_of_customers * \
                   user_classes[2].graph_probabilities
     customer_class_feature_zero.graph_probabilities = np.asarray(temp_matrix) / customer_class_feature_zero.number_of_customers
-    customer_class_feature_one.graph_probabilities = user_classes[1].graph_probabilities
+    # class 1
+    temp_matrix = user_classes[1].number_of_customers * user_classes[1].graph_probabilities + user_classes[
+        2].number_of_customers * user_classes[2].graph_probabilities
+    customer_class_feature_one.graph_probabilities = np.asarray(temp_matrix) / customer_class_feature_one.number_of_customers
 
     # Agg average item sold
+    # class 0
     temp_matrix = user_classes[0].number_of_customers * user_classes[0].item_sold_mean + user_classes[2].number_of_customers * user_classes[2].item_sold_mean
     customer_class_feature_zero.item_sold_mean = np.asarray(temp_matrix) / customer_class_feature_zero.number_of_customers
-    customer_class_feature_one.number_of_customers = user_classes[1].number_of_customers
+    # class 1
+    temp_matrix = user_classes[1].number_of_customers * user_classes[1].item_sold_mean + user_classes[
+        2].number_of_customers * user_classes[2].item_sold_mean
+    customer_class_feature_one.item_sold_mean = np.asarray(temp_matrix) / customer_class_feature_one.number_of_customers
     return customer_class_feature_zero, customer_class_feature_one
 
 
