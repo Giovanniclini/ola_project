@@ -14,7 +14,9 @@ number_of_days = 100
 number_of_experiments = 2
 graph_filename = "../Data/graph.json"
 prices_filename = "../Data/prices.json"
-user_class_filename = "../Data/user_class_aggregate.json"
+user_class_1 = "../Data/user_class_1.json"
+user_class_2 = "../Data/user_class_2.json"
+user_class_3 = "../Data/user_class_3.json"
 max_units_sold = 1
 
 
@@ -41,7 +43,7 @@ if __name__ == '__main__':
     # generate all the possible price configurations
     configurations = initialization_other_steps(prices)
     # generate the customer class from json (aggregate)
-    customer_class = get_customer_class_from_json(user_class_filename)
+    customer_class = get_customer_class_from_json_aggregate(user_class_1, user_class_2, user_class_3)
     # init reward collection for each experiment TS
     rewards_per_experiment_ts = []
     # init reward collection for each experiment UCB

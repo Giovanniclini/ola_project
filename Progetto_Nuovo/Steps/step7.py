@@ -37,9 +37,10 @@ if __name__ == '__main__':
     graph = get_graph_from_json(graph_filename)
     prices = get_prices_from_json(prices_filename)
     configurations = initialization_other_steps(prices)
-    customer_classes = [get_customer_class_from_json(user_class_1), get_customer_class_from_json(user_class_2), get_customer_class_from_json(user_class_3)]
-    customer_classes.append(get_customer_class_from_json_aggregate(user_class_1, user_class_2, user_class_3))
-    customer_class_zero, customer_class_one = get_customer_class_one_feature(user_classes)
+    customer_classes = [get_customer_class_from_json(user_class_1), get_customer_class_from_json(user_class_2),
+                        get_customer_class_from_json(user_class_3),
+                        get_customer_class_from_json_aggregate(user_class_1, user_class_2, user_class_3)]
+    customer_class_zero, customer_class_one = get_customer_class_one_feature(customer_classes)
     customer_classes.append(customer_class_zero)
     customer_classes.append(customer_class_one)
 
@@ -82,21 +83,20 @@ if __name__ == '__main__':
         ts_learners = []
         env = ContextualEnvironment(n_prices, lambda_coefficient, n_products)
 
-        ucb_split_rewards = []
-        ts_split_rewards = []
+        ucb_split_rewards = [[], []]
+        ts_split_rewards = [[], []]
 
         ts_collected_rewards = []
         ucb_collected_rewards = []
 
-        context_ts = None
-        context_ucb = None
+        context_ts = ContextClass()
+        context_ucb = ContextClass()
 
         for t in range(0, number_of_days):
             # every 14 days run context and do a split
             if t % 14 == 0:
                 # UCB LEARNER
                 ucb_learners = []
-                context_ucb = ContextClass()
                 if t == 0:
                     context_ucb.split()
                 elif t == 14:
@@ -132,21 +132,15 @@ if __name__ == '__main__':
 
                 # TS LEARNER
                 ts_learners = []
-                context_ts = ContextClass()
                 if t == 0:
-                    ts_learners.append(TSLearner(n_prices, n_products))
                     context_ts.split()
                 elif t == 14:
-                    ts_learners.append(TSLearner(n_prices, n_products))
-                    ts_learners.append(TSLearner(n_prices, n_products))
                     ucb_collected_rewards.append(ts_split_rewards)
                     context_ts.assign_father_lower_bound(ts_split_rewards)
                     context_ts.split()
                 else:
                     check, l_reward, r_reward = context_ts.evaluate_split_condition(ts_split_rewards[0],
                                                                                     ts_split_rewards[1], t)
-                    ts_learners.append(TSLearner(n_prices, n_products))
-                    ts_learners.append(TSLearner(n_prices, n_products))
                     context_ts.split(check, l_reward, r_reward)
                     if check:
                         if l_reward > r_reward:

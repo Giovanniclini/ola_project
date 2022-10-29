@@ -69,7 +69,7 @@ class ContextClass:
         self.father_lower_bound = self.lower_bound(rewards, 5, 14)
 
     def lower_bound(self, rewards, confidence, cardinality):
-        return rewards - np.sqrt(-np.log10(confidence)/(cardinality * 2))
+        return np.mean(rewards) - np.sqrt(-np.log10(confidence)/(cardinality * 2))
 
     def assign_prob_context_occur(self, time):
         return 1 / (2 ** (time / 14)) * 100
