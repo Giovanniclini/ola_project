@@ -124,10 +124,10 @@ class SocialInfluence:
             # for each product, find the chosen one
             for i in range(5):
                 # if the chosen secondary product is found, let the costumer actually buy it, by updated the
-                # values related to the units sold and the revenue
+                # values related to the units sold and the reven
                 if activated_edges[i] and self.customer_class.reservation_prices[0][i] >= self.configuration[i]:
                     # assign a random amount of units of product purchased by the user
-                    units_purchased = np.random.randint(1, (self.item_sold_mean[i][self.configuration_indexes[i]]*2))
+                    units_purchased = np.random.randint(1, max(2, (self.item_sold_mean[i][self.configuration_indexes[i]]*2)))
                     # update the amount of unites of product purchased by the class of user
                     self.units_sold[i] += units_purchased
                     self.bought[i] += 1

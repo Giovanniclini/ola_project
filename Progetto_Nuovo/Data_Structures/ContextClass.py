@@ -11,7 +11,7 @@ class ContextClass:
         self.pending_list = []
         self.pending_list_lower_bounds = []
         self.pending_list_prob = []
-        self.father_lower_bound = []
+        self.father_lower_bound = 0
         self.reward_index = -1
 
     def update(self, reward):
@@ -63,6 +63,9 @@ class ContextClass:
         p = self.assign_prob_context_occur(time)
         if p * (l_lowerbound + r_lowerbound) >= self.father_lower_bound:
             check = True
+            print("Split OK")
+        else:
+            print("Split NO OK")
         return check, l_lowerbound, r_lowerbound
 
     def assign_father_lower_bound(self, rewards):

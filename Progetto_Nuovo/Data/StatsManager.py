@@ -13,7 +13,7 @@ def evaluate_mean_std_rewards(rewards):
   return mean, std
 
 
-def printRegret(rewards, clairvoyant, tag):
+def printRegret(rewards, clairvoyant):
   plt.figure(figsize=(9, 6))
   plt.ylabel("Regret")
   plt.xlabel("t")
@@ -29,7 +29,8 @@ def printReward(rewards, clairvoyant):
   plt.figure(figsize=(9, 6))
   plt.xlabel("t")
   plt.ylabel("Reward")
-  plt.axhline(y=clairvoyant, color='r', linestyle='-', label='Clairvoyant')
+  # TODO: ERRORE NEL PLOT DEL CLAIRVOYANT
+  #plt.axhline(y=clairvoyant, color='r', linestyle='-', label='Clairvoyant')
   plt.plot(mean, color='b', label='Reward')
   plt.fill_between(range(len(mean)), (mean - std), (mean + std), color='b', alpha=.1)
   plt.grid()
@@ -107,9 +108,13 @@ def print_conversion_rates(prices, products, conversion_rates):
 '''
 
 def print_contextual_graphs(rewards_per_experiment, clairvoyant):
+  printReward(rewards_per_experiment, clairvoyant)
+  printRegret(rewards_per_experiment, clairvoyant)
+  '''
     for customer_class in range(4):
         for exp_rewards in rewards_per_experiment:
-            exp_rewards.flatten()
+            np.asarray(exp_rewards).flatten()
             printReward(exp_rewards, clairvoyant)
             printRegret(exp_rewards, clairvoyant)
+    '''
 

@@ -20,3 +20,4 @@ class ContextualEnvironment:
 
     def select_costumer_class(self, customer_class):
         self.customer_class = customer_class
+

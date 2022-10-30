@@ -6,6 +6,7 @@ from Progetto_Nuovo.generateData import *
 from Progetto_Nuovo.Data.DataManager import *
 from Progetto_Nuovo.Data.StatsManager import *
 from Progetto_Nuovo.Data_Structures.ContextClass import *
+from tqdm import tqdm
 
 n_prices = 4
 n_products = 5
@@ -93,6 +94,7 @@ if __name__ == '__main__':
         context_ucb = ContextClass()
 
         for t in range(0, number_of_days):
+            print("Timestamp",t)
             # every 14 days run context and do a split
             if t % 14 == 0:
                 # UCB LEARNER
@@ -100,8 +102,8 @@ if __name__ == '__main__':
                 if t == 0:
                     context_ucb.split()
                 elif t == 14:
-                    ucb_collected_rewards.append(ucb_split_rewards)
-                    context_ucb.assign_father_lower_bound(ucb_split_rewards)
+                    ucb_collected_rewards.append(ucb_split_rewards[0])
+                    context_ucb.assign_father_lower_bound(ucb_split_rewards[0])
                     context_ucb.split()
                 else:
                     check, l_reward, r_reward = context_ucb.evaluate_split_condition(ucb_split_rewards[0],
@@ -125,18 +127,24 @@ if __name__ == '__main__':
                             context_ucb.pending_list_prob.append(context_ucb.assign_prob_context_occur(t))
                     # if the split isn't worth...
                     else:
-                        context_ucb.father_lower_bound = context_ucb.pending_list_lower_bounds[0]
-                        context_ucb.pending_list_lower_bounds.pop(0)
-                        context_ucb.pending_list_prob.pop(0)
-
+                        # TODO: CAPIRE COME MAI DOPO IL PRIMO SPLIT FINISCE SEMPRE QUI (STESSA COSA PER IL TS)
+                        # QUESTO IF L'HO AGGIUNTO SOLO PER VEDERE SE ARRIVA FINO ALLA FINE, RESETTANDO LA CONTEXT CLASS (STESSA COSA PER IL TS)
+                        if len(context_ucb.pending_list_lower_bounds) == 0:
+                            print("SUS")
+                            context_ucb = ContextClass()
+                            context_ucb.split()
+                        else:
+                            context_ucb.father_lower_bound = context_ucb.pending_list_lower_bounds[0]
+                            context_ucb.pending_list_lower_bounds.pop(0)
+                            context_ucb.pending_list_prob.pop(0)
 
                 # TS LEARNER
                 ts_learners = []
                 if t == 0:
                     context_ts.split()
                 elif t == 14:
-                    ucb_collected_rewards.append(ts_split_rewards)
-                    context_ts.assign_father_lower_bound(ts_split_rewards)
+                    ucb_collected_rewards.append(ts_split_rewards[0])
+                    context_ts.assign_father_lower_bound(ts_split_rewards[0])
                     context_ts.split()
                 else:
                     check, l_reward, r_reward = context_ts.evaluate_split_condition(ts_split_rewards[0],
@@ -157,12 +165,19 @@ if __name__ == '__main__':
                                 context_ts.lower_bound(ts_split_rewards[0], 5, 14))
                             context_ts.pending_list_prob.append(context_ts.assign_prob_context_occur(t))
                     else:
-                        context_ts.father_lower_bound = context_ts.pending_list_lower_bounds[0]
-                        context_ts.pending_list_lower_bounds.pop(0)
-                        context_ts.pending_list_prob.pop(0)
+
+                        if len(context_ts.pending_list_lower_bounds) == 0:
+                            context_ts = ContextClass()
+                            context_ts.split()
+                        else:
+                            context_ts.father_lower_bound = context_ts.pending_list_lower_bounds[0]
+                            context_ts.pending_list_lower_bounds.pop(0)
+                            context_ts.pending_list_prob.pop(0)
 
             # ---------------------------------------THOMPSON SAMPLING----------------------------------
             i = 0
+            ts_learners = []
+            ucb_learners = []
             for split in context_ts.current_split:
                 ts_learners.append(TSLearner(n_prices, n_products))
                 pulled_config_indexes_ts = ts_learners[i].pull_arm()
