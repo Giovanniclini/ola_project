@@ -12,7 +12,6 @@ class SocialInfluence:
         self.lambda_coeff = lambda_coeff
         # customer class in the simulation
         self.customer_class = customer_class
-        # da mettere un grafo per lo step 5
         # configuration in the simulation
         self.configuration = price_configuration
         # number of products
@@ -60,6 +59,8 @@ class SocialInfluence:
     def graph_search(self, initial_active_nodes):
         # store_the number of products, i.e, the nodes of the graph
         prob_matrix = np.copy(self.graph_probs)
+        # init number of clicks array
+        n_clicks = np.zeros(5)
         # initialize the history
         history = []
         # initialize the index of the activated node
@@ -80,12 +81,6 @@ class SocialInfluence:
             return history
         # assign first the history to the initial active nodes array
         history = np.array([initial_active_nodes])
-        # update transition probability of the new active nodes to zero value so that it is not possible to reach
-        # again the same node (product)
-        for i in range(prob_matrix.shape[1]):
-            if i in np.array(np.where(newly_active_nodes == 1)):
-                # saving the index of the recent active node
-                index = i
         # while the number of max steps is not reached and there are still active nodes, continue simulation
         order_of_parallel_product = [active_nodes]
         while t < n_steps_max and len(order_of_parallel_product) != 0:
