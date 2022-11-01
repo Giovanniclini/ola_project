@@ -33,6 +33,7 @@ class SocialInfluence:
         # initialize graph probabilities
         self.graph_probs = customer_class.graph_probabilities
 
+
     def simulation(self):
         # for each user, make a simulation
         for u in range(self.n_users):
@@ -59,8 +60,6 @@ class SocialInfluence:
     def graph_search(self, initial_active_nodes):
         # store_the number of products, i.e, the nodes of the graph
         prob_matrix = np.copy(self.graph_probs)
-        # init number of clicks array
-        n_clicks = np.zeros(5)
         # initialize the history
         history = []
         # initialize the index of the activated node
@@ -84,11 +83,11 @@ class SocialInfluence:
         # while the number of max steps is not reached and there are still active nodes, continue simulation
         order_of_parallel_product = [active_nodes]
         while t < n_steps_max and len(order_of_parallel_product) != 0:
+            # index is the first product activated
             index = np.where(order_of_parallel_product[0] == 1)[0][0]
-            # assign at random value the first secondary node
-            # first_secondary_node = np.random.randint(0, 5)
+            # assign at random value given graph probabilities the first secondary node
             first_secondary_node = random.choices(range(len(prob_matrix[index, :])), prob_matrix[index, :], k=1)[0]
-            # assign at random value the second secondary node
+            # assign at random value given graph probabilities the second secondary node
             second_secondary_node = random.choices(range(len(prob_matrix[index, :])), prob_matrix[index, :], k=1)[0]
             # repeat assignment until the two products are different
             while second_secondary_node == first_secondary_node:
@@ -126,6 +125,7 @@ class SocialInfluence:
                     # update the amount of unites of product purchased by the class of user
                     self.units_sold[i] += units_purchased
                     self.bought[i] += 1
+                    self.customer_class.units_clicked_starting_from_a_primary[index][i] += 1
                     # assign 1 to the new active nodes
                     newly_active_nodes[i] = 1
             # update transition probability of the new active nodes to zero value so that it is not possible to

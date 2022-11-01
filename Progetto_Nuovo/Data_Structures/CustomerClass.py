@@ -14,8 +14,8 @@ class CustomerClass:
         self.item_sold_mean = np.zeros((5, 4))
         # assign a random value to the reservation price for each product
         self.reservation_prices = [np.random.uniform(50., 301.) for _ in range(5)]
-        # keep track of the products clicked
-        self.units_clicked_for_each_product = np.zeros(5)
+        # keep track of units clicked starting from an edge
+        self.units_clicked_starting_from_a_primary = np.zeros((5, 5))
         # keep track of number of units sold of each product (global)
         self.units_purchased_for_each_product = np.zeros(5)
         self.units_purchased_per_product_per_campaign = np.random.randint(0, 20, size=(17, 5))

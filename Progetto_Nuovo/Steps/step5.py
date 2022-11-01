@@ -10,7 +10,7 @@ from tqdm import tqdm
 n_prices = 4
 n_products = 5
 lambda_coefficient = 0.2
-number_of_days = 200
+number_of_days = 25
 number_of_experiments = 5
 graph_filename = "../Data/graph.json"
 prices_filename = "../Data/prices.json"
@@ -49,10 +49,8 @@ if __name__ == '__main__':
         ucb_learner = UCBLearner(n_prices, n_products)
         total_seen_ucb = np.zeros((n_products, n_prices))
         total_seen_product_ucb = np.zeros(n_products)
-        # init Both
-        total_units_sold = np.zeros(n_products)
-        # This matrix keeps track about how many times an edge, starting from a product (row), has been activated
-        activation_matrix = np.zeros((n_products, n_products))
+        # init both
+        total_bought = np.zeros(5)
         # for each day
         for t in tqdm(range (0, number_of_days)):
             alpha_ratios = np.random.dirichlet(customer_class.alpha_probabilities)
@@ -80,6 +78,14 @@ if __name__ == '__main__':
                 total_seen_product_ucb[product] += np.sum(total_seen_daily_ucb[1:])
             ucb_learner.update(pulled_config_indexes_ucb, units_sold_ucb, total_seen_since_daybefore_ucb, total_seen_ucb,
                                total_seen_product_ucb, reward_ucb)
+
+            # bought since day before
+            total_bought_day_before = np.copy(total_bought)
+            # bought til now
+            total_bought += (units_sold_ucb + units_sold_ts)
+            for product in range(len(customer_class.units_clicked_starting_from_a_primary)):
+                customer_class.graph_probabilities[product, :] = (customer_class.graph_probabilities[product, :] * total_bought_day_before[product] + customer_class.units_clicked_starting_from_a_primary[product, :]) / total_bought[product]
+
 
         # append collected reward of current experiment TS
         rewards_per_experiment_ts.append(ts_learner.collected_rewards)
