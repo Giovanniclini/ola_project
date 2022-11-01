@@ -107,14 +107,12 @@ def print_conversion_rates(prices, products, conversion_rates):
   plt.show()
 '''
 
+
 def print_contextual_graphs(rewards_per_experiment, clairvoyant):
-  printReward(rewards_per_experiment, clairvoyant)
-  printRegret(rewards_per_experiment, clairvoyant)
-  '''
-    for customer_class in range(4):
-        for exp_rewards in rewards_per_experiment:
-            np.asarray(exp_rewards).flatten()
-            printReward(exp_rewards, clairvoyant)
-            printRegret(exp_rewards, clairvoyant)
-    '''
+    for customer_class in range(3):
+      rewards = []
+      for exp_rewards in rewards_per_experiment:
+          rewards.append(np.asarray(exp_rewards).flatten())
+      printReward(rewards, clairvoyant[customer_class])
+      printRegret(rewards, clairvoyant[customer_class])
 
