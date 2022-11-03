@@ -136,7 +136,7 @@ if __name__ == '__main__':
                 if t == 0:
                     context_ts.split()
                 elif t == 14:
-                    ucb_collected_rewards.append(ts_split_rewards[0])
+                    ts_collected_rewards.append(ts_split_rewards[0])
                     context_ts.assign_father_lower_bound(ts_split_rewards[0])
                     context_ts.split()
                 else:
@@ -219,5 +219,5 @@ if __name__ == '__main__':
         rewards_per_experiment_ts.append(ts_collected_rewards)
         rewards_per_experiment_ucb.append(ucb_collected_rewards)
 
-        print_contextual_graphs(rewards_per_experiment_ts, clairvoyant)
-        print_contextual_graphs(rewards_per_experiment_ucb, clairvoyant)
+    print_contextual_graphs(rewards_per_experiment_ts, clairvoyant)
+    print_contextual_graphs(rewards_per_experiment_ucb, clairvoyant)
