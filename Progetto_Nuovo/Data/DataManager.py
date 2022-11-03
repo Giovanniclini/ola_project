@@ -142,7 +142,6 @@ def get_customer_class_from_json_aggregate_unknown_graph(file_name_class_1, file
     # Agg average item sold
     temp_matrix = (np.asarray(data_class_1['average_items_sold']) * data_class_1['n_users']) + (np.asarray(data_class_2['average_items_sold']) * data_class_2['n_users']) + (np.asarray(data_class_3['average_items_sold']) * data_class_3['n_users'])
     customer_class_aggregate.item_sold_mean = temp_matrix // customer_class_aggregate.number_of_customers
-    print(customer_class_aggregate.item_sold_mean)
 
     return customer_class_aggregate
 
