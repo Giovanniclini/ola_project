@@ -33,7 +33,6 @@ class SocialInfluence:
         # initialize graph probabilities
         self.graph_probs = customer_class.graph_probabilities
 
-
     def simulation(self):
         # for each user, make a simulation
         for u in range(self.n_users):
