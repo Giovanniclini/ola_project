@@ -12,7 +12,6 @@ n_products = 5
 lambda_coefficient = 0.2
 number_of_days = 200
 number_of_experiments = 5
-graph_filename = "../Data/graph.json"
 prices_filename = "../Data/prices.json"
 user_class_1 = "../Data/user_class_1.json"
 user_class_2 = "../Data/user_class_2.json"
@@ -34,8 +33,6 @@ def estimate_items_for_each_product(mean, seen_since_day_before, unit_sold, tota
 if __name__ == '__main__':
     print(colored('\n\n---------------------------- STEP 4 ----------------------------', 'blue', attrs=['bold']))
 
-    # assign graph from json file
-    graph = get_graph_from_json(graph_filename)
     # assign prices per products from json file
     prices = get_prices_from_json(prices_filename)
     # generate all the possible price configurations
@@ -153,10 +150,9 @@ if __name__ == '__main__':
         # append collected reward of current experiment UCB
         rewards_per_experiment_ucb.append(ucb_learner.collected_rewards)
 
-        printReward(rewards_per_experiment_ts, clairvoyant)
-        printReward(rewards_per_experiment_ucb, clairvoyant)
+        printReward(rewards_per_experiment_ts, clairvoyant, "Reward")
+        printReward(rewards_per_experiment_ucb, clairvoyant, "Reward")
 
-        printRegret(rewards_per_experiment_ts, clairvoyant)
-        printRegret(rewards_per_experiment_ucb, clairvoyant)
+        printRegret(rewards_per_experiment_ucb, rewards_per_experiment_ts, clairvoyant, "Comparing Regret")
 
 

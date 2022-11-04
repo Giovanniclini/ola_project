@@ -14,20 +14,21 @@ def evaluate_mean_std_rewards(rewards):
   return mean, std
 
 
-def printRegret(rewards, clairvoyant, tag):
+def printRegret(rewardUCB, rewardTS, clairvoyant, tag):
   plt.figure(figsize=(9, 6))
   plt.ylabel("Regret")
   plt.xlabel("t")
-  plt.plot(np.cumsum(np.mean(clairvoyant - rewards, axis=0)), color='g', label='Regret')
-  plt.legend()
+  plt.plot(np.cumsum(np.mean(clairvoyant - rewardUCB, axis=0)), color='g', label='RegretUCB')
+  plt.plot(np.cumsum(np.mean(clairvoyant - rewardTS, axis=0)), color='b', label='RegretTS')
+  plt.legend(['UCB regret', 'TS regret'])
   plt.grid()
+  plt.title(tag)
   plt.show()
 
 
 def printReward(rewards, clairvoyant, tag):
   mean = np.mean(rewards, axis=0)
   std = np.std(rewards, axis=0)
-  plt.title(tag)
   plt.figure(figsize=(9, 6))
   plt.xlabel("t")
   plt.ylabel("Reward")
@@ -35,6 +36,7 @@ def printReward(rewards, clairvoyant, tag):
   plt.plot(mean, color='b', label='Reward')
   plt.fill_between(range(len(mean)), (mean - std), (mean + std), color='b', alpha=.1)
   plt.grid()
+  plt.title(tag)
   plt.show()
 
 
