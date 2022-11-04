@@ -8,7 +8,6 @@ class ContextualEnvironment:
         self.lambda_coeff = lambda_coeff
         self.n_prod = n_prod
 
-
     def round(self, configuration, prices, alpha_ratios, item_sold_mean):
         prices_configuration = np.zeros(self.n_prod)
         for product in range(self.n_prod):

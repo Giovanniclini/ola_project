@@ -11,21 +11,18 @@ from tqdm import tqdm
 n_prices = 4
 n_products = 5
 lambda_coefficient = 0.2
-number_of_days = 100
+number_of_days = 200
 window = 25
 number_of_experiments = 5
-graph_filename = "../Data/graph.json"
 prices_filename = "../Data/prices.json"
 user_class_filename = "../Data/user_class_aggregate_abrupt_changes.json"
-max_units_sold = 1.5
+max_units_sold = 1
 n_phases = 4
 
 if __name__ == '__main__':
     print(colored('\n\n---------------------------- STEP 6 ----------------------------', 'blue', attrs=['bold']))
     cd_ucb_phase = 0
     sw_ucb_phase = 0
-    # assign graph from json file
-    graph = get_graph_from_json(graph_filename)
     # assign prices per products from json file
     prices = get_prices_from_json(prices_filename)
     # generate all the possible price configurations

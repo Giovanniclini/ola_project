@@ -12,18 +12,15 @@ n_products = 5
 lambda_coefficient = 0.2
 number_of_days = 200
 number_of_experiments = 5
-graph_filename = "../Data/graph.json"
 prices_filename = "../Data/prices.json"
 user_class_1 = "../Data/user_class_1.json"
 user_class_2 = "../Data/user_class_2.json"
 user_class_3 = "../Data/user_class_3.json"
-max_units_sold = 1
+max_units_sold = 1.5
 
 if __name__ == '__main__':
     print(colored('\n\n---------------------------- STEP 3 ----------------------------', 'blue', attrs=['bold']))
 
-    # assign graph from json file
-    graph = get_graph_from_json(graph_filename)
     # assign prices per products from json file
     prices = get_prices_from_json(prices_filename)
     # generate all the possible price configurations
@@ -81,13 +78,8 @@ if __name__ == '__main__':
         rewards_per_experiment_ts.append(ts_learner.collected_rewards)
         # append collected reward of current experiment UCB
         rewards_per_experiment_ucb.append(ucb_learner.collected_rewards)
-        # printTSBeta(learner.beta_parameters[:, 0, :], rewards_per_experiment[0])
-        # print("SOS", learner.collected_rewards[0])
-    printReward(rewards_per_experiment_ts, clairvoyant)
-    printReward(rewards_per_experiment_ucb, clairvoyant)
 
-    evaluate_mean_std_rewards(rewards_per_experiment_ts)
-    printRegret(rewards_per_experiment_ts, clairvoyant)
-    printRegret(rewards_per_experiment_ucb, clairvoyant)
-
-
+    printReward(rewards_per_experiment_ts, clairvoyant, "TS")
+    printReward(rewards_per_experiment_ucb, clairvoyant, "UCB")
+    printRegret(rewards_per_experiment_ts, clairvoyant, "TS")
+    printRegret(rewards_per_experiment_ucb, clairvoyant, "UCB")

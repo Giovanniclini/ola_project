@@ -51,7 +51,6 @@ if __name__ == '__main__':
 
     for e in range(number_of_experiments):
         # init environment
-
         total_seen_ucb = np.zeros((n_products, n_prices))
         total_seen_product_ucb = np.zeros(n_products)
         total_seen_ts = np.zeros((n_products, n_prices))
@@ -102,7 +101,6 @@ if __name__ == '__main__':
             if t % 14 == 0:
                 # UCB LEARNER
                 if not optimum_found[0]:
-                    #ucb_learners = []
                     if t == 0:
                         context_ucb.split()
                     elif t == 14:
@@ -154,7 +152,6 @@ if __name__ == '__main__':
 
                 # TS LEARNER
                 if not optimum_found[1]:
-                    #ts_learners = []
                     if t == 0:
                         context_ts.split()
                     elif t == 14:
@@ -249,7 +246,7 @@ if __name__ == '__main__':
                     total_seen_ucb[p, pulled_config_indexes_ucb[p]] += np.sum(total_seen_daily_ucb[1:])
                     total_seen_product_ucb[p] += np.sum(total_seen_daily_ucb[1:])
                 ucb_learners[i].update(pulled_config_indexes_ucb, units_sold_ucb, total_seen_since_day_before_ucb,
-                                   total_seen_ucb, total_seen_product_ucb, reward_ucb)
+                                       total_seen_ucb, total_seen_product_ucb, reward_ucb)
                 alpha_ratios_ucb = estimate_alpha_ratios(old_starts_ucb, total_seen_daily_ucb)
                 total_bought_since_day_before_ucb = np.copy(total_sold_product_ucb)
                 for p in range(len(pulled_config_indexes_ucb)):
@@ -259,11 +256,9 @@ if __name__ == '__main__':
                         total_bought_since_day_before_ucb[p][pulled_config_indexes_ucb[p]],
                         units_sold_ucb[p], total_sold_product_ucb[p][pulled_config_indexes_ucb[p]])
                 i += 1
-        if t == 200:
-            ucb_collected_rewards.append(reward_ucb)
-            ts_collected_rewards.append(reward_ts)
-        print("UCB", len(ucb_collected_rewards))
-        print("TS", len(ts_collected_rewards))
+            if t == 200:
+                ucb_collected_rewards.append(ucb_split_rewards[0])
+                ts_collected_rewards.append(ts_split_rewards[0])
         rewards_per_experiment_ucb.append(ucb_collected_rewards)
         rewards_per_experiment_ts.append(ts_collected_rewards)
     print_contextual_graphs(rewards_per_experiment_ucb, clairvoyant, "UCB")

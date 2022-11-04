@@ -1,7 +1,4 @@
 import json
-
-import numpy as np
-
 from Progetto_Nuovo.Data_Structures.CustomerClass import *
 
 

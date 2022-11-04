@@ -12,18 +12,15 @@ n_products = 5
 lambda_coefficient = 0.2
 number_of_days = 200
 number_of_experiments = 5
-graph_filename = "../Data/graph.json"
 prices_filename = "../Data/prices.json"
 user_class_1_filename = "../Data/user_class_1.json"
 user_class_2_filename = "../Data/user_class_2.json"
 user_class_3_filename = "../Data/user_class_3.json"
-max_units_sold = 2
+max_units_sold = 1.5
 
 if __name__ == '__main__':
     print(colored('\n\n---------------------------- STEP 5 ----------------------------', 'blue', attrs=['bold']))
 
-    # assign graph from json file
-    graph = get_graph_from_json(graph_filename)
     # assign prices per products from json file
     prices = get_prices_from_json(prices_filename)
     # generate all the possible price configurations

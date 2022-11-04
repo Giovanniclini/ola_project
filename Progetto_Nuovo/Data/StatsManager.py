@@ -4,16 +4,6 @@ import numpy as np
 from itertools import chain
 
 
-def evaluate_mean_std_rewards(rewards):
-  mean = np.mean(rewards, axis=0)
-  std = np.std(rewards, axis=0)
-  plt.figure(figsize=(9, 6))
-  plt.plot(range(len(mean)), mean)
-  plt.fill_between(range(len(mean)), (mean - std), (mean + std), color='b', alpha=.1)
-  plt.show()
-  return mean, std
-
-
 def printRegret(rewards, clairvoyant, tag):
   plt.figure(figsize=(9, 6))
   plt.ylabel("Regret")
@@ -21,13 +11,13 @@ def printRegret(rewards, clairvoyant, tag):
   plt.plot(np.cumsum(np.mean(clairvoyant - rewards, axis=0)), color='g', label='Regret')
   plt.legend()
   plt.grid()
+  plt.title(tag)
   plt.show()
 
 
 def printReward(rewards, clairvoyant, tag):
   mean = np.mean(rewards, axis=0)
   std = np.std(rewards, axis=0)
-  plt.title(tag)
   plt.figure(figsize=(9, 6))
   plt.xlabel("t")
   plt.ylabel("Reward")
@@ -35,6 +25,7 @@ def printReward(rewards, clairvoyant, tag):
   plt.plot(mean, color='b', label='Reward')
   plt.fill_between(range(len(mean)), (mean - std), (mean + std), color='b', alpha=.1)
   plt.grid()
+  plt.title(tag)
   plt.show()
 
 
@@ -73,7 +64,6 @@ def printUCBBound(regrets, pseudo_regrets, T, n_repetitions, deltas):
   plt.plot(avg_cumu_regret, color='g', label='Regret')
   plt.plot(avg_cumu_regret - 1.96 * std_cumu_regret / np.sqrt(n_repetitions), linestyle='--', color='g')
   plt.plot(ucb1_upper_bound, color='b', label='Upper bound')
-
   plt.legend()
   plt.grid()
   plt.show()
