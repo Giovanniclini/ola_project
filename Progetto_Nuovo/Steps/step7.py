@@ -13,7 +13,6 @@ n_products = 5
 lambda_coefficient = 0.2
 number_of_days = 200
 number_of_experiments = 5
-graph_filename = "../Data/graph.json"
 prices_filename = "../Data/prices.json"
 user_class_1 = "../Data/user_class_1.json"
 user_class_2 = "../Data/user_class_2.json"
@@ -35,7 +34,6 @@ def estimate_items_for_each_product(mean, seen_since_day_before, unit_sold, tota
 if __name__ == '__main__':
     print(colored('\n\n---------------------------- STEP 7 ----------------------------', 'blue', attrs=['bold']))
     # INIT PARAMETERS
-    graph = get_graph_from_json(graph_filename)
     prices = get_prices_from_json(prices_filename)
     configurations = initialization_other_steps(prices)
     customer_classes = [get_customer_class_from_json(user_class_1), get_customer_class_from_json(user_class_2),
@@ -261,7 +259,12 @@ if __name__ == '__main__':
                         total_bought_since_day_before_ucb[p][pulled_config_indexes_ucb[p]],
                         units_sold_ucb[p], total_sold_product_ucb[p][pulled_config_indexes_ucb[p]])
                 i += 1
+        if t == 200:
+            ucb_collected_rewards.append(reward_ucb)
+            ts_collected_rewards.append(reward_ts)
+        print("UCB", len(ucb_collected_rewards))
+        print("TS", len(ts_collected_rewards))
         rewards_per_experiment_ucb.append(ucb_collected_rewards)
         rewards_per_experiment_ts.append(ts_collected_rewards)
-    print_contextual_graphs(rewards_per_experiment_ucb, clairvoyant)
-    print_contextual_graphs(rewards_per_experiment_ts, clairvoyant)
+    print_contextual_graphs(rewards_per_experiment_ucb, clairvoyant, "UCB")
+    print_contextual_graphs(rewards_per_experiment_ts, clairvoyant, "TS")

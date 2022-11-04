@@ -14,7 +14,7 @@ def evaluate_mean_std_rewards(rewards):
   return mean, std
 
 
-def printRegret(rewards, clairvoyant):
+def printRegret(rewards, clairvoyant, tag):
   plt.figure(figsize=(9, 6))
   plt.ylabel("Regret")
   plt.xlabel("t")
@@ -24,14 +24,14 @@ def printRegret(rewards, clairvoyant):
   plt.show()
 
 
-def printReward(rewards, clairvoyant):
+def printReward(rewards, clairvoyant, tag):
   mean = np.mean(rewards, axis=0)
   std = np.std(rewards, axis=0)
+  plt.title(tag)
   plt.figure(figsize=(9, 6))
   plt.xlabel("t")
   plt.ylabel("Reward")
-  # TODO: ERRORE NEL PLOT DEL CLAIRVOYANT
-  #plt.axhline(y=clairvoyant, color='r', linestyle='-', label='Clairvoyant')
+  plt.axhline(y=clairvoyant, color='r', linestyle='-', label='Clairvoyant')
   plt.plot(mean, color='b', label='Reward')
   plt.fill_between(range(len(mean)), (mean - std), (mean + std), color='b', alpha=.1)
   plt.grid()
@@ -89,32 +89,13 @@ def printData(price_configurations, customers, prices, number_of_customer_classe
   print('\nAll the reservation prices are: ')
   for c in range(number_of_customer_classes):
     print(customers[c].reservation_prices)
-'''
-def print_conversion_rates(prices, products, conversion_rates):
-  x = prices  # list of prices
-  categories = categories  # list of categories
-
-  plt.figure(figsize=(14, 8))
-  for i in range(len(categories)):
-    y = env.probabilities[i]
-    smooth = interp1d(x, y, kind='cubic')
-    plt.plot(x, smooth(x), color=colors[i], label=aux_dict[i])
-    plt.scatter(x, y, color=colors[i])
-    plt.title("Conversion Rates")
-    plt.xlabel("Price (€)")
-    plt.ylabel("Conversion Rate")
-
-  plt.legend()
-  plt.show()
-'''
 
 
-def print_contextual_graphs(rewards_per_experiment, clairvoyant):
+def print_contextual_graphs(rewards_per_experiment, clairvoyant, tag):
     rewards = []
     for exp_rewards in rewards_per_experiment:
         rewards.append(list(chain(*exp_rewards)))
-        print(len(list(chain(*exp_rewards))))
     for customer_class in range(3):
-        printReward(rewards, clairvoyant[customer_class])
-        printRegret(np.asarray(rewards), clairvoyant[customer_class])
+        printReward(rewards, clairvoyant[customer_class], tag)
+        printRegret(np.asarray(rewards), clairvoyant[customer_class], tag)
 
