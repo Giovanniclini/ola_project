@@ -10,8 +10,8 @@ from tqdm import tqdm
 n_prices = 4
 n_products = 5
 lambda_coefficient = 0.2
-number_of_days = 100
-number_of_experiments = 2
+number_of_days = 200
+number_of_experiments = 5
 graph_filename = "../Data/graph.json"
 prices_filename = "../Data/prices.json"
 user_class_1 = "../Data/user_class_1.json"
@@ -28,8 +28,6 @@ def estimate_alpha_ratios(old_starts, starts):
 def estimate_items_for_each_product(mean, seen_since_day_before, unit_sold, total_sold):
     if mean * seen_since_day_before + unit_sold == 0:
         return 0.
-    if total_sold == 0:
-        print("ciao")
     return (mean * seen_since_day_before + unit_sold) / total_sold
 
 
@@ -85,7 +83,7 @@ if __name__ == '__main__':
         # initialize item sold mean UCB
         item_sold_mean_ucb = [[3/2 for _ in range(n_prices)] for _ in range(n_products)]
         # for each day
-        for t in range(0, number_of_days):
+        for t in tqdm(range(0, number_of_days)):
             # ---------------------------------------THOMPSON SAMPLING----------------------------------
             # pull prices belonging to a configuration (super arm)
             pulled_config_indexes_ts = ts_learner.pull_arm()

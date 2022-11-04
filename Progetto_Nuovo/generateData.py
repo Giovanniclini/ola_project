@@ -1,24 +1,29 @@
 from itertools import product
-from Progetto_Nuovo.Data_Structures.CustomerClass import CustomerClass
-from Progetto_Nuovo.Social_Influence.SocialInfluence import *
+from Progetto_Nuovo.Data.DataManager import *
 
 
 def generate_configuration_levels(prices, number_of_configurations):
     price_configurations = []
+    price_configuration_indexes = []
     for price in range(0, int((number_of_configurations+5)/5) - 1):  # for each price (except the lowest)
-        for product in range(int((number_of_configurations+5)/4)):
-            configuration_level = np.copy(np.array(prices[:, price]))
-            configuration_level[product] = np.copy(prices[product][price+1])
+        for prod in range(int((number_of_configurations+5)/4)):
+            configuration_level = np.copy((np.array(prices))[:, price])
+            configuration_level_indexes = np.copy(np.array([price for _ in range(5)]))
+            configuration_level[prod] = np.copy(prices[prod][price + 1])
+            configuration_level_indexes[prod] = price + 1
             price_configurations.append(configuration_level)
+            price_configuration_indexes.append(configuration_level_indexes)
     # set the 15th configuration
-    price_configurations.append(np.array(prices[:, 0]))
-    return price_configurations
+    price_configurations.append((np.array(prices))[:, 0])
+    price_configuration_indexes.append(np.array([0 for _ in range(5)]))
+    return price_configurations, price_configuration_indexes
 
 
-def initialization_step2(prices, number_of_configurations):
+def initialization_step2(prices, number_of_configurations, classes):
     margin = 40
     # define all the price configuration levels
-    price_configurations = np.copy(generate_configuration_levels(prices, number_of_configurations))
+    price_configurations, price_configuration_indexes = np.copy(generate_configuration_levels(prices,
+                                                                                              number_of_configurations))
     # define the margin for each price configuration as 18% of prices
     margins_for_each_configuration = np.copy(price_configurations)
     for i in range(len(margins_for_each_configuration)):
@@ -30,8 +35,9 @@ def initialization_step2(prices, number_of_configurations):
     # create all customer classes
     customers = []
     for c in range(3):
-        customers.append(CustomerClass(c))
-    return price_configurations, customers
+        cust = get_customer_class_from_json(classes[c])
+        customers.append(cust)
+    return price_configurations, price_configuration_indexes, customers
 
 
 def generate_all_configurations(prices):
