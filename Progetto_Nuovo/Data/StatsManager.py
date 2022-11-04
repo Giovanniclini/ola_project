@@ -97,6 +97,7 @@ def print_contextual_graphs(rewards_per_experiment, clairvoyant, tag):
     rewards = []
     for exp_rewards in rewards_per_experiment:
         rewards.append(list(chain(*exp_rewards)))
+        print(len(list(chain(*exp_rewards))))
     for customer_class in range(3):
         printReward(rewards, clairvoyant[customer_class], tag)
         printRegret(np.asarray(rewards), clairvoyant[customer_class], tag)

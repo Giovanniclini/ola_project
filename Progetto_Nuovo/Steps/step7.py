@@ -151,6 +151,7 @@ if __name__ == '__main__':
                                 optimum_found[0] = True
                 else:
                     ucb_collected_rewards.append(ucb_split_rewards[0])
+                    ucb_split_rewards = [[], []]
 
                 # TS LEARNER
                 if not optimum_found[1]:
@@ -201,6 +202,7 @@ if __name__ == '__main__':
                                 optimum_found[1] = True
                 else:
                     ts_collected_rewards.append(ts_split_rewards[0])
+                    ts_split_rewards = [[],[]]
 
                 if not optimum_found[0]:
                     ucb_split_rewards = [[], []]
@@ -259,11 +261,9 @@ if __name__ == '__main__':
                         total_bought_since_day_before_ucb[p][pulled_config_indexes_ucb[p]],
                         units_sold_ucb[p], total_sold_product_ucb[p][pulled_config_indexes_ucb[p]])
                 i += 1
-        if t == 200:
-            ucb_collected_rewards.append(reward_ucb)
-            ts_collected_rewards.append(reward_ts)
-        print("UCB", len(ucb_collected_rewards))
-        print("TS", len(ts_collected_rewards))
+            if t == 200:
+                ucb_collected_rewards.append(ucb_split_rewards[0])
+                ts_collected_rewards.append(ts_split_rewards[0])
         rewards_per_experiment_ucb.append(ucb_collected_rewards)
         rewards_per_experiment_ts.append(ts_collected_rewards)
     print_contextual_graphs(rewards_per_experiment_ucb, clairvoyant, "UCB")
