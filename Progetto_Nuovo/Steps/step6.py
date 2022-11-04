@@ -39,7 +39,6 @@ if __name__ == '__main__':
     rewards_per_experiment_ucb = []
 
     for e in range(number_of_experiments):
-        print("Experiment {0}...".format(e))
         # init environment
         env = NonStationaryEnvironment(n_prices, customer_class, lambda_coefficient, n_products)
         # init CD-UCB learner
