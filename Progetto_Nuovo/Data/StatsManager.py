@@ -30,8 +30,7 @@ def printReward(rewards, clairvoyant):
   plt.figure(figsize=(9, 6))
   plt.xlabel("t")
   plt.ylabel("Reward")
-  # TODO: ERRORE NEL PLOT DEL CLAIRVOYANT
-  #plt.axhline(y=clairvoyant, color='r', linestyle='-', label='Clairvoyant')
+  plt.axhline(y=clairvoyant, color='r', linestyle='-', label='Clairvoyant')
   plt.plot(mean, color='b', label='Reward')
   plt.fill_between(range(len(mean)), (mean - std), (mean + std), color='b', alpha=.1)
   plt.grid()

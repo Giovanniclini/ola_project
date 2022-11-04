@@ -196,10 +196,6 @@ def get_customer_class_one_feature(user_classes):
     return customer_class_feature_zero, customer_class_feature_one
 
 
-def get_graph_from_json(filename):
-    return None
-
-
 def get_prices_from_json(filename):
     file = open(filename)
     data = json.load(file)
