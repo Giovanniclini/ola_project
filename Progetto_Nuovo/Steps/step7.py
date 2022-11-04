@@ -12,7 +12,7 @@ n_prices = 4
 n_products = 5
 lambda_coefficient = 0.2
 number_of_days = 200
-number_of_experiments = 4
+number_of_experiments = 5
 graph_filename = "../Data/graph.json"
 prices_filename = "../Data/prices.json"
 user_class_1 = "../Data/user_class_1.json"
@@ -93,86 +93,131 @@ if __name__ == '__main__':
         context_ts = ContextClass()
         context_ucb = ContextClass()
 
-        for t in range(0, number_of_days):
+        ucb_father_reward = []
+        ts_father_reward = []
+
+        optimum_found = [False, False]
+        optimum_split = [None, None]
+        optimum_learner = [None, None]
+        for t in tqdm(range(0, number_of_days)):
             # every 14 days run context and do a split
             if t % 14 == 0:
                 # UCB LEARNER
-                ucb_learners = []
-                if t == 0:
-                    context_ucb.split()
-                elif t == 14:
-                    ucb_collected_rewards.append(ucb_split_rewards[0])
-                    context_ucb.assign_father_lower_bound(ucb_split_rewards[0])
-                    context_ucb.split()
-                else:
-                    check, l_reward, r_reward = context_ucb.evaluate_split_condition(ucb_split_rewards[0],
-                                                                                     ucb_split_rewards[1], t)
-                    context_ucb.split(check, l_reward, r_reward)
-                    # if the split is worth...
-                    if check:
-                        # if the left node is better than the right node it becomes the father node
-                        if l_reward > r_reward:
-                            # 0 -> left, 1 -> right
-                            ucb_collected_rewards.append(ucb_split_rewards[0])
-                            context_ucb.father_lower_bound = l_reward
-                            context_ucb.pending_list_lower_bounds.append(
-                                context_ucb.lower_bound(ucb_split_rewards[1], 5, 14))
-                            context_ucb.pending_list_prob.append(context_ucb.assign_prob_context_occur(t))
-                        else:
-                            ucb_collected_rewards.append(ucb_split_rewards[1])
-                            context_ucb.father_lower_bound = r_reward
-                            context_ucb.pending_list_lower_bounds.append(
-                                context_ucb.lower_bound(ucb_split_rewards[0], 5, 14))
-                            context_ucb.pending_list_prob.append(context_ucb.assign_prob_context_occur(t))
-                    # if the split isn't worth...
+                if not optimum_found[0]:
+                    #ucb_learners = []
+                    if t == 0:
+                        context_ucb.split()
+                    elif t == 14:
+                        ucb_father_reward.append(ucb_split_rewards[0])
+                        ucb_collected_rewards.append(ucb_split_rewards[0])
+                        context_ucb.assign_father_lower_bound(ucb_split_rewards[0])
+                        context_ucb.split()
                     else:
-                        if len(context_ucb.pending_list) > 0:
-                            context_ucb.father_lower_bound = context_ucb.pending_list_lower_bounds[0]
-                            context_ucb.pending_list_lower_bounds.pop(0)
-                            context_ucb.pending_list_prob.pop(0)
+                        split = context_ucb.current_split
+                        check, l_reward, r_reward = context_ucb.evaluate_split_condition(ucb_split_rewards[0],
+                                                                                         ucb_split_rewards[1], t)
+                        context_ucb.split(check, l_reward, r_reward)
+                        # if the split is worth...
+                        if check:
+                            # if the left node is better than the right node it becomes the father node
+                            if l_reward > r_reward:
+                                if len(ucb_learners) > 0:
+                                    optimum_split[0] = split[0]
+                                    optimum_learner[0] = ucb_learners[0]
+                                # 0 -> left, 1 -> right
+                                ucb_father_reward.append(ucb_split_rewards[0])
+                                ucb_collected_rewards.append(ucb_split_rewards[0])
+                                context_ucb.father_lower_bound = l_reward
+                                context_ucb.pending_list_lower_bounds.append(
+                                    context_ucb.lower_bound(ucb_split_rewards[1], 5, 14))
+                                context_ucb.pending_list_prob.append(context_ucb.assign_prob_context_occur(t))
+                            else:
+                                if len(ucb_learners) > 0:
+                                    optimum_split[0] = split[1]
+                                    optimum_learner[0] = ucb_learners[1]
+                                ucb_father_reward.append(ucb_split_rewards[1])
+                                ucb_collected_rewards.append(ucb_split_rewards[1])
+                                context_ucb.father_lower_bound = r_reward
+                                context_ucb.pending_list_lower_bounds.append(
+                                    context_ucb.lower_bound(ucb_split_rewards[0], 5, 14))
+                                context_ucb.pending_list_prob.append(context_ucb.assign_prob_context_occur(t))
+                        # if the split isn't worth...
+                        else:
+                            if len(context_ucb.pending_list) > 0:
+                                ucb_collected_rewards.append(ucb_father_reward.pop(0))
+                                context_ucb.father_lower_bound = context_ucb.pending_list_lower_bounds[0]
+                                context_ucb.pending_list_lower_bounds.pop(0)
+                                context_ucb.pending_list_prob.pop(0)
+                            else:
+                                context_ucb.current_split = optimum_split[0]
+                                optimum_found[0] = True
+                else:
+                    ucb_collected_rewards.append(ucb_split_rewards[0])
 
                 # TS LEARNER
-                ts_learners = []
-                if t == 0:
-                    context_ts.split()
-                elif t == 14:
-                    ts_collected_rewards.append(ts_split_rewards[0])
-                    context_ts.assign_father_lower_bound(ts_split_rewards[0])
-                    context_ts.split()
-                else:
-                    check, l_reward, r_reward = context_ts.evaluate_split_condition(ts_split_rewards[0],
-                                                                                    ts_split_rewards[1], t)
-                    context_ts.split(check, l_reward, r_reward)
-                    if check:
-                        if l_reward > r_reward:
-                            # 0 -> left, 1 -> right
-                            ts_collected_rewards.append(ts_split_rewards[0])
-                            context_ts.father_lower_bound = l_reward
-                            context_ts.pending_list_lower_bounds.append(
-                                context_ts.lower_bound(ts_split_rewards[1], 5, 14))
-                            context_ts.pending_list_prob.append(context_ts.assign_prob_context_occur(t))
-                        else:
-                            ts_collected_rewards.append(ts_split_rewards[1])
-                            context_ts.father_lower_bound = r_reward
-                            context_ts.pending_list_lower_bounds.append(
-                                context_ts.lower_bound(ts_split_rewards[0], 5, 14))
-                            context_ts.pending_list_prob.append(context_ts.assign_prob_context_occur(t))
-
+                if not optimum_found[1]:
+                    #ts_learners = []
+                    if t == 0:
+                        context_ts.split()
+                    elif t == 14:
+                        ts_father_reward.append(ts_split_rewards[0])
+                        ts_collected_rewards.append(ts_split_rewards[0])
+                        context_ts.assign_father_lower_bound(ts_split_rewards[0])
+                        context_ts.split()
                     else:
-                        if len(context_ts.pending_list) > 0:
-                            context_ts.father_lower_bound = context_ts.pending_list_lower_bounds[0]
-                            context_ts.pending_list_lower_bounds.pop(0)
-                            context_ts.pending_list_prob.pop(0)
+                        split = context_ts.current_split
+                        check, l_reward, r_reward = context_ts.evaluate_split_condition(ts_split_rewards[0],
+                                                                                        ts_split_rewards[1], t)
+                        context_ts.split(check, l_reward, r_reward)
+                        if check:
+                            if l_reward > r_reward:
+                                # 0 -> left, 1 -> right
+                                if len(ts_learners) > 1:
+                                    optimum_split[1] = split[0]
+                                    optimum_learner[1] = ts_learners[0]
+                                ts_father_reward.append(ts_split_rewards[0])
+                                ts_collected_rewards.append(ts_split_rewards[0])
+                                context_ts.father_lower_bound = l_reward
+                                context_ts.pending_list_lower_bounds.append(
+                                    context_ts.lower_bound(ts_split_rewards[1], 5, 14))
+                                context_ts.pending_list_prob.append(context_ts.assign_prob_context_occur(t))
+                            else:
+                                if len(ts_learners) > 1:
+                                    optimum_split[1] = split[1]
+                                    optimum_learner[1] = ts_learners[1]
+                                ts_father_reward.append(ts_split_rewards[1])
+                                ts_collected_rewards.append(ts_split_rewards[1])
+                                context_ts.father_lower_bound = r_reward
+                                context_ts.pending_list_lower_bounds.append(
+                                    context_ts.lower_bound(ts_split_rewards[0], 5, 14))
+                                context_ts.pending_list_prob.append(context_ts.assign_prob_context_occur(t))
 
-                ucb_split_rewards = [[], []]
-                ts_split_rewards = [[], []]
+                        else:
+                            if len(context_ts.pending_list) > 0:
+                                ts_collected_rewards.append(list(ts_father_reward.pop(0)))
+                                context_ts.father_lower_bound = context_ts.pending_list_lower_bounds[0]
+                                context_ts.pending_list_lower_bounds.pop(0)
+                                context_ts.pending_list_prob.pop(0)
+                            else:
+                                context_ts.current_split = optimum_split[1]
+                                optimum_found[1] = True
+                else:
+                    ts_collected_rewards.append(ts_split_rewards[0])
+
+                if not optimum_found[0]:
+                    ucb_split_rewards = [[], []]
+                if not optimum_found[1]:
+                    ts_split_rewards = [[], []]
 
             # ---------------------------------------THOMPSON SAMPLING----------------------------------
             i = 0
-            ts_learners = []
-            ucb_learners = []
+            if not optimum_found[1]:
+                ts_learners = []
+            if not optimum_found[0]:
+                ucb_learners = []
             for split in context_ts.current_split:
-                ts_learners.append(TSLearner(n_prices, n_products))
+                if not optimum_found[1]:
+                    ts_learners.append(TSLearner(n_prices, n_products))
                 pulled_config_indexes_ts = ts_learners[i].pull_arm()
                 env.select_costumer_class(customer_classes[get_json_from_binary_feature(split)])
                 reward_ts, units_sold_ts, total_seen_daily_ts = env.round(pulled_config_indexes_ts, prices,
@@ -193,7 +238,8 @@ if __name__ == '__main__':
             # ---------------------------------------------UCB-------------------------------------------
             i = 0
             for split in context_ucb.current_split:
-                ucb_learners.append(UCBLearner(n_prices, n_products))
+                if not optimum_found[0]:
+                    ucb_learners.append(UCBLearner(n_prices, n_products))
                 pulled_config_indexes_ucb = ucb_learners[i].pull_arm()
                 pulled_config_indexes_ucb = np.array(np.transpose(pulled_config_indexes_ucb))[0]
                 env.select_costumer_class(customer_classes[get_json_from_binary_feature(split)])
@@ -215,9 +261,7 @@ if __name__ == '__main__':
                         total_bought_since_day_before_ucb[p][pulled_config_indexes_ucb[p]],
                         units_sold_ucb[p], total_sold_product_ucb[p][pulled_config_indexes_ucb[p]])
                 i += 1
-
-        rewards_per_experiment_ts.append(ts_collected_rewards)
         rewards_per_experiment_ucb.append(ucb_collected_rewards)
-
-    print_contextual_graphs(rewards_per_experiment_ts, clairvoyant)
+        rewards_per_experiment_ts.append(ts_collected_rewards)
     print_contextual_graphs(rewards_per_experiment_ucb, clairvoyant)
+    print_contextual_graphs(rewards_per_experiment_ts, clairvoyant)

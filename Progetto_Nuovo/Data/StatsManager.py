@@ -1,6 +1,7 @@
 from scipy.stats import beta
 import matplotlib.pyplot as plt
 import numpy as np
+from itertools import chain
 
 
 def evaluate_mean_std_rewards(rewards):
@@ -109,10 +110,11 @@ def print_conversion_rates(prices, products, conversion_rates):
 
 
 def print_contextual_graphs(rewards_per_experiment, clairvoyant):
+    rewards = []
+    for exp_rewards in rewards_per_experiment:
+        rewards.append(list(chain(*exp_rewards)))
+        print(len(list(chain(*exp_rewards))))
     for customer_class in range(3):
-      rewards = np.empty((0,0))
-      for exp_rewards in rewards_per_experiment:
-          rewards.concatenate(np.asarray(exp_rewards).T)
-      printReward(rewards, clairvoyant[customer_class])
-      printRegret(rewards, clairvoyant[customer_class])
+        printReward(rewards, clairvoyant[customer_class])
+        printRegret(np.asarray(rewards), clairvoyant[customer_class])
 

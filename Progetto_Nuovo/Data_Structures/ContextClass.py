@@ -57,9 +57,6 @@ class ContextClass:
         p = self.assign_prob_context_occur(time)
         if p * (l_lowerbound + r_lowerbound) >= self.father_lower_bound:
             check = True
-            print("Split OK")
-        else:
-            print("Split NO OK")
         return check, l_lowerbound, r_lowerbound
 
     def assign_father_lower_bound(self, rewards):
