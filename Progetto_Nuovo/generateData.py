@@ -20,18 +20,9 @@ def generate_configuration_levels(prices, number_of_configurations):
 
 
 def initialization_step2(prices, number_of_configurations, classes):
-    margin = 40
     # define all the price configuration levels
     price_configurations, price_configuration_indexes = np.copy(generate_configuration_levels(prices,
                                                                                               number_of_configurations))
-    # define the margin for each price configuration as 18% of prices
-    margins_for_each_configuration = np.copy(price_configurations)
-    for i in range(len(margins_for_each_configuration)):
-        margins_for_each_configuration[i] = np.copy(margins_for_each_configuration[i] - margin)
-    # define the margin means for each price configurations
-    margin_means_for_configuration = np.zeros(number_of_configurations)
-    for c in range(number_of_configurations):
-        margin_means_for_configuration[c] = np.mean(margins_for_each_configuration[c])
     # create all customer classes
     customers = []
     for c in range(3):
