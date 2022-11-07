@@ -4,12 +4,23 @@ import numpy as np
 from itertools import chain
 
 
-def printRegret(rewards, clairvoyant, tag):
+def evaluate_mean_std_rewards(rewards):
+  mean = np.mean(rewards, axis=0)
+  std = np.std(rewards, axis=0)
+  plt.figure(figsize=(9, 6))
+  plt.plot(range(len(mean)), mean)
+  plt.fill_between(range(len(mean)), (mean - std), (mean + std), color='b', alpha=.1)
+  plt.show()
+  return mean, std
+
+
+def printRegret(rewardUCB, rewardTS, clairvoyant, tag):
   plt.figure(figsize=(9, 6))
   plt.ylabel("Regret")
   plt.xlabel("t")
-  plt.plot(np.cumsum(np.mean(clairvoyant - rewards, axis=0)), color='g', label='Regret')
-  plt.legend()
+  plt.plot(np.cumsum(np.mean(clairvoyant - rewardUCB, axis=0)), color='g', label='RegretUCB')
+  plt.plot(np.cumsum(np.mean(clairvoyant - rewardTS, axis=0)), color='b', label='RegretTS')
+  plt.legend(['UCB regret', 'TS regret'])
   plt.grid()
   plt.title(tag)
   plt.show()
@@ -85,6 +96,7 @@ def print_contextual_graphs(rewards_per_experiment, clairvoyant, tag):
     rewards = []
     for exp_rewards in rewards_per_experiment:
         rewards.append(list(chain(*exp_rewards)))
+        print(len(list(chain(*exp_rewards))))
     for customer_class in range(3):
         printReward(rewards, clairvoyant[customer_class], tag)
         printRegret(np.asarray(rewards), clairvoyant[customer_class], tag)

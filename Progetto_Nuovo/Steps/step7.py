@@ -149,6 +149,7 @@ if __name__ == '__main__':
                                 optimum_found[0] = True
                 else:
                     ucb_collected_rewards.append(ucb_split_rewards[0])
+                    ucb_split_rewards = [[], []]
 
                 # TS LEARNER
                 if not optimum_found[1]:
@@ -198,6 +199,7 @@ if __name__ == '__main__':
                                 optimum_found[1] = True
                 else:
                     ts_collected_rewards.append(ts_split_rewards[0])
+                    ts_split_rewards = [[],[]]
 
                 if not optimum_found[0]:
                     ucb_split_rewards = [[], []]

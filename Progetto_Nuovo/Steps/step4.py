@@ -152,10 +152,9 @@ if __name__ == '__main__':
         # append collected reward of current experiment UCB
         rewards_per_experiment_ucb.append(ucb_learner.collected_rewards)
 
-        printReward(rewards_per_experiment_ts, clairvoyant)
-        printReward(rewards_per_experiment_ucb, clairvoyant)
+        printReward(rewards_per_experiment_ts, clairvoyant, "Reward")
+        printReward(rewards_per_experiment_ucb, clairvoyant, "Reward")
 
-        printRegret(rewards_per_experiment_ts, clairvoyant)
-        printRegret(rewards_per_experiment_ucb, clairvoyant)
+        printRegret(rewards_per_experiment_ucb, rewards_per_experiment_ts, clairvoyant, "Comparing Regret")
 
 
