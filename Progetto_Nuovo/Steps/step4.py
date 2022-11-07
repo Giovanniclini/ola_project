@@ -94,6 +94,7 @@ if __name__ == '__main__':
 
             # call alpha estimate for TS
             alpha_ratios_ts = estimate_alpha_ratios(old_starts_ts, total_seen_daily_ts)
+            old_starts_ts += total_seen_daily_ts
 
             # ------------------------------------------unit bought-------------------------------------
 
@@ -130,6 +131,7 @@ if __name__ == '__main__':
 
             # call alpha estimate for UCB
             alpha_ratios_ucb = estimate_alpha_ratios(old_starts_ucb, total_seen_daily_ucb)
+            old_starts_ucb += total_seen_daily_ucb
 
             # ------------------------------------------unit bought-------------------------------------
 

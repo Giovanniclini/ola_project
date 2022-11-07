@@ -220,6 +220,7 @@ if __name__ == '__main__':
                 ts_split_rewards[i].append(reward_ts)
                 ts_learners[i].update(pulled_config_indexes_ts, units_sold_ts, np.sum(total_seen_daily_ts[1:]), reward_ts)
                 alpha_ratios_ts = estimate_alpha_ratios(old_starts_ts, total_seen_daily_ts)
+                old_starts_ts += total_seen_daily_ts
                 total_bought_since_day_before_ts = np.copy(total_sold_product_ts)
                 for p in range(len(pulled_config_indexes_ts)):
                     total_seen_ts[p, pulled_config_indexes_ts[p]] += np.sum(total_seen_daily_ts[1:])
@@ -248,6 +249,7 @@ if __name__ == '__main__':
                 ucb_learners[i].update(pulled_config_indexes_ucb, units_sold_ucb, total_seen_since_day_before_ucb,
                                        total_seen_ucb, total_seen_product_ucb, reward_ucb)
                 alpha_ratios_ucb = estimate_alpha_ratios(old_starts_ucb, total_seen_daily_ucb)
+                old_starts_ucb += total_seen_daily_ucb
                 total_bought_since_day_before_ucb = np.copy(total_sold_product_ucb)
                 for p in range(len(pulled_config_indexes_ucb)):
                     total_sold_product_ucb[p, pulled_config_indexes_ucb[p]] += units_sold_ucb[p]
