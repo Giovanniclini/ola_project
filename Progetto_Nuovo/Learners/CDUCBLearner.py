@@ -27,7 +27,10 @@ class CDUCBLearner(Learner):
                                                           tot_seen[product, pulled_config[product]]
             self.upper_bound[product, pulled_config[product]] = m.sqrt((2 * m.log10(tot_samples[product])) /
                                                                        tot_seen[product, pulled_config[product]])
-            self.conversion_rates[product][pulled_config[product]].append(bought[product]/seen[product, pulled_config[product]])
+            if seen[product, pulled_config[product]] == 0:
+                self.conversion_rates[product][pulled_config[product]].append(0.0)
+            else:
+                self.conversion_rates[product][pulled_config[product]].append(bought[product]/seen[product, pulled_config[product]])
 
         self.detect_change(pulled_config)
 

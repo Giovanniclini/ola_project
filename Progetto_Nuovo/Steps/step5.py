@@ -20,7 +20,6 @@ max_units_sold = 1.5
 
 if __name__ == '__main__':
     print(colored('\n\n---------------------------- STEP 5 ----------------------------', 'blue', attrs=['bold']))
-
     # assign prices per products from json file
     prices = get_prices_from_json(prices_filename)
     # generate all the possible price configurations

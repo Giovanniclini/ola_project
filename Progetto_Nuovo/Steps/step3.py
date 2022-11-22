@@ -20,7 +20,6 @@ max_units_sold = 1.5
 
 if __name__ == '__main__':
     print(colored('\n\n---------------------------- STEP 3 ----------------------------', 'blue', attrs=['bold']))
-
     # assign prices per products from json file
     prices = get_prices_from_json(prices_filename)
     # generate all the possible price configurations
@@ -37,7 +36,6 @@ if __name__ == '__main__':
                                        customer_class.number_of_customers)
 
     for e in range(number_of_experiments):
-        print("Experiment {0}...".format(e))
         # init environment
         env = Environment(n_prices, customer_class, lambda_coefficient, n_products)
         # init Thompson Sampling learner
@@ -47,7 +45,7 @@ if __name__ == '__main__':
         total_seen_ucb = np.zeros((n_products, n_prices))
         total_seen_product_ucb = np.zeros(n_products)
         # for each day
-        for t in tqdm(range (0, number_of_days)):
+        for t in tqdm(range(0, number_of_days)):
             alpha_ratios = np.random.dirichlet(customer_class.alpha_probabilities)
             item_sold_mean = customer_class.item_sold_mean
 
@@ -73,13 +71,11 @@ if __name__ == '__main__':
                 total_seen_product_ucb[product] += np.sum(total_seen_daily_ucb[1:])
             ucb_learner.update(pulled_config_indexes_ucb, units_sold_ucb, total_seen_since_daybefore_ucb, total_seen_ucb,
                                total_seen_product_ucb, reward_ucb)
-
-        # append collected reward of current experiment TS
         rewards_per_experiment_ts.append(ts_learner.collected_rewards)
-        # append collected reward of current experiment UCB
         rewards_per_experiment_ucb.append(ucb_learner.collected_rewards)
 
     printRegret(rewards_per_experiment_ucb, rewards_per_experiment_ts, clairvoyant, "Comparing Regret")
+
 
     printReward(rewards_per_experiment_ts, clairvoyant, "TS")
     printReward(rewards_per_experiment_ucb, clairvoyant, "UCB")

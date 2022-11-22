@@ -36,11 +36,8 @@ if __name__ == '__main__':
     rewards_per_experiment_ucb = []
 
     for e in range(number_of_experiments):
-        # init environment
         env = NonStationaryEnvironment(n_prices, customer_class, lambda_coefficient, n_products)
-        # init CD-UCB learner
         cd_ucb_learner = CDUCBLearner(n_prices, n_products)
-        # init UCB-1
         ucb_learner = SWUCBLearner(n_prices, n_products)
 
         total_seen_cducb = np.zeros((n_products, n_prices))
@@ -63,7 +60,6 @@ if __name__ == '__main__':
             pulled_config_indexes_cducb = cd_ucb_learner.pull_arm()
             pulled_config_indexes_cducb = np.array(np.transpose(pulled_config_indexes_cducb))[0]
             reward_cducb, units_sold_cducb, total_seen_daily_cducb = env.round(pulled_config_indexes_ucb, prices, alpha_ratios, item_sold_mean, cd_ucb_phase)
-
 
             # seen since day before
             total_seen_since_daybefore_ucb = np.copy(total_seen_ucb)
@@ -120,9 +116,9 @@ if __name__ == '__main__':
         sw_ucb_instantaneus_regret[t_index] = clairvoyant_phases[i] -np.mean(rewards_per_experiment_ucb, axis=0)[t_index]
 
     plt.figure(0)
-    plt.plot(np.mean(rewards_per_experiment_cducb, axis=0), 'r')
-    plt.plot(np.mean(rewards_per_experiment_ucb, axis=0), 'b')
-    plt.plot(optimum_per_round, 'k--')
+    plt.plot(np.mean(rewards_per_experiment_cducb, axis=0), 'r', label="CD-UCB rewards")
+    plt.plot(np.mean(rewards_per_experiment_ucb, axis=0), 'b', label="SW-UCB rewards")
+    plt.plot(optimum_per_round, 'k--', label='Clairvoyant')
     plt.legend(['CD-UCB', 'SW-UCB', 'Clairvoyant'])
     plt.xlabel("t")
     plt.ylabel("Reward")

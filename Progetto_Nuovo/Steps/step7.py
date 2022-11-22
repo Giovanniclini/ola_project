@@ -11,7 +11,7 @@ from tqdm import tqdm
 n_prices = 4
 n_products = 5
 lambda_coefficient = 0.2
-number_of_days = 200
+number_of_days = 211
 number_of_experiments = 5
 prices_filename = "../Data/prices.json"
 user_class_1 = "../Data/user_class_1.json"
@@ -96,6 +96,7 @@ if __name__ == '__main__':
         optimum_found = [False, False]
         optimum_split = [None, None]
         optimum_learner = [None, None]
+        optimum_father_reward = [None, None]
         for t in tqdm(range(0, number_of_days)):
             # every 14 days run context and do a split
             if t % 14 == 0:
@@ -120,6 +121,7 @@ if __name__ == '__main__':
                                 if len(ucb_learners) > 0:
                                     optimum_split[0] = split[0]
                                     optimum_learner[0] = ucb_learners[0]
+                                    optimum_father_reward[0] = ucb_split_rewards[0]
                                 # 0 -> left, 1 -> right
                                 ucb_father_reward.append(ucb_split_rewards[0])
                                 ucb_collected_rewards.append(ucb_split_rewards[0])
@@ -131,6 +133,7 @@ if __name__ == '__main__':
                                 if len(ucb_learners) > 0:
                                     optimum_split[0] = split[1]
                                     optimum_learner[0] = ucb_learners[1]
+                                    optimum_father_reward[0] = ucb_split_rewards[1]
                                 ucb_father_reward.append(ucb_split_rewards[1])
                                 ucb_collected_rewards.append(ucb_split_rewards[1])
                                 context_ucb.father_lower_bound = r_reward
@@ -145,11 +148,11 @@ if __name__ == '__main__':
                                 context_ucb.pending_list_lower_bounds.pop(0)
                                 context_ucb.pending_list_prob.pop(0)
                             else:
+                                ucb_collected_rewards.append(optimum_father_reward[0])
                                 context_ucb.current_split = optimum_split[0]
                                 optimum_found[0] = True
                 else:
                     ucb_collected_rewards.append(ucb_split_rewards[0])
-                    ucb_split_rewards = [[], []]
 
                 # TS LEARNER
                 if not optimum_found[1]:
@@ -171,6 +174,7 @@ if __name__ == '__main__':
                                 if len(ts_learners) > 1:
                                     optimum_split[1] = split[0]
                                     optimum_learner[1] = ts_learners[0]
+                                    optimum_father_reward[1] = ts_split_rewards[0]
                                 ts_father_reward.append(ts_split_rewards[0])
                                 ts_collected_rewards.append(ts_split_rewards[0])
                                 context_ts.father_lower_bound = l_reward
@@ -181,6 +185,7 @@ if __name__ == '__main__':
                                 if len(ts_learners) > 1:
                                     optimum_split[1] = split[1]
                                     optimum_learner[1] = ts_learners[1]
+                                    optimum_father_reward[1] = ts_split_rewards[1]
                                 ts_father_reward.append(ts_split_rewards[1])
                                 ts_collected_rewards.append(ts_split_rewards[1])
                                 context_ts.father_lower_bound = r_reward
@@ -195,16 +200,14 @@ if __name__ == '__main__':
                                 context_ts.pending_list_lower_bounds.pop(0)
                                 context_ts.pending_list_prob.pop(0)
                             else:
+                                ts_collected_rewards.append(optimum_father_reward[1])
                                 context_ts.current_split = optimum_split[1]
                                 optimum_found[1] = True
                 else:
                     ts_collected_rewards.append(ts_split_rewards[0])
-                    ts_split_rewards = [[],[]]
 
-                if not optimum_found[0]:
-                    ucb_split_rewards = [[], []]
-                if not optimum_found[1]:
-                    ts_split_rewards = [[], []]
+                ucb_split_rewards = [[], []]
+                ts_split_rewards = [[], []]
 
             # ---------------------------------------THOMPSON SAMPLING----------------------------------
             i = 0
@@ -260,10 +263,6 @@ if __name__ == '__main__':
                         total_bought_since_day_before_ucb[p][pulled_config_indexes_ucb[p]],
                         units_sold_ucb[p], total_sold_product_ucb[p][pulled_config_indexes_ucb[p]])
                 i += 1
-            if t == 200:
-                ucb_collected_rewards.append(ucb_split_rewards[0])
-                ts_collected_rewards.append(ts_split_rewards[0])
         rewards_per_experiment_ucb.append(ucb_collected_rewards)
         rewards_per_experiment_ts.append(ts_collected_rewards)
-    print_contextual_graphs(rewards_per_experiment_ucb, clairvoyant, "UCB")
-    print_contextual_graphs(rewards_per_experiment_ts, clairvoyant, "TS")
+    print_contextual_graphs(rewards_per_experiment_ucb, rewards_per_experiment_ts, clairvoyant)

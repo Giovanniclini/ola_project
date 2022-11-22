@@ -37,7 +37,7 @@ def evaluate_rewards_per_combination(configurations, customer_class, prices):
             for price in range(4):
                 current_reward += prices[product][price] * customer_class.conversion_rates[product][price] * \
                                   customer_class.alpha_probabilities[product] * \
-                                  customer_class.item_sold_mean[product][price]
+                                  np.mean(np.mean(customer_class.item_sold_mean, axis=1))#[product][price]
         rewards_per_combination.append(current_reward)
     return max(rewards_per_combination)
 
