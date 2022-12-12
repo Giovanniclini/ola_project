@@ -11,13 +11,13 @@ from tqdm import tqdm
 n_prices = 4
 n_products = 5
 lambda_coefficient = 0.2
-number_of_days = 211
+number_of_days = 200
 number_of_experiments = 5
 prices_filename = "../Data/prices.json"
 user_class_1 = "../Data/user_class_1.json"
 user_class_2 = "../Data/user_class_2.json"
 user_class_3 = "../Data/user_class_3.json"
-max_units_sold = 1
+max_units_sold = 0.75
 
 
 def estimate_alpha_ratios(old_starts, starts):
@@ -230,10 +230,11 @@ if __name__ == '__main__':
                 for p in range(len(pulled_config_indexes_ts)):
                     total_seen_ts[p, pulled_config_indexes_ts[p]] += np.sum(total_seen_daily_ts[1:])
                     total_sold_product_ts[p, pulled_config_indexes_ts[p]] += units_sold_ts[p]
-                    item_sold_mean_ts[p][pulled_config_indexes_ts[p]] = estimate_items_for_each_product(
-                        item_sold_mean_ts[p][pulled_config_indexes_ts[p]],
-                        total_bought_since_day_before_ts[p, pulled_config_indexes_ts[p]], units_sold_ts[p],
-                        total_sold_product_ts[p, pulled_config_indexes_ts[p]])
+                    if total_sold_product_ts[p, pulled_config_indexes_ts[p]] > 0:
+                        item_sold_mean_ts[p][pulled_config_indexes_ts[p]] = estimate_items_for_each_product(
+                            item_sold_mean_ts[p][pulled_config_indexes_ts[p]],
+                            total_bought_since_day_before_ts[p, pulled_config_indexes_ts[p]], units_sold_ts[p],
+                            total_sold_product_ts[p, pulled_config_indexes_ts[p]])
                 i += 1
 
             # ---------------------------------------------UCB-------------------------------------------
@@ -258,10 +259,11 @@ if __name__ == '__main__':
                 total_bought_since_day_before_ucb = np.copy(total_sold_product_ucb)
                 for p in range(len(pulled_config_indexes_ucb)):
                     total_sold_product_ucb[p, pulled_config_indexes_ucb[p]] += units_sold_ucb[p]
-                    item_sold_mean_ucb[p][pulled_config_indexes_ucb[p]] = estimate_items_for_each_product(
-                        item_sold_mean_ucb[p][pulled_config_indexes_ucb[p]],
-                        total_bought_since_day_before_ucb[p][pulled_config_indexes_ucb[p]],
-                        units_sold_ucb[p], total_sold_product_ucb[p][pulled_config_indexes_ucb[p]])
+                    if total_sold_product_ucb[p, pulled_config_indexes_ucb[p]] > 0:
+                        item_sold_mean_ucb[p][pulled_config_indexes_ucb[p]] = estimate_items_for_each_product(
+                            item_sold_mean_ucb[p][pulled_config_indexes_ucb[p]],
+                            total_bought_since_day_before_ucb[p][pulled_config_indexes_ucb[p]],
+                            units_sold_ucb[p], total_sold_product_ucb[p][pulled_config_indexes_ucb[p]])
                 i += 1
         rewards_per_experiment_ucb.append(ucb_collected_rewards)
         rewards_per_experiment_ts.append(ts_collected_rewards)

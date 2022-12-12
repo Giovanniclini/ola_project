@@ -75,7 +75,5 @@ if __name__ == '__main__':
         rewards_per_experiment_ucb.append(ucb_learner.collected_rewards)
 
     printRegret(rewards_per_experiment_ucb, rewards_per_experiment_ts, clairvoyant, "Comparing Regret")
-
-
     printReward(rewards_per_experiment_ts, clairvoyant, "TS")
     printReward(rewards_per_experiment_ucb, clairvoyant, "UCB")

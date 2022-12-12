@@ -6,6 +6,7 @@ from Progetto_Nuovo.generateData import *
 from Progetto_Nuovo.Data.DataManager import *
 from Progetto_Nuovo.Data.StatsManager import *
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 n_prices = 4
 n_products = 5
@@ -16,7 +17,7 @@ prices_filename = "../Data/prices.json"
 user_class_1 = "../Data/user_class_1.json"
 user_class_2 = "../Data/user_class_2.json"
 user_class_3 = "../Data/user_class_3.json"
-max_units_sold = 1
+max_units_sold = 0.75
 
 
 def estimate_alpha_ratios(old_starts, starts):
@@ -106,14 +107,14 @@ if __name__ == '__main__':
                 total_seen_ts[p, pulled_config_indexes_ts[p]] += np.sum(total_seen_daily_ts[1:])
                 total_sold_product_ts[p, pulled_config_indexes_ts[p]] += units_sold_ts[p]
                 # call unit bought for product estimate
-                item_sold_mean_ts[p][pulled_config_indexes_ts[p]] = estimate_items_for_each_product(
-                    item_sold_mean_ts[p][pulled_config_indexes_ts[p]],
-                    total_bought_since_day_before_ts[p, pulled_config_indexes_ts[p]], units_sold_ts[p],
-                    total_sold_product_ts[p, pulled_config_indexes_ts[p]])
-
+                if total_sold_product_ts[p, pulled_config_indexes_ts[p]] > 0:
+                    item_sold_mean_ts[p][pulled_config_indexes_ts[p]] = estimate_items_for_each_product(
+                        item_sold_mean_ts[p][pulled_config_indexes_ts[p]],
+                        total_bought_since_day_before_ts[p, pulled_config_indexes_ts[p]], units_sold_ts[p],
+                        total_sold_product_ts[p, pulled_config_indexes_ts[p]])
             # ---------------------------------------------UCB-------------------------------------------
 
-            # UCB-1
+            # UCB
             pulled_config_indexes_ucb = ucb_learner.pull_arm()
             pulled_config_indexes_ucb = np.array(np.transpose(pulled_config_indexes_ucb))[0]
             reward_ucb, units_sold_ucb, total_seen_daily_ucb = env.round(pulled_config_indexes_ucb, prices,
@@ -137,24 +138,22 @@ if __name__ == '__main__':
 
             # seen since day before
             total_bought_since_day_before_ucb = np.copy(total_sold_product_ucb)
-
             # seen til now
             for p in range(len(pulled_config_indexes_ucb)):
                 total_sold_product_ucb[p, pulled_config_indexes_ucb[p]] += units_sold_ucb[p]
                 # call unit bought for product estimate
-                item_sold_mean_ucb[p][pulled_config_indexes_ucb[p]] = estimate_items_for_each_product(
-                    item_sold_mean_ucb[p][pulled_config_indexes_ucb[p]],
-                    total_bought_since_day_before_ucb[p][pulled_config_indexes_ucb[p]],
-                    units_sold_ucb[p], total_sold_product_ucb[p][pulled_config_indexes_ucb[p]])
-
+                if total_sold_product_ucb[p, pulled_config_indexes_ucb[p]] > 0:
+                    item_sold_mean_ucb[p][pulled_config_indexes_ucb[p]] = estimate_items_for_each_product(
+                        item_sold_mean_ucb[p][pulled_config_indexes_ucb[p]],
+                        total_bought_since_day_before_ucb[p][pulled_config_indexes_ucb[p]],
+                        units_sold_ucb[p], total_sold_product_ucb[p][pulled_config_indexes_ucb[p]])
         # append collected reward of current experiment TS
         rewards_per_experiment_ts.append(ts_learner.collected_rewards)
         # append collected reward of current experiment UCB
         rewards_per_experiment_ucb.append(ucb_learner.collected_rewards)
 
+    printRegret(rewards_per_experiment_ucb, rewards_per_experiment_ts, clairvoyant, "Comparing Regret")
     printReward(rewards_per_experiment_ts, clairvoyant, "TS Rewards")
     printReward(rewards_per_experiment_ucb, clairvoyant, "UCB Rewards")
-
-    printRegret(rewards_per_experiment_ucb, rewards_per_experiment_ts, clairvoyant, "TS and UCB regrets")
 
 

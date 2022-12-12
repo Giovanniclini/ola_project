@@ -10,6 +10,7 @@ def printRegret(rewardUCB, rewardTS, clairvoyant, tag):
     plt.xlabel("t")
     plt.plot(np.cumsum(np.mean(clairvoyant - rewardUCB, axis=0)), color='g', label='RegretUCB')
     plt.plot(np.cumsum(np.mean(clairvoyant - rewardTS, axis=0)), color='b', label='RegretTS')
+    plt.legend(loc="upper left")
     plt.grid()
     plt.title(tag)
     plt.show()
