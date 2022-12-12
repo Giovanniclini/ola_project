@@ -88,7 +88,8 @@ if __name__ == '__main__':
         rewards_per_experiment_ucb.append(ucb_learner.collected_rewards)
         # printTSBeta(learner.beta_parameters[:, 0, :], rewards_per_experiment[0])
         # print("SOS", learner.collected_rewards[0])
+    printReward(rewards_per_experiment_ts, clairvoyant, "TS")
+    printReward(rewards_per_experiment_ucb, clairvoyant, "UCB")
+
     printRegret(rewards_per_experiment_ucb, rewards_per_experiment_ts, clairvoyant, "Comparing Regret")
-    printReward(rewards_per_experiment_ts, clairvoyant, "TS Rewards")
-    printReward(rewards_per_experiment_ucb, clairvoyant, "UCB Rewards")
 

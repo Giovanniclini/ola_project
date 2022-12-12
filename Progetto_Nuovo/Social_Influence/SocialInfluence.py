@@ -91,14 +91,20 @@ class SocialInfluence:
             # repeat assignment until the two products are different
             while second_secondary_node == first_secondary_node:
                 second_secondary_node = random.choices(range(len(prob_matrix[index, :])), prob_matrix[index, :], k=1)[0]
-            # select from the probability matrix only the rows related to the active nodes
+            # select from the probability matrix only the rows related to the active node
             transition_probabilities_from_the_active_node = (prob_matrix.T * order_of_parallel_product[0]).T
             # select from the probability rows just the ones related to the active node
             p_row = transition_probabilities_from_the_active_node[index]
             if np.all(activated_edges_simulation):  # if all activated_edges_simulation == True
                 return history
-            # update the value of the transition probability related to the second secondary product
-            p_row[second_secondary_node] = p_row[second_secondary_node] * self.lambda_coeff
+            # update the value of the transition probability related to the second secondary product and primary, the others 0
+            for i in range(5):
+                if i == first_secondary_node:
+                    p_row[i] = p_row[first_secondary_node]
+                elif i == second_secondary_node:
+                    p_row[i] = p_row[second_secondary_node] * self.lambda_coeff
+                else:
+                    p_row[i] = 0.0
             # assign false to all the activated edges array to keep track of the one that will be selected (
             # clicked secondary product)
             activated_edges = [False for _ in range(5)]

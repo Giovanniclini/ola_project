@@ -17,7 +17,7 @@ prices_filename = "../Data/prices.json"
 user_class_1 = "../Data/user_class_1.json"
 user_class_2 = "../Data/user_class_2.json"
 user_class_3 = "../Data/user_class_3.json"
-max_units_sold = 0.75
+max_units_sold = 0.5
 
 
 def estimate_alpha_ratios(old_starts, starts):
