@@ -1,10 +1,10 @@
 from termcolor import colored
-from Progetto_Nuovo.Learners.SWUCBLearner import *
-from Progetto_Nuovo.generateData import *
-from Progetto_Nuovo.Data.DataManager import *
-from Progetto_Nuovo.Data.StatsManager import *
-from Progetto_Nuovo.Learners.CDUCBLearner import *
-from Progetto_Nuovo.Environment.NonStationaryEnvironment import *
+from Learners.SWUCBLearner import *
+from generateData import *
+from Data.DataManager import *
+from Data.StatsManager import *
+from Learners.CDUCBLearner import *
+from Environment.NonStationaryEnvironment import *
 from tqdm import tqdm
 
 n_prices = 4
@@ -15,7 +15,7 @@ window = 25
 number_of_experiments = 5
 prices_filename = "../Data/prices.json"
 user_class_filename = "../Data/user_class_aggregate_abrupt_changes.json"
-max_units_sold = 1.5
+max_units_sold = 2
 n_phases = 4
 
 if __name__ == '__main__':

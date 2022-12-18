@@ -1,11 +1,11 @@
 from termcolor import colored
-from Progetto_Nuovo.Environment.ContextualEnvironment import ContextualEnvironment
-from Progetto_Nuovo.Learners.TSLearner import *
-from Progetto_Nuovo.Learners.UCBLearner import *
-from Progetto_Nuovo.generateData import *
-from Progetto_Nuovo.Data.DataManager import *
-from Progetto_Nuovo.Data.StatsManager import *
-from Progetto_Nuovo.Data_Structures.ContextClass import *
+from Environment.ContextualEnvironment import ContextualEnvironment
+from Learners.TSLearner import *
+from Learners.UCBLearner import *
+from generateData import *
+from Data.DataManager import *
+from Data.StatsManager import *
+from Data_Structures.ContextClass import *
 from tqdm import tqdm
 
 n_prices = 4

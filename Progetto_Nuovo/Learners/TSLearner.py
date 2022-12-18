@@ -1,4 +1,4 @@
-from Progetto_Nuovo.Learners.Learner import *
+from Learners.Learner import *
 import numpy as np
 import math
 

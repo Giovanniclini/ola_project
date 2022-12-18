@@ -1,4 +1,4 @@
-from Progetto_Nuovo.Social_Influence.SocialInfluence import *
+from Social_Influence.SocialInfluence import *
 
 
 class NonStationaryEnvironment:

@@ -1,5 +1,5 @@
 import json
-from Progetto_Nuovo.Data_Structures.CustomerClass import *
+from Data_Structures.CustomerClass import *
 
 
 def get_customer_class_from_json(filename):

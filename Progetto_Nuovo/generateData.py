@@ -1,5 +1,5 @@
 from itertools import product
-from Progetto_Nuovo.Data.DataManager import *
+from Data.DataManager import *
 
 
 def generate_configuration_levels(prices, number_of_configurations):
