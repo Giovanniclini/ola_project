@@ -1,6 +1,6 @@
-from Progetto_Nuovo.generateData import *
+from generateData import *
 from termcolor import colored
-from Progetto_Nuovo.Social_Influence.SocialInfluence import *
+from Social_Influence.SocialInfluence import *
 
 # define number of price configurations (price changes)
 number_of_configurations = 15

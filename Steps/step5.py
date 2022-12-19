@@ -1,10 +1,10 @@
 from termcolor import colored
-from Progetto_Nuovo.Environment.Environment import *
-from Progetto_Nuovo.Learners.TSLearner import *
-from Progetto_Nuovo.Learners.UCBLearner import *
-from Progetto_Nuovo.generateData import *
-from Progetto_Nuovo.Data.DataManager import *
-from Progetto_Nuovo.Data.StatsManager import *
+from Environment.Environment import *
+from Learners.TSLearner import *
+from Learners.UCBLearner import *
+from generateData import *
+from Data.DataManager import *
+from Data.StatsManager import *
 from tqdm import tqdm
 
 n_prices = 4
@@ -13,20 +13,20 @@ lambda_coefficient = 0.2
 number_of_days = 200
 number_of_experiments = 5
 prices_filename = "../Data/prices.json"
-user_class_1 = "../Data/user_class_1.json"
-user_class_2 = "../Data/user_class_2.json"
-user_class_3 = "../Data/user_class_3.json"
+user_class_1_filename = "../Data/user_class_1.json"
+user_class_2_filename = "../Data/user_class_2.json"
+user_class_3_filename = "../Data/user_class_3.json"
 max_units_sold = 1.5
 
 if __name__ == '__main__':
-    print(colored('\n\n---------------------------- STEP 3 ----------------------------', 'blue', attrs=['bold']))
+    print(colored('\n\n---------------------------- STEP 5 ----------------------------', 'blue', attrs=['bold']))
     # assign prices per products from json file
     prices = get_prices_from_json(prices_filename)
     # generate all the possible price configurations
     configurations = initialization_other_steps(prices)
     # generate the customer class from json (aggregate)
-    customer_class = get_customer_class_from_json_aggregate(user_class_1, user_class_2, user_class_3)
-
+    customer_class = get_customer_class_from_json_aggregate_unknown_graph(user_class_1_filename, user_class_2_filename,
+                                                                          user_class_3_filename)
     # init reward collection for each experiment TS
     rewards_per_experiment_ts = []
     # init reward collection for each experiment UCB
@@ -44,8 +44,10 @@ if __name__ == '__main__':
         ucb_learner = UCBLearner(n_prices, n_products)
         total_seen_ucb = np.zeros((n_products, n_prices))
         total_seen_product_ucb = np.zeros(n_products)
+        # init both
+        total_bought = np.zeros(5)
         # for each day
-        for t in tqdm(range(0, number_of_days)):
+        for t in tqdm(range (0, number_of_days)):
             alpha_ratios = np.random.dirichlet(customer_class.alpha_probabilities)
             item_sold_mean = customer_class.item_sold_mean
 
@@ -71,9 +73,23 @@ if __name__ == '__main__':
                 total_seen_product_ucb[product] += np.sum(total_seen_daily_ucb[1:])
             ucb_learner.update(pulled_config_indexes_ucb, units_sold_ucb, total_seen_since_daybefore_ucb, total_seen_ucb,
                                total_seen_product_ucb, reward_ucb)
-        rewards_per_experiment_ts.append(ts_learner.collected_rewards)
-        rewards_per_experiment_ucb.append(ucb_learner.collected_rewards)
 
-    printRegret(rewards_per_experiment_ucb, rewards_per_experiment_ts, clairvoyant, "Comparing Regret")
+            # bought since day before
+            total_bought_day_before = np.copy(total_bought)
+            # bought til now
+            total_bought += (units_sold_ucb + units_sold_ts)
+            for product in range(len(customer_class.units_clicked_starting_from_a_primary)):
+                customer_class.graph_probabilities[product, :] = (customer_class.graph_probabilities[product, :] * total_bought_day_before[product] + customer_class.units_clicked_starting_from_a_primary[product, :]) / total_bought[product]
+
+
+        # append collected reward of current experiment TS
+        rewards_per_experiment_ts.append(ts_learner.collected_rewards)
+        # append collected reward of current experiment UCB
+        rewards_per_experiment_ucb.append(ucb_learner.collected_rewards)
+        # printTSBeta(learner.beta_parameters[:, 0, :], rewards_per_experiment[0])
+        # print("SOS", learner.collected_rewards[0])
     printReward(rewards_per_experiment_ts, clairvoyant, "TS")
     printReward(rewards_per_experiment_ucb, clairvoyant, "UCB")
+
+    printRegret(rewards_per_experiment_ucb, rewards_per_experiment_ts, clairvoyant, "Comparing Regret")
+

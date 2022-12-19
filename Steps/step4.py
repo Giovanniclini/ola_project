@@ -1,12 +1,11 @@
 from termcolor import colored
-from Progetto_Nuovo.Environment.Environment import *
-from Progetto_Nuovo.Learners.TSLearner import *
-from Progetto_Nuovo.Learners.UCBLearner import *
-from Progetto_Nuovo.generateData import *
-from Progetto_Nuovo.Data.DataManager import *
-from Progetto_Nuovo.Data.StatsManager import *
+from Environment.Environment import *
+from Learners.TSLearner import *
+from Learners.UCBLearner import *
+from generateData import *
+from Data.DataManager import *
+from Data.StatsManager import *
 from tqdm import tqdm
-import matplotlib.pyplot as plt
 
 n_prices = 4
 n_products = 5
