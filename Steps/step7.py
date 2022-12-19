@@ -127,7 +127,7 @@ if __name__ == '__main__':
                                 ucb_collected_rewards.append(ucb_split_rewards[0])
                                 context_ucb.father_lower_bound = l_reward
                                 context_ucb.pending_list_lower_bounds.append(
-                                    context_ucb.lower_bound(ucb_split_rewards[1], 5, 14))
+                                    context_ucb.lower_bound(ucb_split_rewards[1], 10e-10, 14))
                                 context_ucb.pending_list_prob.append(context_ucb.assign_prob_context_occur(t))
                             else:
                                 if len(ucb_learners) > 0:
@@ -138,7 +138,7 @@ if __name__ == '__main__':
                                 ucb_collected_rewards.append(ucb_split_rewards[1])
                                 context_ucb.father_lower_bound = r_reward
                                 context_ucb.pending_list_lower_bounds.append(
-                                    context_ucb.lower_bound(ucb_split_rewards[0], 5, 14))
+                                    context_ucb.lower_bound(ucb_split_rewards[0], 10e-10, 14))
                                 context_ucb.pending_list_prob.append(context_ucb.assign_prob_context_occur(t))
                         # if the split isn't worth...
                         else:
@@ -179,7 +179,7 @@ if __name__ == '__main__':
                                 ts_collected_rewards.append(ts_split_rewards[0])
                                 context_ts.father_lower_bound = l_reward
                                 context_ts.pending_list_lower_bounds.append(
-                                    context_ts.lower_bound(ts_split_rewards[1], 5, 14))
+                                    context_ts.lower_bound(ts_split_rewards[1], 10e-10, 14))
                                 context_ts.pending_list_prob.append(context_ts.assign_prob_context_occur(t))
                             else:
                                 if len(ts_learners) > 1:
@@ -190,7 +190,7 @@ if __name__ == '__main__':
                                 ts_collected_rewards.append(ts_split_rewards[1])
                                 context_ts.father_lower_bound = r_reward
                                 context_ts.pending_list_lower_bounds.append(
-                                    context_ts.lower_bound(ts_split_rewards[0], 5, 14))
+                                    context_ts.lower_bound(ts_split_rewards[0], 10e-10, 14))
                                 context_ts.pending_list_prob.append(context_ts.assign_prob_context_occur(t))
 
                         else:
