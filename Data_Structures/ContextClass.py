@@ -52,15 +52,15 @@ class ContextClass:
 
     def evaluate_split_condition(self, rewards0, rewards1, time):
         check = False
-        l_lowerbound = self.lower_bound(rewards0, 5, 14)
-        r_lowerbound = self.lower_bound(rewards1, 5, 14)
+        l_lowerbound = self.lower_bound(rewards0, 10e-10, 14)
+        r_lowerbound = self.lower_bound(rewards1, 10e-10, 14)
         p = self.assign_prob_context_occur(time)
         if p * (l_lowerbound + r_lowerbound) >= self.father_lower_bound:
             check = True
         return check, l_lowerbound, r_lowerbound
 
     def assign_father_lower_bound(self, rewards):
-        self.father_lower_bound = self.lower_bound(rewards, 5, 14)
+        self.father_lower_bound = self.lower_bound(rewards, 10e-10, 14)
 
     def lower_bound(self, rewards, confidence, cardinality):
         return np.mean(rewards) - np.sqrt(np.log10(confidence)/(cardinality * 2))
