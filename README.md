@@ -1,12 +1,5 @@
 # ola_project
-A project for OLA corse at PoliMI
-
-L'obiettivo è scegliere la combinazione migliore di prezzi per le cinque tipologie di prodotti. 
-Per ogni prodotto ci sono 4 prezzi possibili (definiti da noi).
-Ad ogni prezzo è associata una probabilità p_prezzo (corrisponde a quella dell'environment del prof).
-Ad ogni classe di utente è associata un'altra probabilità che dovrebbe rappresentare la conversion rate, ovvero la probabilità che quel prodotto venga acquistato dato un prezzo pullato dalla probabilità precedente.
-
-La parte di social influence determinerà come l'utente si muove dalle pagine del sito ed è quella che impone i limiti su quante pagine l'utente visita. Ad ogni visita ad una pagina, l'algoritmo di pricing si aggiorna. Ad ogni visita viene restituita la classe dell'utente, l'esito (0 se non compra, 1 se compra) su un prodotto specifico ad un prezzo specifico assime alla quantità acquistata (?).
-
-A questo punto l'algoritmo di pricing pullerà l'arm sulla base del prodotto acquistato a quel prezzo, indicando al Learner quale tipologia di utente lo ha acquistato, così da scegliere con quale probabilità vengono aggiornate le reward e i valori necessari per l'interazione successiva. 
+This project deals with e-commerce trying to establish the optimal price for 5 different products without any storage cost. The aim of e-commerce is to maximize its revenue; in doing this, we need the demand curve of given products which is a graph depicting the relationship between the price of a certain commodity (the y-axis) and the quantity of that commodity that is demanded at that price (the x-axis). In real-world applications demand curves are not available a-priopri therefore they need to be estimated via online learning techniques such as Thompson Sampling, Upper Confidence Bound (UCB) Bandit Algorithm etc.
+The website is characterized as it follows: once the user enters our website all the products are displayed and then, once he clicks on one of the products, a web page is created in which the clicked product, called primary, is shown with its price. If this product is added to the cart by the user, then two other products, whose prices are hidden, are recommended by the system in different slots ordered by relevance. If the user clicks one of them, called secondary, then a new page is loaded in which the clicked one is displayed together with its own price. The probability to look at the second slot is lower with respect to the first one which is 1 considering the corresponding primary product added to the cart. The number of visited pages is finite since the system will not show products which have already been seen. In the end, the customer buys what is in the cart. Furthermore, each customer is characterized by a personal reservation price which prevents him from buying a single unit of a product if the price is higher than that
+We imagine that every day a random number of potential customers access one of the e-commerce pages structured as above with a certain probability.
 
